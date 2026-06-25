@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --color-neutral-primary-soft: #F8F8F8;
+    --color-neutral-secondary-soft: #FFFFFF;
+    --color-neutral-tertiary-soft: #D9D9D9;
+    --color-neutral-secondary-medium: #F8F8F8;
+    --color-neutral-tertiary-medium: #D9D9D9;
+    --color-neutral-quaternary: #BBC3CF;
+    --color-neutral-primary: #F8F8F8;
+    --color-dark: #2D2B27;
+    --color-white: #FFFFFF;
+
+    /* Text & Semantic Colors */
+    --color-heading: #2D2B27;
+    --color-body: #6A6864;
+    --color-body-subtle: #A39EA0;
+    --color-brand: #951D18;
+    --color-brand-soft: rgba(149, 29, 24, 0.2);
+    --color-brand-softer: rgba(149, 29, 24, 0.1);
+    --color-secondary: #E2981A;
+    --color-fg-brand: #951D18;
+    --color-fg-brand-strong: #711713;
+    --color-success: #10B981;
+    --color-success-soft: rgba(16, 185, 129, 0.1);
+    --color-success-medium: rgba(16, 185, 129, 0.2);
+    --color-fg-success: #10B981;
+    --color-fg-success-strong: #047857;
+    --color-danger: #EF4444;
+    --color-danger-soft: rgba(239, 68, 68, 0.1);
+    --color-danger-medium: rgba(239, 68, 68, 0.2);
+    --color-fg-danger: #EF4444;
+    --color-fg-danger-strong: #B91C1C;
+    --color-warning: #E2981A;
+    --color-warning-soft: rgba(226, 152, 26, 0.1);
+    --color-warning-medium: rgba(226, 152, 26, 0.2);
+    --color-fg-warning: #E2981A;
+    --color-fg-disabled: #A39EA0;
+
+    /* Borders */
+    --color-border-default: #D9D9D9;
+    --color-border-default-medium: #BBC3CF;
+    --color-border-default-strong: #B4BAC5;
+    --color-border-brand: #951D18;
+    --color-border-brand-subtle: rgba(149, 29, 24, 0.3);
+    --color-border-success: #10B981;
+    --color-border-success-subtle: rgba(16, 185, 129, 0.3);
+    --color-border-danger: #EF4444;
+    --color-border-danger-subtle: rgba(239, 68, 68, 0.3);
+    --color-border-warning: #E2981A;
+    --color-border-warning-subtle: rgba(226, 152, 26, 0.3);
+    --color-border-buffer: #BBC3CF;
+
+    /* Shadows (Light Theme) */
+    --shadow-color-light: #ffffff;
+    --shadow-color-dark: #D9D9D9;
+    
+    --shadow-2xs: 1px 1px 2px var(--shadow-color-dark), -1px -1px 2px var(--shadow-color-light);
+    --shadow-xs: 2px 2px 4px var(--shadow-color-dark), -2px -2px 4px var(--shadow-color-light);
+    --shadow-sm: 3px 3px 6px var(--shadow-color-dark), -3px -3px 6px var(--shadow-color-light);
+    --shadow-md: 6px 6px 12px var(--shadow-color-dark), -6px -6px 12px var(--shadow-color-light);
+    --shadow-lg: 8px 8px 16px var(--shadow-color-dark), -8px -8px 16px var(--shadow-color-light);
+    --shadow-xl: 10px 10px 20px var(--shadow-color-dark), -10px -10px 20px var(--shadow-color-light);
+    --shadow-2xl: 12px 12px 24px var(--shadow-color-dark), -12px -12px 24px var(--shadow-color-light);
+    --shadow-inset: inset 2px 2px 5px var(--shadow-color-dark), inset -3px -3px 7px var(--shadow-color-light);
+    
+    /* Radius */
+    --radius-sm: 2px;
+    --radius-default: 6px;
+    --radius-base: 8px;
+    --radius-full: 9999px;
+  }
+
+  body {
+    @apply bg-neutral-primary-soft text-body font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-heading font-semibold;
+  }
+}
