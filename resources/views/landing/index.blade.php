@@ -3,9 +3,9 @@
 
 @section('content')
 <!-- Hero Section -->
-<section class="relative pt-20 pb-32 lg:pt-32 lg:pb-48 bg-neutral-primary overflow-hidden">
+<section class="relative pt-20 pb-32 lg:pt-32 lg:pb-48 bg-transparent overflow-hidden">
     <!-- Premium Gradient Background -->
-    <div class="absolute inset-0 bg-gradient-to-br from-neutral-primary via-neutral-primary-soft to-brand/5"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-neutral-primary via-neutral-primary-soft to-brand/5 opacity-80"></div>
     <div class="absolute right-0 top-0 w-2/3 h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at top right, var(--color-brand) 0%, transparent 70%);"></div>
     
     <!-- Majestic Watermark -->
@@ -119,7 +119,7 @@
 </section>
 
 <!-- Berita Terbaru -->
-<section class="py-24 bg-neutral-primary">
+<section class="py-24 bg-transparent">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div class="max-w-2xl">

@@ -5,7 +5,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
     
     <!-- Card: Total Permohonan -->
-    <div class="bg-neutral-primary-soft rounded-base shadow-md border-l-4 border-brand p-6">
+    <div class="bg-white/60 backdrop-blur-xl rounded-base shadow-md border-l-4 border-brand p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs font-bold text-fg-brand uppercase tracking-wider mb-1">Total Permohonan</p>
@@ -18,7 +18,7 @@
     </div>
     
     <!-- Card: Menunggu Verifikasi -->
-    <div class="bg-neutral-primary-soft rounded-base shadow-md border-l-4 border-warning p-6">
+    <div class="bg-white/60 backdrop-blur-xl rounded-base shadow-md border-l-4 border-warning p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs font-bold text-fg-warning uppercase tracking-wider mb-1">Menunggu Verifikasi</p>
@@ -31,7 +31,7 @@
     </div>
     
     <!-- Card: Disetujui & Dijadwalkan -->
-    <div class="bg-neutral-primary-soft rounded-base shadow-md border-l-4 border-success p-6">
+    <div class="bg-white/60 backdrop-blur-xl rounded-base shadow-md border-l-4 border-success p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs font-bold text-fg-success uppercase tracking-wider mb-1">Disetujui & Dijadwalkan</p>
@@ -44,7 +44,7 @@
     </div>
     
     <!-- Card: Selesai -->
-    <div class="bg-neutral-primary-soft rounded-base shadow-md border-l-4 border-secondary p-6">
+    <div class="bg-white/60 backdrop-blur-xl rounded-base shadow-md border-l-4 border-secondary p-6">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs font-bold text-secondary uppercase tracking-wider mb-1">Selesai (Disumpah)</p>

@@ -2,27 +2,32 @@
 @section('title', 'Manajemen Permohonan')
 
 @section('content')
-<div class="bg-neutral-primary-soft rounded-base border border-border-default shadow-md mb-8">
-    <div class="py-4 px-6 border-b border-border-default bg-neutral-primary-soft rounded-t-base">
-        <h6 class="m-0 font-bold text-heading">Daftar Permohonan Sumpah Advokat</h6>
+<div class="bg-white/60 backdrop-blur-xl rounded-xl shadow-sm border border-border-default mb-8 overflow-hidden">
+    <div class="py-5 px-6 border-b border-border-default bg-neutral-primary-soft flex justify-between items-center">
+        <div>
+            <h6 class="m-0 font-bold text-heading text-lg flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-brand"></i> Daftar Permohonan Sumpah Advokat
+            </h6>
+            <p class="text-sm text-body-subtle mt-1">Kelola dan verifikasi seluruh permohonan yang masuk.</p>
+        </div>
     </div>
-    <div class="p-0">
+    <div class="p-6">
         <!-- Wrapper matching tables.md specs -->
         <div class="overflow-x-auto w-full">
             <table class="w-full text-left whitespace-nowrap text-[14px] text-body" id="permohonanTable">
                 <thead class="bg-neutral-secondary-soft border-b border-border-default text-body font-medium">
                     <tr>
-                        <th class="px-6 py-3 font-medium">No</th>
-                        <th class="px-6 py-3 font-medium">Nomor Registrasi</th>
-                        <th class="px-6 py-3 font-medium">Nama Pemohon</th>
-                        <th class="px-6 py-3 font-medium">NIK</th>
-                        <th class="px-6 py-3 font-medium">Organisasi</th>
-                        <th class="px-6 py-3 font-medium">Tanggal Pengajuan</th>
-                        <th class="px-6 py-3 font-medium">Status</th>
-                        <th class="px-6 py-3 font-medium">Aksi</th>
+                        <th class="px-6 py-4 font-medium">No</th>
+                        <th class="px-6 py-4 font-medium">Nomor Registrasi</th>
+                        <th class="px-6 py-4 font-medium">Nama Pemohon</th>
+                        <th class="px-6 py-4 font-medium">NIK</th>
+                        <th class="px-6 py-4 font-medium">Organisasi</th>
+                        <th class="px-6 py-4 font-medium">Tanggal Pengajuan</th>
+                        <th class="px-6 py-4 font-medium">Status</th>
+                        <th class="px-6 py-4 font-medium">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="bg-neutral-primary divide-y divide-border-default">
+                <tbody class="bg-white/60 divide-y divide-border-default">
                     <!-- DataTables will populate this -->
                 </tbody>
             </table>

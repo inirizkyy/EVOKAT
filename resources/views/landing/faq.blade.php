@@ -2,7 +2,7 @@
 @section('title', 'FAQ (Tanya Jawab)')
 
 @section('content')
-<section class="py-12 lg:py-20 bg-neutral-primary min-h-[calc(100vh-88px)]">
+<section class="py-12 lg:py-20 bg-transparent min-h-[calc(100vh-88px)]">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center mb-12">

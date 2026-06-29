@@ -19,8 +19,8 @@
     @stack('styles')
 </head>
 <body class="bg-neutral-primary-soft text-body font-sans min-h-screen flex flex-col pt-[88px] selection:bg-brand selection:text-white relative z-0">
-    <!-- Global Decorative Gradient Background -->
-    <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-neutral-primary-soft to-neutral-tertiary-soft/30 -z-20 pointer-events-none"></div>
+    <!-- Global Dotted Pattern Background -->
+    <div class="fixed inset-0 opacity-20 -z-20 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, var(--color-border-default-strong) 1px, transparent 0); background-size: 32px 32px;"></div>
     
     <!-- Decorative Top Gradient -->
     <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-brand-softer via-brand-softer/30 to-transparent -z-10 pointer-events-none"></div>
@@ -58,6 +58,8 @@
                     <a href="{{ url('/permohonan') }}" class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-[15px] font-medium bg-brand text-white shadow-sm hover:shadow-md hover:bg-brand-soft active:shadow-inset transition-all border border-brand-softer">
                         Ajukan Permohonan
                     </a>
+                    
+
                 </div>
 
                 <!-- Mobile menu button -->
@@ -88,6 +90,8 @@
                     <a href="{{ url('/permohonan') }}" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium bg-brand text-white shadow-sm border border-brand-softer">
                         Ajukan Permohonan
                     </a>
+                    
+
                 </div>
             </div>
         </div>

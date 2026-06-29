@@ -72,8 +72,8 @@ class FrontendController extends Controller
             'email' => 'required|email|max:255',
             'no_hp' => 'required|string|max:20',
             'nama_organisasi' => 'required|string|max:255',
-            'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'dokumen.*' => 'required|file|mimes:pdf,jpeg,png,jpg|max:2048',
+            'foto' => 'required|file|mimes:pdf|max:2048',
+            'dokumen.*' => 'required|file|mimes:pdf|max:2048',
         ]);
 
         try {

@@ -8,7 +8,7 @@
 @endsection
 
 @section('content')
-<div class="bg-neutral-primary-soft rounded-base border border-border-default shadow-md mb-8">
+<div class="bg-white/60 backdrop-blur-xl rounded-xl shadow-sm border border-border-default mb-8 overflow-hidden">
     <div class="p-0">
         <div class="overflow-x-auto w-full">
             <table class="w-full text-left whitespace-nowrap text-[14px] text-body">
@@ -21,7 +21,7 @@
                         <th class="px-6 py-3 font-medium text-center w-[15%]">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="bg-neutral-primary divide-y divide-border-default">
+                <tbody class="bg-white/60 divide-y divide-border-default">
                     @forelse($persyaratan as $index => $item)
                     <tr class="hover:bg-neutral-secondary-soft transition-colors">
                         <td class="px-6 py-4">{{ $index + 1 }}</td>

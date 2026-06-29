@@ -8,7 +8,7 @@
 @endsection
 
 @section('content')
-<div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col mb-8">
+<div class="bg-white/60 backdrop-blur-xl rounded-xl shadow-sm border border-border-default mb-8 overflow-hidden">
     <div class="py-4 px-6 border-b border-border-default bg-neutral-primary-soft rounded-t-base">
         <h6 class="m-0 font-bold text-heading">Form Berita</h6>
     </div>

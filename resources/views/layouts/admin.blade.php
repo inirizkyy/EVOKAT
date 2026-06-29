@@ -13,9 +13,8 @@
     @stack('styles')
 </head>
 <body class="bg-neutral-primary-soft text-body font-sans antialiased relative z-0">
-    <!-- Global Decorative Gradient Background -->
-    <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-neutral-primary-soft to-neutral-tertiary-soft/30 -z-20 pointer-events-none"></div>
-    
+    <!-- Global Dotted Pattern Background -->
+    <div class="fixed inset-0 opacity-20 -z-20 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, var(--color-border-default-strong) 1px, transparent 0); background-size: 32px 32px;"></div>
     <!-- Decorative Top Gradient -->
     <div class="fixed top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-brand-softer via-brand-softer/30 to-transparent -z-10 pointer-events-none"></div>
 

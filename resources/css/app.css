@@ -76,7 +76,25 @@
   }
 
   body {
-    @apply bg-neutral-primary-soft text-body font-sans;
+    @apply bg-neutral-primary-soft text-body font-sans relative;
+    background-color: var(--color-neutral-primary-soft);
+    background-image: radial-gradient(var(--color-border-default) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+    background-attachment: fixed;
+  }
+
+  /* Decorative top glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 0%, var(--color-brand-softer) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
   }
 
   h1, h2, h3, h4, h5, h6 {
