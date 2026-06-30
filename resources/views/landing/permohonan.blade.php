@@ -43,26 +43,26 @@
 
             <div x-data="permohonanForm()">
                 <!-- Step Indicator -->
-                <div class="flex items-center justify-center mb-10">
-                    <div class="flex items-center space-x-3 sm:space-x-4">
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center justify-center w-12 h-12 rounded-full font-bold transition-all duration-300 shadow-sm" 
-                                :class="step >= 1 ? 'bg-brand text-white ring-4 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
+                <div class="flex items-start justify-center mb-12">
+                    <div class="flex items-start space-x-2 sm:space-x-4">
+                        <div class="flex flex-col items-center w-28 sm:w-32">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold transition-all duration-300 shadow-sm" 
+                                :class="step >= 1 ? 'bg-brand text-white ring-8 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
                                 1
                             </div>
-                            <span class="mt-2 text-xs font-bold transition-colors" :class="step >= 1 ? 'text-brand' : 'text-body-subtle'">Data Diri</span>
+                            <span class="mt-4 text-[15px] font-bold transition-colors text-center" :class="step >= 1 ? 'text-brand' : 'text-body-subtle'">Data Diri</span>
                         </div>
                         
-                        <div class="h-1 w-16 sm:w-24 md:w-32 bg-border-default rounded overflow-hidden mb-6">
-                            <div class="h-full bg-brand transition-all duration-500" :style="`width: ${step >= 2 ? '100%' : '0%'}`"></div>
+                        <div class="h-[4px] w-12 sm:w-20 md:w-28 bg-border-default rounded-full mt-[26px]">
+                            <div class="h-full bg-brand transition-all duration-500 rounded-full" :style="`width: ${step >= 2 ? '100%' : '0%'}`"></div>
                         </div>
                         
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center justify-center w-12 h-12 rounded-full font-bold transition-all duration-300 shadow-sm" 
-                                :class="step >= 2 ? 'bg-brand text-white ring-4 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
+                        <div class="flex flex-col items-center w-28 sm:w-32">
+                            <div class="flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold transition-all duration-300 shadow-sm" 
+                                :class="step >= 2 ? 'bg-brand text-white ring-8 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
                                 2
                             </div>
-                            <span class="mt-2 text-xs font-bold transition-colors" :class="step >= 2 ? 'text-brand' : 'text-body-subtle'">Unggah Dokumen</span>
+                            <span class="mt-4 text-[15px] font-bold transition-colors text-center" :class="step >= 2 ? 'text-brand' : 'text-body-subtle'">Unggah Dokumen</span>
                         </div>
                     </div>
                 </div>
