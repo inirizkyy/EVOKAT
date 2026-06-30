@@ -45,31 +45,43 @@
                 <!-- Step Indicator -->
                 <div class="flex items-start justify-center mb-12">
                     <div class="flex items-start space-x-2 sm:space-x-4">
-                        <div class="flex flex-col items-center w-28 sm:w-32">
-                            <div class="flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold transition-all duration-300 shadow-sm" 
-                                :class="step >= 1 ? 'bg-brand text-white ring-8 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
+                        <div class="flex flex-col items-center w-24 sm:w-28">
+                            <div class="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg sm:text-xl font-bold transition-all duration-300 shadow-sm" 
+                                :class="step >= 1 ? 'bg-brand text-white ring-4 sm:ring-8 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
                                 1
                             </div>
-                            <span class="mt-4 text-[15px] font-bold transition-colors text-center" :class="step >= 1 ? 'text-brand' : 'text-body-subtle'">Data Diri</span>
+                            <span class="mt-3 sm:mt-4 text-[14px] sm:text-[16px] font-bold transition-colors text-center" :class="step >= 1 ? 'text-brand' : 'text-body-subtle'">Data Diri</span>
                         </div>
                         
-                        <div class="h-[4px] w-12 sm:w-20 md:w-28 bg-border-default rounded-full mt-[26px]">
+                        <div class="h-[4px] w-8 sm:w-16 bg-border-default rounded-full mt-[24px] sm:mt-[26px]">
                             <div class="h-full bg-brand transition-all duration-500 rounded-full" :style="`width: ${step >= 2 ? '100%' : '0%'}`"></div>
                         </div>
                         
-                        <div class="flex flex-col items-center w-28 sm:w-32">
-                            <div class="flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold transition-all duration-300 shadow-sm" 
-                                :class="step >= 2 ? 'bg-brand text-white ring-8 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
+                        <div class="flex flex-col items-center w-24 sm:w-28">
+                            <div class="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg sm:text-xl font-bold transition-all duration-300 shadow-sm" 
+                                :class="step >= 2 ? 'bg-brand text-white ring-4 sm:ring-8 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
                                 2
                             </div>
-                            <span class="mt-4 text-[15px] font-bold transition-colors text-center" :class="step >= 2 ? 'text-brand' : 'text-body-subtle'">Unggah Dokumen</span>
+                            <span class="mt-3 sm:mt-4 text-[14px] sm:text-[16px] font-bold transition-colors text-center" :class="step >= 2 ? 'text-brand' : 'text-body-subtle'">Unggah Dokumen</span>
+                        </div>
+
+                        <div class="h-[4px] w-8 sm:w-16 bg-border-default rounded-full mt-[24px] sm:mt-[26px]">
+                            <div class="h-full bg-brand transition-all duration-500 rounded-full" :style="`width: ${step >= 3 ? '100%' : '0%'}`"></div>
+                        </div>
+                        
+                        <div class="flex flex-col items-center w-24 sm:w-28">
+                            <div class="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full text-lg sm:text-xl font-bold transition-all duration-300 shadow-sm" 
+                                :class="step >= 3 ? 'bg-brand text-white ring-4 sm:ring-8 ring-brand-softer' : 'bg-white text-body-subtle border border-border-default'">
+                                3
+                            </div>
+                            <span class="mt-3 sm:mt-4 text-[14px] sm:text-[16px] font-bold transition-colors text-center" :class="step >= 3 ? 'text-brand' : 'text-body-subtle'">Ringkasan</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="text-center mb-10 border-b border-border-default pb-6">
-                    <h3 class="font-['Playfair_Display'] text-2xl font-bold text-heading" x-text="step === 1 ? 'Identitas Pemohon' : 'Dokumen Persyaratan'"></h3>
-                    <p class="text-[15px] text-body-subtle mt-2" x-text="step === 1 ? 'Pastikan data yang Anda masukkan sesuai dengan KTP.' : 'Unggah file dengan format PDF (Maks 2MB).'"></p>
+                    <h3 class="font-['Playfair_Display'] text-2xl font-bold text-heading" x-text="step === 1 ? 'Identitas Pemohon' : (step === 2 ? 'Dokumen Persyaratan' : 'Ringkasan Permohonan')"></h3>
+                    <p class="text-[15px] text-body-subtle mt-2" x-text="step === 1 ? 'Pastikan data yang Anda masukkan sesuai dengan KTP.' : (step === 2 ? 'Unggah file dengan format PDF (Maks 2MB).' : 'Harap periksa kembali seluruh data yang telah dimasukkan sebelum permohonan diajukan.')"></p>
                 </div>
 
                 <form action="{{ url('/permohonan') }}" method="POST" enctype="multipart/form-data" id="permohonan-form">
@@ -196,8 +208,98 @@
                             <button type="button" @click="prevStep()" class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3.5 rounded-full text-[15px] font-bold bg-white text-heading border border-border-default-strong shadow-sm hover:bg-neutral-secondary-soft hover:text-brand transition-all">
                                 <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Data Diri
                             </button>
-                            <button type="submit" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 rounded-full text-[15px] font-bold bg-brand text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all border border-brand-softer">
-                                <i class="fa-solid fa-paper-plane mr-2"></i> Submit Permohonan
+                            <button type="button" @click="nextStep2()" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 rounded-full text-[15px] font-bold bg-brand text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all border border-brand-softer">
+                                Lanjut ke Ringkasan <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: RINGKASAN -->
+                    <div x-show="step === 3" x-cloak style="display: none;" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-x-4" x-transition:enter-end="opacity-100 transform translate-x-0" class="relative z-10 space-y-6">
+                        
+                        <!-- Identitas Pemohon Card -->
+                        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-border-default shadow-sm">
+                            <h4 class="font-bold text-[17px] sm:text-[18px] text-heading flex items-center gap-2 mb-6 pb-4 border-b border-border-default"><i class="fa-regular fa-id-badge text-brand text-xl"></i> Identitas Pemohon</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Nama Lengkap, Gelar</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.nama_lengkap"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">NIK</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.nik"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Email Aktif</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.email"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Organisasi Advokat</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.nama_organisasi"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detail Pemohon Card -->
+                        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-border-default shadow-sm">
+                            <h4 class="font-bold text-[17px] sm:text-[18px] text-heading flex items-center gap-2 mb-6 pb-4 border-b border-border-default"><i class="fa-solid fa-graduation-cap text-brand text-xl"></i> Detail Pemohon</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Tempat Lahir</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.tempat_lahir"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Tanggal Lahir</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.tanggal_lahir"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Jenis Kelamin</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.jenis_kelamin"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Nomor HP/WA</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.no_hp"></span>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Alamat Lengkap</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading leading-relaxed" x-text="formData.alamat"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Berkas Terlampir Card -->
+                        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-border-default shadow-sm">
+                            <h4 class="font-bold text-[17px] sm:text-[18px] text-heading flex items-center gap-2 mb-6 pb-4 border-b border-border-default"><i class="fa-solid fa-paperclip text-brand text-xl"></i> Berkas Terlampir</h4>
+                            <ul class="space-y-4">
+                                <template x-for="file in files" :key="file.name">
+                                    <li class="flex items-start sm:items-center gap-3 sm:gap-4">
+                                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-brand/5 flex items-center justify-center shrink-0 border border-brand/10">
+                                            <i class="fa-solid fa-file-pdf text-brand/80 text-lg sm:text-xl"></i>
+                                        </div>
+                                        <div class="flex flex-col pt-1 sm:pt-0">
+                                            <span class="font-bold text-[15px] sm:text-[16px] text-heading" x-text="file.name"></span>
+                                            <span class="text-body-subtle text-[13px] sm:text-[14px]" x-text="file.filename"></span>
+                                        </div>
+                                    </li>
+                                </template>
+                                <li x-show="files.length === 0" class="text-body-subtle text-[15px] italic">Belum ada berkas yang dilampirkan.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Declaration Checkbox -->
+                        <div class="mt-8 p-6 sm:p-7 rounded-2xl bg-white border-2 border-border-default shadow-sm flex items-start gap-4 sm:gap-5 transition-all hover:border-brand/30 hover:shadow-md cursor-pointer group" @click="persetujuan = !persetujuan">
+                            <input type="checkbox" id="persetujuan" x-model="persetujuan" required class="mt-1 w-6 h-6 sm:w-7 sm:h-7 rounded-md border-2 border-border-default-medium text-brand focus:ring-brand shrink-0 cursor-pointer transition-transform group-hover:scale-105" @click.stop>
+                            <label for="persetujuan" class="text-[15px] sm:text-[16px] text-heading font-semibold leading-relaxed cursor-pointer select-none">
+                                Saya menyatakan bahwa seluruh data yang diisi adalah benar, sah, dan sesuai dengan berkas aslinya. Segala resiko dan konsekuensi akibat pemalsuan data sepenuhnya menjadi tanggung jawab saya.
+                            </label>
+                        </div>
+
+                        <div class="mt-10 pt-6 border-t border-border-default flex flex-col-reverse sm:flex-row justify-between items-center gap-4">
+                            <button type="button" @click="prevStep2()" class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3.5 rounded-full text-[15px] font-bold bg-white text-heading border border-border-default-strong shadow-sm hover:bg-neutral-secondary-soft hover:text-brand transition-all">
+                                <i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya
+                            </button>
+                            <button type="submit" :disabled="!persetujuan" class="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3.5 rounded-full text-[15px] font-bold bg-brand text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all border border-brand-softer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-md">
+                                Ajukan Permohonan <i class="fa-solid fa-paper-plane ml-2"></i>
                             </button>
                         </div>
                     </div>
@@ -215,6 +317,9 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('permohonanForm', () => ({
             step: 1,
+            formData: {},
+            files: [],
+            persetujuan: false,
             nextStep() {
                 // Validate inputs visible in step 1 and also 'foto'
                 const form = document.getElementById('permohonan-form');
@@ -236,6 +341,57 @@
             },
             prevStep() {
                 this.step = 1;
+                window.scrollTo({ top: document.querySelector('#form-container').offsetTop - 100, behavior: 'smooth' });
+            },
+            nextStep2() {
+                const form = document.getElementById('permohonan-form');
+                const step2Inputs = form.querySelectorAll('[x-show="step === 2"] input[required]');
+                
+                let valid = true;
+                for (let input of step2Inputs) {
+                    if (!input.checkValidity()) {
+                        valid = false;
+                        input.reportValidity();
+                        break; // Stop at first invalid
+                    }
+                }
+
+                if (valid) {
+                    // Collect form data for summary
+                    this.formData = {
+                        nik: form.querySelector('input[name="nik"]').value,
+                        nama_lengkap: form.querySelector('input[name="nama_lengkap"]').value,
+                        tempat_lahir: form.querySelector('input[name="tempat_lahir"]').value,
+                        tanggal_lahir: form.querySelector('input[name="tanggal_lahir"]').value,
+                        jenis_kelamin: form.querySelector('select[name="jenis_kelamin"]').value === 'L' ? 'Laki-laki' : (form.querySelector('select[name="jenis_kelamin"]').value === 'P' ? 'Perempuan' : '-'),
+                        nama_organisasi: form.querySelector('input[name="nama_organisasi"]').value,
+                        no_hp: form.querySelector('input[name="no_hp"]').value,
+                        email: form.querySelector('input[name="email"]').value,
+                        alamat: form.querySelector('textarea[name="alamat"]').value,
+                    };
+
+                    // Collect files for summary
+                    this.files = [];
+                    const fotoInput = form.querySelector('input[name="foto"]');
+                    if (fotoInput.files.length > 0) {
+                        this.files.push({ name: 'Pas Foto Pemohon', filename: fotoInput.files[0].name });
+                    }
+                    
+                    const docInputs = form.querySelectorAll('input[type="file"][name^="dokumen"]');
+                    docInputs.forEach(input => {
+                        if (input.files.length > 0) {
+                            // Find the label text closest to this input
+                            const label = input.closest('.bg-white').querySelector('label.text-heading').innerText.replace('*', '').trim();
+                            this.files.push({ name: label, filename: input.files[0].name });
+                        }
+                    });
+
+                    this.step = 3;
+                    window.scrollTo({ top: document.querySelector('#form-container').offsetTop - 100, behavior: 'smooth' });
+                }
+            },
+            prevStep2() {
+                this.step = 2;
                 window.scrollTo({ top: document.querySelector('#form-container').offsetTop - 100, behavior: 'smooth' });
             }
         }))
