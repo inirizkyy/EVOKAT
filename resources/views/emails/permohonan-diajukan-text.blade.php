@@ -14,4 +14,4 @@ URL Tracking: {{ url('/tracking') }}
 
 Hormat kami,
 Panitia Pengambilan Sumpah Advokat
-E-Advokat
+EVOKAT

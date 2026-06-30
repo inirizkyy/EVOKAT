@@ -8,7 +8,7 @@
         <div class="text-center mb-12">
             <h1 class="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-heading mb-4">Frequently Asked Questions</h1>
             <div class="w-24 h-1 bg-brand mx-auto rounded-full"></div>
-            <p class="text-body-subtle mt-6 max-w-2xl mx-auto text-lg">Pertanyaan yang sering diajukan terkait layanan E-Advokat Pengadilan Tinggi Tanjungkarang.</p>
+            <p class="text-body-subtle mt-6 max-w-2xl mx-auto text-lg">Pertanyaan yang sering diajukan terkait layanan EVOKAT Pengadilan Tinggi Tanjungkarang.</p>
         </div>
         
         <div class="space-y-4 relative" x-data="{ active: null }">

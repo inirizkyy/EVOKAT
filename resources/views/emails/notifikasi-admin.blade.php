@@ -34,7 +34,7 @@
             </tr>
         </table>
 
-        <p>Silakan login ke panel admin E-Advokat untuk memeriksa kelengkapan dan keabsahan dokumen persyaratan pemohon tersebut.</p>
+        <p>Silakan login ke panel admin EVOKAT untuk memeriksa kelengkapan dan keabsahan dokumen persyaratan pemohon tersebut.</p>
         
         <div style="text-align: center; margin-top: 30px;">
             <a href="{{ route('admin.permohonan.show', $permohonan->id) }}" style="background-color: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verifikasi Sekarang</a>
@@ -42,7 +42,7 @@
         
         <br><br>
         <p style="font-size: 12px; color: #7f8c8d; border-top: 1px solid #eee; padding-top: 10px;">
-            Email ini dikirim secara otomatis oleh Sistem E-Advokat. Mohon tidak membalas email ini.
+            Email ini dikirim secara otomatis oleh Sistem EVOKAT. Mohon tidak membalas email ini.
         </p>
     </div>
 </body>

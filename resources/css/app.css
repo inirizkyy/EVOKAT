@@ -16,9 +16,9 @@
     --color-white: #FFFFFF;
 
     /* Text & Semantic Colors */
-    --color-heading: #2D2B27;
-    --color-body: #6A6864;
-    --color-body-subtle: #A39EA0;
+    --color-heading: #1A1816;
+    --color-body: #4B4A47;
+    --color-body-subtle: #6A6864;
     --color-brand: #951D18;
     --color-brand-soft: rgba(149, 29, 24, 0.2);
     --color-brand-softer: rgba(149, 29, 24, 0.1);
@@ -75,8 +75,12 @@
     --radius-full: 9999px;
   }
 
+  html {
+    font-size: 110%; /* Skala seluruh UI menjadi lebih besar untuk aksesibilitas */
+  }
+
   body {
-    @apply bg-neutral-primary-soft text-body font-sans relative;
+    @apply bg-neutral-primary-soft text-body font-sans relative antialiased font-medium;
     background-color: var(--color-neutral-primary-soft);
     background-image: radial-gradient(var(--color-border-default) 1px, transparent 1px);
     background-size: 24px 24px;

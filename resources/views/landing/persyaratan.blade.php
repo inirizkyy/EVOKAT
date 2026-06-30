@@ -57,7 +57,7 @@
                     </div>
                     <div class="text-center sm:text-left">
                         <h4 class="font-['Playfair_Display'] font-bold text-lg text-heading mb-1">Ketentuan Berkas Digital</h4>
-                        <p class="text-[14px] text-body leading-relaxed">Seluruh dokumen persyaratan harus dipindai/di-scan dan diunggah dalam format <strong class="text-info">PDF, JPG, JPEG, atau PNG</strong> dengan ukuran maksimal <strong class="text-brand">2 MB</strong> untuk setiap filenya. Pastikan pindaian terlihat tajam dan terbaca jelas.</p>
+                        <p class="text-[14px] text-body leading-relaxed">Seluruh dokumen persyaratan harus dipindai/di-scan dan diunggah dalam format <strong class="text-info">PDF</strong> dengan ukuran maksimal <strong class="text-brand">2 MB</strong> untuk setiap filenya. Pastikan pindaian terlihat tajam dan terbaca jelas.</p>
                     </div>
                 </div>
                 

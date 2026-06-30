@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - Admin E-Advokat</title>
+    <title>@yield('title') - Admin EVOKAT</title>
     <!-- Google Fonts: Nunito Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,7 +23,7 @@
         <div class="w-[256px] flex-shrink-0 flex flex-col bg-neutral-primary-soft/80 backdrop-blur-md border-r border-border-default z-20">
             <a href="{{ route('dashboard') }}" class="flex items-center p-6 mb-2 no-underline text-heading hover:text-brand transition-colors">
                 <i class="fa-solid fa-scale-balanced text-2xl mr-3 text-brand"></i>
-                <span class="text-xl font-bold">E-Advokat</span>
+                <span class="text-xl font-bold">EVOKAT</span>
             </a>
             
             <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
@@ -132,7 +132,7 @@
             </main>
             
             <footer class="bg-transparent border-t border-border-default/50 text-center py-6 text-[14px] text-body-subtle">
-                © {{ date('Y') }} E-Advokat Pengadilan Tinggi Tanjungkarang
+                © {{ date('Y') }} EVOKAT Pengadilan Tinggi Tanjungkarang
             </footer>
         </div>
     </div>

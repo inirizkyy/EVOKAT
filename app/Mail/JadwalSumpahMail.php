@@ -31,7 +31,7 @@ class JadwalSumpahMail extends Mailable
         return new Envelope(
             subject: 'Pemberitahuan Jadwal Pelaksanaan Sumpah Advokat',
             replyTo: [
-                new \Illuminate\Mail\Mailables\Address('adminadvokat@gmail.com', 'Admin E-Advokat'),
+                new \Illuminate\Mail\Mailables\Address('adminadvokat@gmail.com', 'Admin EVOKAT'),
             ],
         );
     }

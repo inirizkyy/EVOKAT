@@ -13,4 +13,4 @@ Mohon hadir tepat waktu dengan membawa berkas-berkas asli yang disyaratkan serta
 
 Hormat kami,
 Panitia Pengambilan Sumpah Advokat
-E-Advokat
+EVOKAT

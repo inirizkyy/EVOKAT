@@ -89,7 +89,7 @@ class FrontendController extends Controller
                 // Kirim email ke pemohon
                 \Illuminate\Support\Facades\Mail::to($permohonan->pemohon->email, $permohonan->pemohon->nama_lengkap)->send(new \App\Mail\PermohonanDiajukanMail($permohonan));
                 // Kirim notifikasi ke admin
-                \Illuminate\Support\Facades\Mail::to('adminadvokat@gmail.com', 'Admin E-Advokat')->send(new \App\Mail\NotifikasiAdminMail($permohonan));
+                \Illuminate\Support\Facades\Mail::to('adminadvokat@gmail.com', 'Admin EVOKAT')->send(new \App\Mail\NotifikasiAdminMail($permohonan));
             } catch (\Exception $mailException) {
                 // Log or ignore email error so it doesn't break the submission
                 \Illuminate\Support\Facades\Log::error('Gagal mengirim email permohonan: ' . $mailException->getMessage());

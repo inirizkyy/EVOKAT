@@ -46,7 +46,7 @@
                     <div class="ml-20 sm:ml-32 w-full">
                         <div class="bg-neutral-primary-soft rounded-2xl p-6 sm:p-8 shadow-sm border border-border-default hover:shadow-md hover:border-brand/30 transition-all relative w-full duration-300">
                             <h4 class="font-['Playfair_Display'] text-2xl font-bold text-brand mb-3">Upload Dokumen</h4>
-                            <p class="text-[15px] text-body leading-relaxed">Unggah seluruh berkas persyaratan yang ditentukan ke dalam format digital (PDF/JPG) dengan batas ukuran maksimal 2MB per file. Berkas harus dapat dibaca dengan jelas.</p>
+                            <p class="text-[15px] text-body leading-relaxed">Unggah seluruh berkas persyaratan yang ditentukan ke dalam format digital (PDF) dengan batas ukuran maksimal 2MB per file. Berkas harus dapat dibaca dengan jelas.</p>
                         </div>
                     </div>
                 </div>

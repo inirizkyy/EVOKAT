@@ -9,8 +9,8 @@ Detail Permohonan:
 - Organisasi Advokat: {{ $permohonan->pemohon->organisasi->nama_organisasi ?? '-' }}
 - Waktu Pengajuan: {{ \Carbon\Carbon::parse($permohonan->created_at)->format('d F Y H:i:s') }} WIB
 
-Silakan login ke panel admin E-Advokat untuk memeriksa kelengkapan dan keabsahan dokumen persyaratan pemohon tersebut.
+Silakan login ke panel admin EVOKAT untuk memeriksa kelengkapan dan keabsahan dokumen persyaratan pemohon tersebut.
 
 URL Verifikasi: {{ route('admin.permohonan.show', $permohonan->id) }}
 
-Email ini dikirim secara otomatis oleh Sistem E-Advokat. Mohon tidak membalas email ini.
+Email ini dikirim secara otomatis oleh Sistem EVOKAT. Mohon tidak membalas email ini.

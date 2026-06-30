@@ -8,7 +8,7 @@
         <div class="text-center mb-12">
             <h1 class="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-heading mb-4">Kontak Kami</h1>
             <div class="w-24 h-1 bg-brand mx-auto rounded-full"></div>
-            <p class="text-body-subtle mt-6 max-w-2xl mx-auto text-lg">Hubungi kami jika Anda memiliki pertanyaan atau membutuhkan bantuan terkait layanan E-Advokat.</p>
+            <p class="text-body-subtle mt-6 max-w-2xl mx-auto text-lg">Hubungi kami jika Anda memiliki pertanyaan atau membutuhkan bantuan terkait layanan EVOKAT.</p>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">

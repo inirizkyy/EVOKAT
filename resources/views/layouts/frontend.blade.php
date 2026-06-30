@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - E-Advokat Pengadilan Tinggi Tanjungkarang</title>
+    <title>@yield('title') - EVOKAT Pengadilan Tinggi Tanjungkarang</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,7 @@
                         <div class="w-10 h-10 rounded-base bg-neutral-primary-soft shadow-sm border border-border-default flex items-center justify-center text-brand group-hover:shadow-md transition-all">
                             <i class="fa-solid fa-scale-balanced text-lg"></i>
                         </div>
-                        <span class="font-['Playfair_Display'] font-bold text-xl text-heading tracking-wide">E-Advokat</span>
+                        <span class="font-['Playfair_Display'] font-bold text-xl text-heading tracking-wide">EVOKAT</span>
                     </a>
                 </div>
 
@@ -112,7 +112,7 @@
                         <div class="w-10 h-10 rounded-base bg-neutral-primary-soft shadow-sm border border-border-default flex items-center justify-center text-brand">
                             <i class="fa-solid fa-scale-balanced text-lg"></i>
                         </div>
-                        <span class="font-['Playfair_Display'] font-bold text-xl text-heading tracking-wide">E-Advokat</span>
+                        <span class="font-['Playfair_Display'] font-bold text-xl text-heading tracking-wide">EVOKAT</span>
                     </a>
                     <p class="text-[14px] text-body-subtle leading-relaxed">
                         Sistem Informasi Permohonan Sumpah Advokat Pengadilan Tinggi Tanjungkarang. Melayani dengan cepat, transparan, dan akuntabel.

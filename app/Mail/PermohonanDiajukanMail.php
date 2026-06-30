@@ -31,7 +31,7 @@ class PermohonanDiajukanMail extends Mailable
         return new Envelope(
             subject: 'Pendaftaran Permohonan Sumpah Advokat - Nomor Registrasi: ' . $this->permohonan->nomor_permohonan,
             replyTo: [
-                new \Illuminate\Mail\Mailables\Address('adminadvokat@gmail.com', 'Admin E-Advokat'),
+                new \Illuminate\Mail\Mailables\Address('adminadvokat@gmail.com', 'Admin EVOKAT'),
             ],
         );
     }

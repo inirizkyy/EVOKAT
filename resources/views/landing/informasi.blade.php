@@ -6,7 +6,7 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center mb-12">
-            <h1 class="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-heading mb-4">Informasi Layanan E-Advokat</h1>
+            <h1 class="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-heading mb-4">Informasi Layanan EVOKAT</h1>
             <div class="w-24 h-1 bg-brand mx-auto rounded-full"></div>
         </div>
         
@@ -22,7 +22,7 @@
                     Penjelasan Layanan
                 </h4>
                 <div class="space-y-4 text-body leading-relaxed text-[15px] bg-white p-6 rounded-2xl border border-border-default shadow-sm border-l-4 border-l-brand">
-                    <p>Layanan E-Advokat adalah sistem elektronik yang disediakan oleh Pengadilan Tinggi Tanjungkarang untuk memfasilitasi calon advokat dalam proses permohonan pengambilan sumpah profesi advokat sesuai dengan amanat Undang-Undang Nomor 18 Tahun 2003 tentang Advokat.</p>
+                    <p>Layanan EVOKAT adalah sistem elektronik yang disediakan oleh Pengadilan Tinggi Tanjungkarang untuk memfasilitasi calon advokat dalam proses permohonan pengambilan sumpah profesi advokat sesuai dengan amanat Undang-Undang Nomor 18 Tahun 2003 tentang Advokat.</p>
                     <p>Sistem ini dirancang untuk mewujudkan asas peradilan yang cepat, sederhana, dan biaya ringan, serta meningkatkan transparansi pelayanan publik.</p>
                 </div>
             </div>
@@ -63,13 +63,13 @@
                     <div class="relative pl-10 group">
                         <div class="absolute -left-[21px] top-0 w-10 h-10 rounded-full bg-white border-2 border-brand shadow-sm flex items-center justify-center text-brand font-bold text-[16px] group-hover:bg-brand group-hover:text-white transition-colors">1</div>
                         <div class="bg-white p-5 rounded-xl border border-border-default shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-[15px] text-body leading-relaxed"><strong class="text-heading">Pengisian Formulir:</strong> Pemohon mengisi formulir pendaftaran secara online melalui situs web E-Advokat.</p>
+                            <p class="text-[15px] text-body leading-relaxed"><strong class="text-heading">Pengisian Formulir:</strong> Pemohon mengisi formulir pendaftaran secara online melalui situs web EVOKAT.</p>
                         </div>
                     </div>
                     <div class="relative pl-10 group">
                         <div class="absolute -left-[21px] top-0 w-10 h-10 rounded-full bg-white border-2 border-brand shadow-sm flex items-center justify-center text-brand font-bold text-[16px] group-hover:bg-brand group-hover:text-white transition-colors">2</div>
                         <div class="bg-white p-5 rounded-xl border border-border-default shadow-sm hover:shadow-md transition-shadow">
-                            <p class="text-[15px] text-body leading-relaxed"><strong class="text-heading">Unggah Berkas:</strong> Mengunggah semua dokumen persyaratan dalam format digital (PDF/JPG) dengan ukuran maksimal 2MB per file.</p>
+                            <p class="text-[15px] text-body leading-relaxed"><strong class="text-heading">Unggah Berkas:</strong> Mengunggah semua dokumen persyaratan dalam format digital (PDF) dengan ukuran maksimal 2MB per file.</p>
                         </div>
                     </div>
                     <div class="relative pl-10 group">

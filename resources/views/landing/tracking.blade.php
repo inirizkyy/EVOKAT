@@ -41,12 +41,30 @@
                         <input type="text" class="block w-full rounded-full border-2 border-border-default-medium bg-white shadow-lg text-[18px] sm:text-[20px] text-center text-heading py-5 px-16 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all font-mono tracking-widest placeholder:tracking-normal placeholder:text-[16px]" name="nomor_permohonan" required placeholder="Contoh: ADV-20260701-0001">
                     </div>
                 </div>
-                <div class="text-center">
+                <div class="text-center mb-8">
                     <button type="submit" class="inline-flex justify-center items-center px-12 py-4 rounded-full text-[18px] font-bold bg-brand text-white shadow-md hover:shadow-xl hover:-translate-y-1 active:shadow-inset active:translate-y-0 transition-all duration-300 border border-brand-softer w-full sm:w-auto">
                         Lacak Status <i class="fa-solid fa-arrow-right-long ml-3"></i>
                     </button>
                 </div>
             </form>
+
+            <!-- Informasi Layanan Box -->
+            <div class="p-6 sm:p-8 rounded-2xl bg-[#faf9f6] border border-border-default shadow-sm relative z-10 w-full" style="background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px;">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-border-default-medium shadow-sm flex items-center justify-center text-heading flex-shrink-0">
+                        <i class="fa-solid fa-info"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-[16px] font-bold text-heading mb-3">Informasi Layanan</h5>
+                        <ul class="space-y-3 text-[14.5px] font-medium text-heading leading-relaxed list-disc list-outside ml-4">
+                            <li>Nomor registrasi dikirimkan melalui halaman konfirmasi dan email saat Anda selesai mengisi formulir.</li>
+                            <li>Format registrasi: <code class="px-2 py-1 bg-white border border-border-default rounded-md text-[13px] font-mono font-bold text-brand shadow-sm">ADV-YYYYMMDD-XXXX</code></li>
+                            <li>Proses verifikasi dan penerbitan izin memakan waktu estimasi <strong class="text-brand">3-5 hari kerja</strong>.</li>
+                            <li>Jika permohonan Anda <strong class="text-fg-danger">Ditolak</strong>, perbaiki dokumen sesuai catatan petugas dan ajukan permohonan baru.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
         @if(isset($permohonan))

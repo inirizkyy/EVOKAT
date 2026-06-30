@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'E-Advokat') }}</title>
+        <title>{{ config('app.name', 'EVOKAT') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +33,7 @@
                                 <i class="fa-solid fa-scale-balanced"></i>
                             </div>
                             <div>
-                                <span class="block font-['Playfair_Display'] text-2xl font-bold text-heading leading-none">E-Advokat</span>
+                                <span class="block font-['Playfair_Display'] text-2xl font-bold text-heading leading-none">EVOKAT</span>
                                 <span class="block text-[11px] font-bold text-brand uppercase tracking-widest mt-1">Pengadilan Tinggi</span>
                             </div>
                         </a>
