@@ -37,10 +37,19 @@
                     <span class="font-medium text-[14px]">Permohonan Sumpah</span>
                 </a>
                 
-                <a href="{{ route('admin.jadwal.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.jadwal.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-calendar-check w-6"></i>
-                    <span class="font-medium text-[14px]">Jadwal Sumpah</span>
+                <a href="{{ route('admin.buku-registrasi.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.buku-registrasi.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                    <i class="fa-solid fa-address-book w-6"></i>
+                    <span class="font-medium text-[14px]">Buku Registrasi Advokat</span>
                 </a>
+
+                <a href="{{ route('admin.chat.index') }}" class="flex items-center justify-between px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.chat.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-comments w-6"></i>
+                        <span class="font-medium text-[14px]">Live Chat</span>
+                    </div>
+                    <span id="sidebar-chat-badge" class="hidden bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"></span>
+                </a>
+
                 
                 <div class="pt-6 pb-2 px-4 text-xs font-semibold uppercase tracking-wider text-body-subtle">
                     Master Data
@@ -59,6 +68,11 @@
                 <a href="{{ route('admin.faq.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.faq.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
                     <i class="fa-solid fa-circle-question w-6"></i>
                     <span class="font-medium text-[14px]">FAQ</span>
+                </a>
+                
+                <a href="{{ route('admin.surat-template.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.surat-template.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                    <i class="fa-solid fa-file-word w-6"></i>
+                    <span class="font-medium text-[14px]">Template Surat</span>
                 </a>
                 
                 <a href="{{ route('admin.pengaturan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.pengaturan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
@@ -142,6 +156,30 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const badge = document.getElementById('sidebar-chat-badge');
+            
+            function fetchUnreadCount() {
+                fetch('{{ route('admin.chat.unread') }}', {
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                })
+                .catch(err => console.error('Error fetching unread count:', err));
+            }
+
+            fetchUnreadCount();
+            setInterval(fetchUnreadCount, 10000); // Check every 10 seconds
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

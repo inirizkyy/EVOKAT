@@ -39,6 +39,7 @@ class JadwalSumpahMail extends Mailable
     public function content(): Content
     {
         return new Content(
+            html: 'emails.jadwal-sumpah',
             text: 'emails.jadwal-sumpah-text',
         );
     }

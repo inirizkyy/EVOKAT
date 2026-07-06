@@ -26,7 +26,7 @@
                 
                 <h1 class="font-['Playfair_Display'] text-5xl md:text-6xl lg:text-7xl font-bold text-heading leading-[1.1] mb-8">
                     Sistem Digitalisasi <br />
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-strong relative inline-block">
+                    <span class="text-brand relative inline-block">
                         Sumpah Advokat
                         <svg class="absolute w-full h-3 -bottom-1 left-0 text-brand opacity-30" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="4" fill="none"/></svg>
                     </span>
@@ -140,7 +140,9 @@
                     @if($berita->thumbnail)
                         <img src="{{ asset('storage/'.$berita->thumbnail) }}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="{{ $berita->judul }}">
                     @else
-                        <img src="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" alt="Hukum">
+                        <div class="w-full h-full bg-neutral-primary flex items-center justify-center transform group-hover:scale-105 transition-transform duration-700">
+                            <i class="fa-solid fa-newspaper text-5xl text-border-strong opacity-50"></i>
+                        </div>
                     @endif
                     <div class="absolute top-4 left-4">
                         <span class="px-4 py-1.5 bg-white/90 backdrop-blur-sm border border-border-default rounded-full text-xs font-bold text-brand shadow-sm">Berita Utama</span>
@@ -155,7 +157,7 @@
                     <p class="text-[15px] text-body line-clamp-3 mb-6 leading-relaxed">{{ Str::limit(strip_tags($berita->isi), 120) }}</p>
                     
                     <div class="mt-auto pt-5 border-t border-border-default/50">
-                        <a href="#" class="inline-flex items-center text-sm font-bold text-brand group-hover:text-brand-strong">
+                        <a href="{{ route('berita.show', $berita->slug) }}" class="inline-flex items-center text-sm font-bold text-brand group-hover:text-brand-strong">
                             Baca Selengkapnya <i class="fa-solid fa-arrow-right-long ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                         </a>
                     </div>

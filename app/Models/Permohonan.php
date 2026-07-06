@@ -18,7 +18,7 @@ class Permohonan extends Model
                 'status_lama' => 'Baru',
                 'status_baru' => $permohonan->status,
                 'keterangan' => 'Permohonan berhasil diajukan.',
-                'changed_by' => auth()->id() ?? 1,
+                'changed_by' => auth()->id(),
             ]);
         });
 
@@ -29,7 +29,7 @@ class Permohonan extends Model
                     'status_lama' => $permohonan->getOriginal('status'),
                     'status_baru' => $permohonan->status,
                     'keterangan' => $permohonan->catatan ?? 'Status diperbarui.',
-                    'changed_by' => auth()->id() ?? 1,
+                    'changed_by' => auth()->id(),
                 ]);
             }
         });
@@ -58,5 +58,10 @@ class Permohonan extends Model
     public function jadwalSumpah()
     {
         return $this->hasOne(JadwalSumpah::class, 'permohonan_id');
+    }
+
+    public function bukuRegistrasi()
+    {
+        return $this->hasOne(BukuRegistrasiAdvokat::class, 'permohonan_id');
     }
 }

@@ -1,12 +1,12 @@
 @extends('layouts.frontend')
-@section('title', 'Tracking Status Permohonan')
+@section('title', 'Cek Status Permohonan')
 
 @section('content')
 <section class="py-12 lg:py-20 bg-transparent min-h-[calc(100vh-88px)]">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center mb-12">
-            <h1 class="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-heading mb-4">Tracking Permohonan</h1>
+            <h1 class="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-heading mb-4">Cek Status Permohonan</h1>
             <p class="text-body-subtle text-lg">Pantau status permohonan sumpah advokat Anda secara real-time.</p>
         </div>
         
@@ -16,7 +16,30 @@
                 <i class="fa-solid fa-magnifying-glass-chart"></i>
             </div>
 
-            @if(session('success'))
+            @if(session('nomor_permohonan'))
+            {{-- Banner khusus setelah submit form permohonan --}}
+            <div class="mb-8 rounded-2xl border border-border-success-subtle bg-success-soft relative z-10 overflow-hidden">
+                <div class="px-6 pt-6 pb-4 flex items-center gap-3 border-b border-border-success-subtle">
+                    <div class="w-9 h-9 rounded-full bg-white border border-border-success-subtle flex items-center justify-center text-fg-success-strong flex-shrink-0">
+                        <i class="fa-solid fa-circle-check text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-fg-success-strong text-[15px]">Permohonan Berhasil Diajukan!</p>
+                        <p class="text-[13px] text-fg-success">Simpan nomor registrasi Anda di bawah ini untuk keperluan pelacakan.</p>
+                    </div>
+                </div>
+                <div class="px-6 py-5 flex flex-col items-center gap-3">
+                    <p class="text-[13px] font-medium text-fg-success uppercase tracking-widest">Nomor Registrasi Anda</p>
+                    <div class="flex items-center gap-3">
+                        <span id="nomorRegistrasi" class="font-mono text-2xl sm:text-3xl font-bold text-fg-success-strong tracking-widest">{{ session('nomor_permohonan') }}</span>
+                        <button type="button" onclick="copyNomor()" title="Salin nomor" class="w-9 h-9 rounded-full border border-border-success-subtle bg-white text-fg-success hover:text-fg-success-strong hover:shadow-md transition-all flex items-center justify-center flex-shrink-0">
+                            <i id="copyIcon" class="fa-regular fa-copy text-base"></i>
+                        </button>
+                    </div>
+                    <p class="text-[12px] text-fg-success">Nomor ini juga telah dikirimkan ke email Anda.</p>
+                </div>
+            </div>
+            @elseif(session('success'))
             <div class="mb-8 p-4 rounded-2xl bg-success-soft border border-border-success-subtle text-fg-success-strong flex items-start gap-3 relative z-10">
                 <i class="fa-solid fa-circle-check mt-1"></i>
                 <p class="text-[14px]">{{ session('success') }}</p>
@@ -38,7 +61,7 @@
                         <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-brand text-body-subtle">
                             <i class="fa-solid fa-magnifying-glass text-xl"></i>
                         </div>
-                        <input type="text" class="block w-full rounded-full border-2 border-border-default-medium bg-white shadow-lg text-[18px] sm:text-[20px] text-center text-heading py-5 px-16 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all font-mono tracking-widest placeholder:tracking-normal placeholder:text-[16px]" name="nomor_permohonan" required placeholder="Contoh: ADV-20260701-0001">
+                        <input type="text" class="block w-full rounded-full border-2 border-border-default-medium bg-white shadow-lg text-[18px] sm:text-[20px] text-center text-heading py-5 px-16 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all font-mono tracking-widest placeholder:tracking-normal placeholder:text-[16px]" name="nomor_permohonan" required placeholder="Contoh: ADV-20260701-0001" value="{{ session('nomor_permohonan') ?? (isset($permohonan) ? $permohonan->nomor_permohonan : '') }}">
                     </div>
                 </div>
                 <div class="text-center mb-8">
@@ -93,6 +116,10 @@
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-danger-soft border border-border-danger-subtle text-fg-danger-strong shadow-sm">{{ $permohonan->status }}</span>
                             @elseif($permohonan->status == 'Disetujui' || $permohonan->status == 'Selesai')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-success-soft border border-border-success-subtle text-fg-success-strong shadow-sm">{{ $permohonan->status }}</span>
+                            @elseif($permohonan->status == 'Verifikasi Berkas Fisik')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-solid fa-folder-open mr-1.5"></i>{{ $permohonan->status }}</span>
+                            @elseif($permohonan->status == 'Diproses')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm"><i class="fa-solid fa-spinner fa-spin mr-1.5"></i>{{ $permohonan->status }}</span>
                             @else
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm">{{ $permohonan->status }}</span>
                             @endif
@@ -119,6 +146,42 @@
             <div class="mb-8 p-5 rounded-xl bg-warning-soft border border-border-warning-subtle text-fg-warning flex flex-col gap-2">
                 <h5 class="font-bold flex items-center gap-2"><i class="fa-solid fa-bell"></i> Catatan Verifikasi:</h5>
                 <p class="text-[14px] leading-relaxed ml-6">{{ $permohonan->catatan }}</p>
+            </div>
+            @endif
+
+            @if(in_array($permohonan->status, ['Disetujui', 'Dijadwalkan Sumpah', 'Selesai']) && $permohonan->file_surat)
+            <!-- Panel Surat Pengantar Final -->
+            <div class="mb-8 p-6 rounded-2xl bg-success-soft border border-border-success-subtle text-fg-success-strong relative overflow-hidden">
+                <i class="fa-solid fa-file-circle-check absolute -right-4 -bottom-4 text-8xl text-success opacity-10 pointer-events-none"></i>
+                <h5 class="font-bold text-lg mb-4 flex items-center gap-2 text-fg-success-strong">
+                    <i class="fa-solid fa-file-arrow-down"></i> Surat Pengantar Final
+                </h5>
+                <div class="h-px w-full bg-border-success-subtle mb-4"></div>
+                <p class="text-[14px] mb-4">Surat pengantar sumpah Anda telah ditandatangani dan disetujui. Silakan unduh surat pengantar resmi Anda menggunakan tombol di bawah ini.</p>
+                <a href="{{ route('permohonan.download-final', $permohonan->nomor_permohonan) }}" class="inline-flex items-center px-6 py-3 rounded-full text-[14px] font-bold bg-success text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all border border-success-subtle">
+                    <i class="fa-solid fa-download mr-2"></i> Unduh Surat Pengantar Sumpah
+                </a>
+            </div>
+            @endif
+
+            @if($permohonan->status == 'Verifikasi Berkas Fisik' && $permohonan->tanggal_verifikasi_fisik)
+            <div class="mb-8 p-6 rounded-2xl bg-warning-soft border border-border-warning-subtle text-fg-warning relative overflow-hidden">
+                <i class="fa-regular fa-folder-open absolute -right-4 -bottom-4 text-8xl text-fg-warning opacity-10 pointer-events-none"></i>
+                <h5 class="font-bold text-lg mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days"></i> Jadwal Pengecekan Berkas Fisik
+                </h5>
+                <div class="h-px w-full bg-border-warning-subtle mb-4"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+                    <div>
+                        <span class="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Hari</span>
+                        <span class="block text-xl font-bold text-fg-warning">{{ $permohonan->hari_verifikasi_fisik ?? '-' }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Tanggal</span>
+                        <span class="block text-xl font-bold text-fg-warning">{{ \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->translatedFormat('d F Y') }}</span>
+                    </div>
+                </div>
+                <p class="text-[13px] mt-4 opacity-80 relative z-10">Harap datang membawa seluruh berkas fisik sesuai persyaratan pada jadwal di atas.</p>
             </div>
             @endif
 
@@ -194,4 +257,21 @@
 
     </div>
 </section>
+
+@push('scripts')
+<script>
+function copyNomor() {
+    const nomor = document.getElementById('nomorRegistrasi').textContent.trim();
+    navigator.clipboard.writeText(nomor).then(() => {
+        const icon = document.getElementById('copyIcon');
+        icon.classList.remove('fa-regular', 'fa-copy');
+        icon.classList.add('fa-solid', 'fa-check');
+        setTimeout(() => {
+            icon.classList.remove('fa-solid', 'fa-check');
+            icon.classList.add('fa-regular', 'fa-copy');
+        }, 2000);
+    });
+}
+</script>
+@endpush
 @endsection

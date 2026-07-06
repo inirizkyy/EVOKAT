@@ -30,16 +30,18 @@ class DatabaseSeeder extends Seeder
 
         // Master Persyaratan
         $persyaratan = [
-            ['nama_persyaratan' => 'KTP', 'deskripsi' => 'Kartu Tanda Penduduk Provinsi Lampung', 'is_required' => true],
-            ['nama_persyaratan' => 'Ijazah S1 Hukum', 'deskripsi' => 'Legalisir ijazah S1 Hukum', 'is_required' => true],
-            ['nama_persyaratan' => 'Sertifikat PKPA', 'deskripsi' => 'Sertifikat Pendidikan Khusus Profesi Advokat', 'is_required' => true],
-            ['nama_persyaratan' => 'Sertifikat UPA', 'deskripsi' => 'Sertifikat Ujian Profesi Advokat', 'is_required' => true],
-            ['nama_persyaratan' => 'Surat Magang', 'deskripsi' => 'Surat keterangan magang minimal 2 tahun', 'is_required' => true],
-            ['nama_persyaratan' => 'SK Pengangkatan Advokat', 'deskripsi' => 'SK pengangkatan dari organisasi advokat', 'is_required' => true],
-            ['nama_persyaratan' => 'Fotokopi Kartu Anggota Organisasi', 'deskripsi' => 'Fotokopi kartu anggota organisasi advokat', 'is_required' => true],
-            ['nama_persyaratan' => 'Surat Pernyataan Tidak Berstatus PNS, TNI, Polri, Pejabat Negara', 'deskripsi' => 'Surat Keterangan tidak pernah dipidana dari Pengadilan Negeri karena melakukan tindak pidana kejahatan yang diancam dengan pidana penjara 5 tahun atau lebih', 'is_required' => true],
-            ['nama_persyaratan' => 'Surat Keterangan Tidak Pernah Dipidana', 'deskripsi' => 'Surat Keterangan tidak pernah dipidana dari Pengadilan Negeri karena melakukan tindak pidana kejahatan yang diancam dengan pidana penjara 5 tahun atau lebih', 'is_required' => true],
-            ['nama_persyaratan' => 'Foto Copy SK Kepengurusan Organisasi', 'deskripsi' => 'Foto Copy SK nama-nama Pengurus Organisasi Advokat (Pusat/Daerah)', 'is_required' => true],
+            ['nama_persyaratan' => 'Surat Permohonan dari Pimpinan Organisasi', 'deskripsi' => 'Surat permohonan resmi yang ditandatangani oleh pimpinan organisasi advokat', 'is_required' => true],
+            ['nama_persyaratan' => 'Fotokopi SK Pendirian Organisasi & SK Kepengurusan', 'deskripsi' => 'Fotokopi SK Pendirian organisasi dari Kemenkum HAM dan SK Kepengurusan', 'is_required' => true],
+            ['nama_persyaratan' => 'Asli dan Fotokopi Surat Kartu Tanda Penduduk (KTP)', 'deskripsi' => 'Asli dan Fotokopi Surat Kartu Tanda Penduduk (KTP Lampung)', 'is_required' => true],
+            ['nama_persyaratan' => 'Asli dan Legalisir Ijazah Sarjana Hukum', 'deskripsi' => 'Asli dan Legalisir Ijazah Sarjana Hukum sudah 2 tahun kelulusan', 'is_required' => true],
+            ['nama_persyaratan' => 'Asli dan Legalisir Sertifikat PKPA', 'deskripsi' => 'Asli dan Legalisir Sertifikat Pendidikan Khusus Profesi Advokat (PKPA)', 'is_required' => true],
+            ['nama_persyaratan' => 'Asli dan Legalisir Sertifikat UPA', 'deskripsi' => 'Asli dan Legalisir Sertifikat Ujian Pendidikan Advokat (UPA)', 'is_required' => true],
+            ['nama_persyaratan' => 'Surat Keterangan Magang', 'deskripsi' => 'Surat Keterangan Magang selama 2 tahun berturut-turut', 'is_required' => true],
+            ['nama_persyaratan' => 'Asli dan Legalisir SK Pengangkatan Advokat', 'deskripsi' => 'Asli dan Legalisir Surat Keputusan Pengangkatan Advokat (Nomor, Tanggal, dan Tempat)', 'is_required' => true],
+            ['nama_persyaratan' => 'Fotokopi Kartu Anggota Organisasi (Opsional)', 'deskripsi' => 'Fotokopi Kartu Anggota Organisasi beserta Nomor Anggota (opsional)', 'is_required' => false],
+            ['nama_persyaratan' => 'Asli Surat Pernyataan Tidak sebagai PNS/TNI/POLRI/Pejabat Negara', 'deskripsi' => 'Asli Surat Pernyataan Tidak sebagai PNS/TNI/POLRI/Pejabat Negara di atas materai Rp10.000', 'is_required' => true],
+            ['nama_persyaratan' => 'Asli Surat Keterangan Tidak Pernah Dipidana', 'deskripsi' => 'Asli Surat Keterangan Tidak Pernah Dipidana dari Kepolisian dan Pengadilan', 'is_required' => true],
+            ['nama_persyaratan' => 'Asli dan Fotokopi Akta Kelahiran', 'deskripsi' => 'Asli dan Fotokopi Akta Kelahiran', 'is_required' => true],
         ];
         foreach ($persyaratan as $p) {
             \App\Models\MasterPersyaratan::create($p);

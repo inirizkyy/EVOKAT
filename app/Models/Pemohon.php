@@ -19,4 +19,9 @@ class Pemohon extends Model
     {
         return $this->hasOne(Permohonan::class, 'pemohon_id');
     }
+
+    public function bukuRegistrasi()
+    {
+        return $this->hasOne(BukuRegistrasiAdvokat::class, 'pemohon_id');
+    }
 }

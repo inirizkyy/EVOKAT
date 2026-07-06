@@ -39,15 +39,24 @@ class PermohonanService
             ]);
 
             // Upload dan Simpan Dokumen
-            foreach ($dokumenData as $persyaratanId => $file) {
-                $path = $file->store('permohonan/dokumen/' . $nomorPermohonan, 'public');
-                DokumenPersyaratan::create([
-                    'permohonan_id' => $permohonan->id,
-                    'persyaratan_id' => $persyaratanId,
-                    'file_path' => $path,
-                    'status_dokumen' => 'Pending'
-                ]);
+            if ($dokumenData) {
+                foreach ($dokumenData as $persyaratanId => $file) {
+                    if (!$file) continue;
+                    $path = $file->store('permohonan/dokumen/' . $nomorPermohonan, 'public');
+                    DokumenPersyaratan::create([
+                        'permohonan_id' => $permohonan->id,
+                        'persyaratan_id' => $persyaratanId,
+                        'file_path' => $path,
+                        'status_dokumen' => 'Pending'
+                    ]);
+                }
             }
+
+            // Otomatis masuk ke Buku Registrasi Advokat
+            \App\Models\BukuRegistrasiAdvokat::create([
+                'pemohon_id' => $pemohon->id,
+                'permohonan_id' => $permohonan->id,
+            ]);
 
             DB::commit();
             return $permohonan;

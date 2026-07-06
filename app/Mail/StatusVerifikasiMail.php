@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PermohonanDiajukanMail extends Mailable
+class StatusVerifikasiMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -29,7 +29,7 @@ class PermohonanDiajukanMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pendaftaran Permohonan Sumpah Advokat - Nomor Registrasi: ' . $this->permohonan->nomor_permohonan,
+            subject: 'Pembaruan Status Verifikasi Permohonan Sumpah Advokat - ' . $this->permohonan->nomor_permohonan,
             replyTo: [
                 new \Illuminate\Mail\Mailables\Address('adminadvokat@gmail.com', 'Admin EVOKAT'),
             ],
@@ -42,8 +42,8 @@ class PermohonanDiajukanMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.permohonan-diajukan',
-            text: 'emails.permohonan-diajukan-text',
+            html: 'emails.status-verifikasi',
+            text: 'emails.status-verifikasi-text',
         );
     }
 

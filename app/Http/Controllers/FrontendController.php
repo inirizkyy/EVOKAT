@@ -25,6 +25,12 @@ class FrontendController extends Controller
         return view('landing.index', compact('stats', 'beritaTerbaru'));
     }
 
+    public function showBerita($slug)
+    {
+        $berita = Berita::where('slug', $slug)->firstOrFail();
+        return view('landing.berita-show', compact('berita'));
+    }
+
     public function informasi()
     {
         return view('landing.informasi');
@@ -62,7 +68,7 @@ class FrontendController extends Controller
 
     public function storePermohonan(Request $request, PermohonanService $service)
     {
-        $request->validate([
+        $rules = [
             'nik' => 'required|numeric|digits:16|unique:pemohons',
             'nama_lengkap' => 'required|string|max:255',
             'tempat_lahir' => 'required|string|max:255',
@@ -72,9 +78,22 @@ class FrontendController extends Controller
             'email' => 'required|email|max:255',
             'no_hp' => 'required|string|max:20',
             'nama_organisasi' => 'required|string|max:255',
-            'foto' => 'required|file|mimes:pdf|max:2048',
-            'dokumen.*' => 'required|file|mimes:pdf|max:2048',
-        ]);
+            'nomor_sk' => 'required|string|max:255',
+            'tanggal_sk' => 'required|date',
+            'foto' => 'required|file|mimes:jpg,jpeg,png|max:2048',
+        ];
+
+        // Validasi dokumen persyaratan secara dinamis berdasarkan status is_required di database
+        $persyaratan = MasterPersyaratan::all();
+        foreach ($persyaratan as $p) {
+            if ($p->is_required) {
+                $rules["dokumen.{$p->id}"] = 'required|file|mimes:pdf|max:2048';
+            } else {
+                $rules["dokumen.{$p->id}"] = 'nullable|file|mimes:pdf|max:2048';
+            }
+        }
+
+        $request->validate($rules);
 
         try {
             $pemohonData = $request->except(['_token', 'dokumen', 'nama_organisasi']);
@@ -95,15 +114,21 @@ class FrontendController extends Controller
                 \Illuminate\Support\Facades\Log::error('Gagal mengirim email permohonan: ' . $mailException->getMessage());
             }
             
-            return redirect('/tracking')->with('success', 'Permohonan berhasil diajukan. Nomor Registrasi Anda: ' . $permohonan->nomor_permohonan);
+            return redirect('/tracking')
+                ->with('success', 'Permohonan berhasil diajukan. Nomor Registrasi Anda: ' . $permohonan->nomor_permohonan)
+                ->with('nomor_permohonan', $permohonan->nomor_permohonan);
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
-    public function tracking()
+    public function tracking(Request $request, PermohonanService $service)
     {
-        return view('landing.tracking');
+        $permohonan = null;
+        if (session('nomor_permohonan')) {
+            $permohonan = $service->getPermohonanByNomor(session('nomor_permohonan'));
+        }
+        return view('landing.tracking', compact('permohonan'));
     }
 
     public function cekTracking(Request $request, PermohonanService $service)
@@ -119,5 +144,17 @@ class FrontendController extends Controller
         }
 
         return view('landing.tracking', compact('permohonan'));
+    }
+
+    public function downloadFinalSurat($nomor_permohonan)
+    {
+        $permohonan = Permohonan::where('nomor_permohonan', $nomor_permohonan)->firstOrFail();
+        if ($permohonan->status !== 'Disetujui' && $permohonan->status !== 'Selesai') {
+            abort(403, 'Surat final belum tersedia.');
+        }
+        if (!$permohonan->file_surat || !\Illuminate\Support\Facades\Storage::disk('public')->exists($permohonan->file_surat)) {
+            abort(404, 'File surat tidak ditemukan.');
+        }
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($permohonan->file_surat, 'Surat_Final_' . $permohonan->nomor_permohonan . '.pdf');
     }
 }

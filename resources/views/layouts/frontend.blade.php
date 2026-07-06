@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') - EVOKAT Pengadilan Tinggi Tanjungkarang</title>
     
     <!-- Google Fonts -->
@@ -53,7 +54,7 @@
                     <div class="h-6 w-px bg-border-default mx-2"></div>
                     
                     <a href="{{ url('/tracking') }}" class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-[15px] font-medium bg-neutral-primary-soft text-heading shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default mr-2">
-                        Tracking
+                        Cek Status
                     </a>
                     <a href="{{ url('/permohonan') }}" class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-[15px] font-medium bg-brand text-white shadow-sm hover:shadow-md hover:bg-brand-soft active:shadow-inset transition-all border border-brand-softer">
                         Ajukan Permohonan
@@ -85,7 +86,7 @@
                 
                 <div class="pt-4 mt-2 border-t border-border-default flex flex-col gap-3">
                     <a href="{{ url('/tracking') }}" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium bg-neutral-primary-soft text-heading shadow-sm border border-border-default">
-                        Tracking Permohonan
+                        Cek Status
                     </a>
                     <a href="{{ url('/permohonan') }}" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium bg-brand text-white shadow-sm border border-brand-softer">
                         Ajukan Permohonan
@@ -141,7 +142,7 @@
                     </h5>
                     <ul class="space-y-3">
                         <li><a href="{{ url('/permohonan') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Ajukan Permohonan</a></li>
-                        <li><a href="{{ url('/tracking') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Tracking Permohonan</a></li>
+                        <li><a href="{{ url('/tracking') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Cek Status</a></li>
                         <li><a href="{{ url('/alur') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Alur Pengajuan</a></li>
                     </ul>
                 </div>
@@ -194,9 +195,7 @@
         </div>
     </footer>
 
-    <!-- jQuery (jika masih dibutuhkan oleh plugin lain) -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
+    <x-chat-widget />
     @stack('scripts')
 </body>
 </html>

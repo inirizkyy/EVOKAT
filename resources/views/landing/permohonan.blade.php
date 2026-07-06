@@ -120,6 +120,14 @@
                                 <input type="text" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="nama_organisasi" value="{{ old('nama_organisasi') }}" required placeholder="Ketik nama organisasi advokat">
                             </div>
                             <div class="group">
+                                <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Nomor SK Advokat <span class="text-fg-danger">*</span></label>
+                                <input type="text" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="nomor_sk" value="{{ old('nomor_sk') }}" required placeholder="Contoh: SK/123/2026">
+                            </div>
+                            <div class="group">
+                                <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Tanggal SK Advokat <span class="text-fg-danger">*</span></label>
+                                <input type="date" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="tanggal_sk" value="{{ old('tanggal_sk') }}" required>
+                            </div>
+                            <div class="group">
                                 <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Nomor HP/WhatsApp <span class="text-fg-danger">*</span></label>
                                 <input type="text" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="no_hp" value="{{ old('no_hp') }}" required placeholder="08xxxxxxxxxx">
                             </div>
@@ -140,8 +148,8 @@
                                     <p class="mb-2 text-[15px] text-heading font-semibold text-center leading-snug" id="foto-text" style="word-break: break-word;">
                                         <span class="text-brand">Klik unggah</span> atau seret dokumen
                                     </p>
-                                    <p class="text-[14px] text-body font-medium mt-1 text-center">Format PDF (Maks. 2MB)</p>
-                                    <input id="foto" name="foto" type="file" class="hidden" required accept=".pdf" onchange="document.getElementById('foto-text').innerHTML = this.files[0] ? '<span class=\'text-brand\'><i class=\'fa-solid fa-file-pdf mr-1\'></i></span> ' + this.files[0].name : '<span class=\'text-brand\'>Klik unggah</span> atau seret dokumen'" />
+                                    <p class="text-[14px] text-body font-medium mt-1 text-center">Format JPG/JPEG/PNG (Maks. 2MB)</p>
+                                    <input id="foto" name="foto" type="file" class="hidden" required accept=".jpg,.jpeg,.png" onchange="document.getElementById('foto-text').innerHTML = this.files[0] ? '<span class=\'text-brand\'><i class=\'fa-solid fa-image mr-1\'></i></span> ' + this.files[0].name : '<span class=\'text-brand\'>Klik unggah</span> atau seret dokumen'" />
                                 </label>
                             </div>
                             
@@ -155,7 +163,7 @@
                                     <div>
                                         <h5 class="text-[14px] font-bold text-brand-strong mb-1">Cetak Fisik Diperlukan</h5>
                                         <p class="text-[14px] text-heading font-medium leading-relaxed">
-                                            Saat verifikasi dokumen fisik di Pengadilan, Anda <strong class="text-brand">wajib</strong> membawa pas foto <strong class="text-brand">3x4</strong> sebanyak <strong class="text-brand">3 lembar</strong>.
+                                            Saat verifikasi dokumen fisik di Pengadilan, Anda <strong class="text-brand">wajib</strong> membawa pas foto <strong class="text-brand">3x4</strong> sebanyak <strong class="text-brand">2 lembar</strong>.
                                         </p>
                                     </div>
                                 </div>
@@ -236,6 +244,14 @@
                                 <div>
                                     <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Organisasi Advokat</span>
                                     <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.nama_organisasi"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Nomor SK Advokat</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.nomor_sk"></span>
+                                </div>
+                                <div>
+                                    <span class="block text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-body-subtle mb-1.5">Tanggal SK Advokat</span>
+                                    <span class="block text-[16px] sm:text-[17px] font-bold text-heading" x-text="formData.tanggal_sk"></span>
                                 </div>
                             </div>
                         </div>
@@ -365,6 +381,8 @@
                         tanggal_lahir: form.querySelector('input[name="tanggal_lahir"]').value,
                         jenis_kelamin: form.querySelector('select[name="jenis_kelamin"]').value === 'L' ? 'Laki-laki' : (form.querySelector('select[name="jenis_kelamin"]').value === 'P' ? 'Perempuan' : '-'),
                         nama_organisasi: form.querySelector('input[name="nama_organisasi"]').value,
+                        nomor_sk: form.querySelector('input[name="nomor_sk"]').value,
+                        tanggal_sk: form.querySelector('input[name="tanggal_sk"]').value,
                         no_hp: form.querySelector('input[name="no_hp"]').value,
                         email: form.querySelector('input[name="email"]').value,
                         alamat: form.querySelector('textarea[name="alamat"]').value,
