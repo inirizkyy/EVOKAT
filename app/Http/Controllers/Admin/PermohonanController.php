@@ -27,6 +27,7 @@ class PermohonanController extends Controller
                 ->addColumn('status_badge', function($row){
                     if($row->status == 'Menunggu Verifikasi') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-neutral-secondary-medium border border-border-default text-heading">Menunggu</span>';
                     if($row->status == 'Disetujui') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-success-soft border border-border-success-subtle text-fg-success-strong">Disetujui</span>';
+                    if($row->status == 'Dijadwalkan Sumpah') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-success-soft border border-border-success-subtle text-fg-success-strong"><i class="fa-regular fa-calendar-check mr-1"></i>Dijadwalkan Sumpah</span>';
                     if($row->status == 'Selesai') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-brand-softer border border-border-brand-subtle text-fg-brand-strong">Selesai</span>';
                     if($row->status == 'Ditolak') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-danger-soft border border-border-danger-subtle text-fg-danger-strong">Ditolak</span>';
                     if($row->status == 'Verifikasi Berkas Fisik') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-solid fa-folder-open mr-1"></i>Verifikasi Fisik</span>';
@@ -92,14 +93,6 @@ class PermohonanController extends Controller
                         ]
                     );
                     $permohonan->load('jadwalSumpah');
-
-                    // Send email notification to applicant
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($permohonan->pemohon->email, $permohonan->pemohon->nama_lengkap)
-                            ->send(new \App\Mail\JadwalSumpahMail($jadwal));
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error('Gagal mengirim email jadwal sumpah dari verifikasi: ' . $e->getMessage());
-                    }
                 }
 
                 $activeTemplate = \App\Models\SuratTemplate::where('is_active', true)->first();
@@ -137,6 +130,9 @@ class PermohonanController extends Controller
                     if ($oldPath && $oldPath !== $newPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
                         \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
                     }
+
+                    // Keep DB status as Diproses until syncStatusAndNotify evaluates it
+                    $permohonan->status = 'Diproses';
                 } else {
                     return back()->with('error', 'Surat bertanda tangan wajib diunggah untuk status Disetujui.')->withInput();
                 }
@@ -152,8 +148,11 @@ class PermohonanController extends Controller
                 'catatan' => $request->catatan,
             ]);
 
-            // Kirim email notifikasi ke pemohon untuk status selain 'Diproses' (karena Diproses sudah mengirimkan JadwalSumpahMail)
-            if ($request->status !== 'Diproses') {
+            // Sync status and send notification email if both schedule & final letter are ready
+            $permohonan->syncStatusAndNotify();
+
+            // Kirim email notifikasi ke pemohon untuk status selain 'Diproses' dan 'Disetujui'
+            if (!in_array($request->status, ['Diproses', 'Disetujui'])) {
                 try {
                     \Illuminate\Support\Facades\Mail::to($permohonan->pemohon->email, $permohonan->pemohon->nama_lengkap)
                         ->send(new \App\Mail\StatusVerifikasiMail($permohonan));
@@ -163,6 +162,12 @@ class PermohonanController extends Controller
             }
 
             \Illuminate\Support\Facades\DB::commit();
+            
+            if ($request->status === 'Diproses') {
+                return redirect()->route('admin.permohonan.show', $permohonan->id)
+                    ->with('success', 'Status permohonan berhasil diperbarui dan draf surat berhasil dibuat.');
+            }
+
             return redirect()->route('admin.permohonan.index')->with('success', 'Status permohonan berhasil diperbarui.');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
@@ -170,8 +175,18 @@ class PermohonanController extends Controller
         }
     }
 
-    public function downloadSurat(string $id) {
+    public function downloadSurat(Request $request, string $id) {
         $permohonan = Permohonan::findOrFail($id);
+
+        // Validate the signatory position selection only for draft letters in 'Diproses' state
+        if ($permohonan->status === 'Diproses') {
+            $request->validate([
+                'jabatan' => 'required|in:PANITERA,PLH. PANITERA,PLT. PANITERA',
+            ], [
+                'jabatan.required' => 'Silakan pilih jabatan penandatangan terlebih dahulu.',
+                'jabatan.in' => 'Jabatan penandatangan tidak valid.',
+            ]);
+        }
 
         // Regenerate draft on the fly if status is Diproses to use the active template
         if ($permohonan->status === 'Diproses') {
@@ -179,7 +194,7 @@ class PermohonanController extends Controller
 
             if ($activeTemplate && \Illuminate\Support\Facades\Storage::disk('public')->exists($activeTemplate->file_path)) {
                 try {
-                    $path = $this->generateWordDraft($permohonan, $activeTemplate);
+                    $path = $this->generateWordDraft($permohonan, $activeTemplate, $request->jabatan);
                     $permohonan->file_surat = $path;
                     $permohonan->save();
                 } catch (\Exception $e) {
@@ -203,9 +218,10 @@ class PermohonanController extends Controller
         
         $extension = pathinfo($permohonan->file_surat, PATHINFO_EXTENSION);
 
-        $displayName = ($permohonan->status === 'Disetujui' || $permohonan->status === 'Selesai')
-            ? 'Surat_Final_' . $permohonan->nomor_permohonan . '.pdf'
-            : 'Draft_Surat_' . $permohonan->nomor_permohonan . '.' . $extension;
+        $safeNomor = str_replace('/', '_', $permohonan->nomor_permohonan);
+        $displayName = (in_array($permohonan->status, ['Disetujui', 'Dijadwalkan Sumpah', 'Selesai']))
+            ? 'Surat_Final_' . $safeNomor . '.pdf'
+            : 'Draft_Surat_' . $safeNomor . '.' . $extension;
             
         return \Illuminate\Support\Facades\Storage::disk('public')->download($permohonan->file_surat, $displayName);
     }
@@ -213,9 +229,11 @@ class PermohonanController extends Controller
     /**
      * Helper to generate Word draft from template.
      */
-    private function generateWordDraft($permohonan, $activeTemplate)
+    private function generateWordDraft($permohonan, $activeTemplate, $jabatan = null)
     {
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(storage_path('app/public/' . $activeTemplate->file_path));
+        
+        $templateProcessor->setValue('jabatan', $jabatan ?? '-');
         
         $pemohon = $permohonan->pemohon;
         $jadwal = $permohonan->jadwalSumpah;

@@ -84,8 +84,9 @@ class PermohonanVerifikasiTest extends TestCase
         });
     }
 
-    public function test_admin_can_approve_permohonan_and_send_approved_status_mail()
+    public function test_admin_can_approve_permohonan_but_status_remains_diproses_if_no_schedule()
     {
+        $this->permohonan->update(['status' => 'Diproses']);
         $file = UploadedFile::fake()->create('surat_final.pdf', 500, 'application/pdf');
 
         $response = $this->actingAs($this->admin)
@@ -99,16 +100,14 @@ class PermohonanVerifikasiTest extends TestCase
 
         $this->assertDatabaseHas('permohonans', [
             'id' => $this->permohonan->id,
-            'status' => 'Disetujui',
+            'status' => 'Diproses', // remains Diproses because there's no schedule yet
         ]);
 
-        Mail::assertSent(StatusVerifikasiMail::class, function ($mail) {
-            return $mail->hasTo($this->pemohon->email) &&
-                   $mail->permohonan->status === 'Disetujui';
-        });
+        Mail::assertNotSent(StatusVerifikasiMail::class);
+        Mail::assertNotSent(JadwalSumpahMail::class);
     }
 
-    public function test_admin_sends_jadwal_sumpah_mail_on_diproses_status()
+    public function test_admin_can_schedule_but_status_remains_diproses_if_no_signed_letter()
     {
         $response = $this->actingAs($this->admin)
             ->post(route('admin.permohonan.verifikasi', $this->permohonan->id), [
@@ -119,17 +118,95 @@ class PermohonanVerifikasiTest extends TestCase
                 'lokasi_sumpah' => 'Gedung PT',
             ]);
 
-        $response->assertRedirect(route('admin.permohonan.index'));
+        $response->assertRedirect(route('admin.permohonan.show', $this->permohonan->id));
+
+        $this->assertDatabaseHas('permohonans', [
+            'id' => $this->permohonan->id,
+            'status' => 'Diproses', // remains Diproses because there's no final signed letter yet
+        ]);
+
+        Mail::assertNotSent(JadwalSumpahMail::class);
+        Mail::assertNotSent(StatusVerifikasiMail::class);
+    }
+
+    public function test_status_transitions_to_dijadwalkan_sumpah_when_both_schedule_and_letter_are_ready()
+    {
+        // 1. Create schedule first
+        $this->actingAs($this->admin)
+            ->post(route('admin.permohonan.verifikasi', $this->permohonan->id), [
+                'status' => 'Diproses',
+                'catatan' => 'Jadwal sumpah telah ditetapkan',
+                'tanggal_sumpah' => '2026-07-10',
+                'jam_sumpah' => '09:00',
+                'lokasi_sumpah' => 'Gedung PT',
+            ]);
 
         $this->assertDatabaseHas('permohonans', [
             'id' => $this->permohonan->id,
             'status' => 'Diproses',
         ]);
+        
+        Mail::assertNotSent(JadwalSumpahMail::class);
 
+        // 2. Upload signed letter
+        $file = UploadedFile::fake()->create('surat_final.pdf', 500, 'application/pdf');
+
+        $response = $this->actingAs($this->admin)
+            ->post(route('admin.permohonan.verifikasi', $this->permohonan->id), [
+                'status' => 'Disetujui',
+                'catatan' => 'Selamat permohonan disetujui',
+                'surat_bertanda_tangan' => $file,
+            ]);
+
+        $response->assertRedirect(route('admin.permohonan.index'));
+
+        // Status should now automatically update to 'Dijadwalkan Sumpah'
+        $this->assertDatabaseHas('permohonans', [
+            'id' => $this->permohonan->id,
+            'status' => 'Dijadwalkan Sumpah',
+        ]);
+
+        // Email notification should be sent
         Mail::assertSent(JadwalSumpahMail::class, function ($mail) {
             return $mail->hasTo($this->pemohon->email);
         });
+    }
 
-        Mail::assertNotSent(StatusVerifikasiMail::class);
+    public function test_applicant_can_download_final_letter_when_status_is_dijadwalkan_sumpah()
+    {
+        $filePath = 'permohonan/surat/surat_final_' . str_replace('/', '_', $this->permohonan->nomor_permohonan) . '.pdf';
+
+        $this->permohonan->update([
+            'status' => 'Dijadwalkan Sumpah',
+            'file_surat' => $filePath,
+        ]);
+
+        Storage::disk('public')->put($filePath, 'dummy pdf content');
+
+        $response = $this->get(route('permohonan.download-final', $this->permohonan->nomor_permohonan));
+
+        $response->assertStatus(200);
+        $response->assertDownload('Surat_Final_' . str_replace('/', '_', $this->permohonan->nomor_permohonan) . '.pdf');
+    }
+
+    public function test_admin_cannot_download_draft_if_jabatan_is_missing()
+    {
+        $this->permohonan->update(['status' => 'Diproses']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.permohonan.download-surat', $this->permohonan->id));
+
+        $response->assertSessionHasErrors('jabatan');
+    }
+
+    public function test_admin_can_download_draft_with_valid_jabatan()
+    {
+        $this->permohonan->update(['status' => 'Diproses']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.permohonan.download-surat', $this->permohonan->id) . '?jabatan=PANITERA');
+
+        $response->assertStatus(200);
+        $response->assertDownload('Draft_Surat_' . str_replace('/', '_', $this->permohonan->nomor_permohonan) . '.pdf');
     }
 }

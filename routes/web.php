@@ -32,7 +32,7 @@ Route::get('/permohonan', [FrontendController::class, 'permohonan']);
 Route::post('/permohonan', [FrontendController::class, 'storePermohonan']);
 Route::get('/tracking', [FrontendController::class, 'tracking']);
 Route::post('/tracking', [FrontendController::class, 'cekTracking']);
-Route::get('/permohonan/{nomor_permohonan}/download-final', [FrontendController::class, 'downloadFinalSurat'])->name('permohonan.download-final');
+Route::get('/permohonan/{nomor_permohonan}/download-final', [FrontendController::class, 'downloadFinalSurat'])->name('permohonan.download-final')->where('nomor_permohonan', '[A-Za-z0-9\/_-]+');
 
 // Chat Routes (Guest)
 Route::post('/chat/init', [ChatController::class, 'init']);

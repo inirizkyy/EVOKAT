@@ -29,23 +29,21 @@ class JadwalController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        $jadwal = JadwalSumpah::create($request->all());
-        
-        $permohonan = \App\Models\Permohonan::find($jadwal->permohonan_id);
-        if($permohonan && $permohonan->status == 'Disetujui') {
-            $permohonan->update(['status' => 'Dijadwalkan Sumpah']);
-        }
-
+        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
+            $jadwal = JadwalSumpah::create($request->all());
+            
+            $permohonan = \App\Models\Permohonan::find($jadwal->permohonan_id);
             if ($permohonan) {
-                \Illuminate\Support\Facades\Mail::to($permohonan->pemohon->email, $permohonan->pemohon->nama_lengkap)
-                    ->send(new \App\Mail\JadwalSumpahMail($jadwal));
+                $permohonan->syncStatusAndNotify();
             }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Gagal mengirim email jadwal: ' . $e->getMessage());
-        }
 
-        return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil ditambahkan.');
+            \Illuminate\Support\Facades\DB::commit();
+            return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Gagal menambahkan jadwal: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function edit(JadwalSumpah $jadwal)
@@ -63,24 +61,50 @@ class JadwalController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        $jadwal->update($request->all());
-
+        \Illuminate\Support\Facades\DB::beginTransaction();
         try {
+            $jadwal->update($request->all());
+
             $permohonan = \App\Models\Permohonan::find($jadwal->permohonan_id);
             if ($permohonan) {
-                \Illuminate\Support\Facades\Mail::to($permohonan->pemohon->email, $permohonan->pemohon->nama_lengkap)
-                    ->send(new \App\Mail\JadwalSumpahMail($jadwal));
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Gagal mengirim email update jadwal: ' . $e->getMessage());
-        }
+                // Sync status and notify. It will return true if status transitioned to Dijadwalkan Sumpah and sent mail.
+                $transitioned = $permohonan->syncStatusAndNotify();
 
-        return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil diperbarui.');
+                // If status did not transition but is already Dijadwalkan Sumpah, we explicitly send the updated schedule email.
+                if (!$transitioned && $permohonan->status === 'Dijadwalkan Sumpah') {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($permohonan->pemohon->email, $permohonan->pemohon->nama_lengkap)
+                            ->send(new \App\Mail\JadwalSumpahMail($jadwal));
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Gagal mengirim email update jadwal: ' . $e->getMessage());
+                    }
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+            return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil diperbarui.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function destroy(JadwalSumpah $jadwal)
     {
-        $jadwal->delete();
-        return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil dihapus.');
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            $permohonan = \App\Models\Permohonan::find($jadwal->permohonan_id);
+            $jadwal->delete();
+
+            if ($permohonan) {
+                $permohonan->syncStatusAndNotify();
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+            return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil dihapus.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Gagal menghapus jadwal: ' . $e->getMessage());
+        }
     }
 }

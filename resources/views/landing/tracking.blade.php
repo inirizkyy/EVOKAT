@@ -120,6 +120,8 @@
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-solid fa-folder-open mr-1.5"></i>{{ $permohonan->status }}</span>
                             @elseif($permohonan->status == 'Diproses')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm"><i class="fa-solid fa-spinner fa-spin mr-1.5"></i>{{ $permohonan->status }}</span>
+                            @elseif($permohonan->status == 'Dijadwalkan Sumpah')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-success-soft border border-border-success-subtle text-fg-success-strong shadow-sm"><i class="fa-regular fa-calendar-check mr-1.5"></i>{{ $permohonan->status }}</span>
                             @else
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm">{{ $permohonan->status }}</span>
                             @endif
@@ -185,7 +187,7 @@
             </div>
             @endif
 
-            @if($permohonan->jadwalSumpah)
+            @if(in_array($permohonan->status, ['Dijadwalkan Sumpah', 'Selesai']) && $permohonan->jadwalSumpah)
             <div class="mb-10 p-6 rounded-2xl bg-success-soft border border-border-success-subtle text-fg-success relative overflow-hidden">
                 <!-- Decorative Icon -->
                 <i class="fa-regular fa-calendar-check absolute -right-4 -bottom-4 text-8xl text-success opacity-10 pointer-events-none"></i>

@@ -149,8 +149,11 @@
                                         <span class="text-brand">Klik unggah</span> atau seret dokumen
                                     </p>
                                     <p class="text-[14px] text-body font-medium mt-1 text-center">Format JPG/JPEG/PNG (Maks. 2MB)</p>
-                                    <input id="foto" name="foto" type="file" class="hidden" required accept=".jpg,.jpeg,.png" onchange="document.getElementById('foto-text').innerHTML = this.files[0] ? '<span class=\'text-brand\'><i class=\'fa-solid fa-image mr-1\'></i></span> ' + this.files[0].name : '<span class=\'text-brand\'>Klik unggah</span> atau seret dokumen'" />
+                                    <input id="foto" name="foto" type="file" class="hidden" required accept=".jpg,.jpeg,.png" onchange="document.getElementById('foto-text').innerHTML = this.files[0] ? '<span class=\'text-brand\'><i class=\'fa-solid fa-image mr-1\'></i></span> ' + this.files[0].name : '<span class=\'text-brand\'>Klik unggah</span> atau seret dokumen'; fotoError = ''" />
                                 </label>
+                                <p x-show="fotoError" class="text-[14px] text-fg-danger-strong font-medium mt-2 flex items-center gap-1.5" x-cloak style="display: none;">
+                                    <i class="fa-solid fa-circle-exclamation"></i> <span x-text="fotoError"></span>
+                                </p>
                             </div>
                             
                             <!-- Info Cetak Fisik -->
@@ -205,8 +208,11 @@
                                             <i class="fa-solid fa-upload text-brand/70 text-xl flex-shrink-0"></i>
                                             <span id="dokumen-name-{{ $p->id }}" class="text-[15px] font-semibold text-body truncate w-full text-center group-hover:text-brand transition-colors">Pilih File...</span>
                                         </div>
-                                        <input id="dokumen_{{ $p->id }}" type="file" class="hidden" name="dokumen[{{ $p->id }}]" {{ $p->is_required ? 'required' : '' }} accept=".pdf" onchange="document.getElementById('dokumen-name-{{ $p->id }}').textContent = this.files[0] ? this.files[0].name : 'Pilih File...'">
+                                        <input id="dokumen_{{ $p->id }}" type="file" class="hidden" name="dokumen[{{ $p->id }}]" {{ $p->is_required ? 'required' : '' }} accept=".pdf" onchange="document.getElementById('dokumen-name-{{ $p->id }}').textContent = this.files[0] ? this.files[0].name : 'Pilih File...'; dokumenErrors[{{ $p->id }}] = ''">
                                     </label>
+                                    <p x-show="dokumenErrors[{{ $p->id }}]" class="text-[14px] text-fg-danger-strong font-medium mt-2 flex items-center gap-1.5" x-cloak style="display: none;">
+                                        <i class="fa-solid fa-circle-exclamation"></i> <span x-text="dokumenErrors[{{ $p->id }}]"></span>
+                                    </p>
                                 </div>
                             </div>
                             @endforeach
@@ -303,12 +309,12 @@
                         </div>
 
                         <!-- Declaration Checkbox -->
-                        <div class="mt-8 p-6 sm:p-7 rounded-2xl bg-white border-2 border-border-default shadow-sm flex items-start gap-4 sm:gap-5 transition-all hover:border-brand/30 hover:shadow-md cursor-pointer group" @click="persetujuan = !persetujuan">
-                            <input type="checkbox" id="persetujuan" x-model="persetujuan" required class="mt-1 w-6 h-6 sm:w-7 sm:h-7 rounded-md border-2 border-border-default-medium text-brand focus:ring-brand shrink-0 cursor-pointer transition-transform group-hover:scale-105" @click.stop>
-                            <label for="persetujuan" class="text-[15px] sm:text-[16px] text-heading font-semibold leading-relaxed cursor-pointer select-none">
+                        <label class="mt-8 p-6 sm:p-7 rounded-2xl bg-white border-2 border-border-default shadow-sm flex items-start gap-4 sm:gap-5 transition-all hover:border-brand/30 hover:shadow-md cursor-pointer group">
+                            <input type="checkbox" id="persetujuan" x-model="persetujuan" required class="mt-1 w-6 h-6 sm:w-7 sm:h-7 rounded-md border-2 border-border-default-medium text-brand focus:ring-brand shrink-0 cursor-pointer transition-transform group-hover:scale-105">
+                            <span class="text-[15px] sm:text-[16px] text-heading font-semibold leading-relaxed select-none">
                                 Saya menyatakan bahwa seluruh data yang diisi adalah benar, sah, dan sesuai dengan berkas aslinya. Segala resiko dan konsekuensi akibat pemalsuan data sepenuhnya menjadi tanggung jawab saya.
-                            </label>
-                        </div>
+                            </span>
+                        </label>
 
                         <div class="mt-10 pt-6 border-t border-border-default flex flex-col-reverse sm:flex-row justify-between items-center gap-4">
                             <button type="button" @click="prevStep2()" class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3.5 rounded-full text-[15px] font-bold bg-white text-heading border border-border-default-strong shadow-sm hover:bg-neutral-secondary-soft hover:text-brand transition-all">
@@ -336,10 +342,31 @@
             formData: {},
             files: [],
             persetujuan: false,
+            fotoError: '',
+            dokumenErrors: {},
             nextStep() {
-                // Validate inputs visible in step 1 and also 'foto'
+                // Clear previous errors
+                this.fotoError = '';
+
                 const form = document.getElementById('permohonan-form');
-                const step1Inputs = form.querySelectorAll('[x-show="step === 1"] input[required], [x-show="step === 1"] select[required], [x-show="step === 1"] textarea[required]');
+                const fotoInput = form.querySelector('input[name="foto"]');
+                
+                // Validate foto file input
+                if (fotoInput && fotoInput.required && fotoInput.files.length === 0) {
+                    this.fotoError = 'Pas foto wajib diunggah.';
+                    window.scrollTo({ top: fotoInput.closest('.group').offsetTop - 120, behavior: 'smooth' });
+                    return;
+                } else if (fotoInput && fotoInput.files.length > 0) {
+                    const fileSize = fotoInput.files[0].size;
+                    if (fileSize > 2 * 1024 * 1024) {
+                        this.fotoError = 'Ukuran pas foto maksimal 2MB.';
+                        window.scrollTo({ top: fotoInput.closest('.group').offsetTop - 120, behavior: 'smooth' });
+                        return;
+                    }
+                }
+
+                // Validate other Step 1 inputs (ignoring file input)
+                const step1Inputs = form.querySelectorAll('[x-show="step === 1"] input[required]:not([type="file"]), [x-show="step === 1"] select[required], [x-show="step === 1"] textarea[required]');
                 
                 let valid = true;
                 for (let input of step1Inputs) {
@@ -360,53 +387,72 @@
                 window.scrollTo({ top: document.querySelector('#form-container').offsetTop - 100, behavior: 'smooth' });
             },
             nextStep2() {
+                // Clear previous errors
+                this.dokumenErrors = {};
+
                 const form = document.getElementById('permohonan-form');
-                const step2Inputs = form.querySelectorAll('[x-show="step === 2"] input[required]');
+                const step2FileInputs = form.querySelectorAll('input[type="file"][name^="dokumen"]');
                 
-                let valid = true;
-                for (let input of step2Inputs) {
-                    if (!input.checkValidity()) {
-                        valid = false;
-                        input.reportValidity();
-                        break; // Stop at first invalid
-                    }
-                }
-
-                if (valid) {
-                    // Collect form data for summary
-                    this.formData = {
-                        nik: form.querySelector('input[name="nik"]').value,
-                        nama_lengkap: form.querySelector('input[name="nama_lengkap"]').value,
-                        tempat_lahir: form.querySelector('input[name="tempat_lahir"]').value,
-                        tanggal_lahir: form.querySelector('input[name="tanggal_lahir"]').value,
-                        jenis_kelamin: form.querySelector('select[name="jenis_kelamin"]').value === 'L' ? 'Laki-laki' : (form.querySelector('select[name="jenis_kelamin"]').value === 'P' ? 'Perempuan' : '-'),
-                        nama_organisasi: form.querySelector('input[name="nama_organisasi"]').value,
-                        nomor_sk: form.querySelector('input[name="nomor_sk"]').value,
-                        tanggal_sk: form.querySelector('input[name="tanggal_sk"]').value,
-                        no_hp: form.querySelector('input[name="no_hp"]').value,
-                        email: form.querySelector('input[name="email"]').value,
-                        alamat: form.querySelector('textarea[name="alamat"]').value,
-                    };
-
-                    // Collect files for summary
-                    this.files = [];
-                    const fotoInput = form.querySelector('input[name="foto"]');
-                    if (fotoInput.files.length > 0) {
-                        this.files.push({ name: 'Pas Foto Pemohon', filename: fotoInput.files[0].name });
-                    }
-                    
-                    const docInputs = form.querySelectorAll('input[type="file"][name^="dokumen"]');
-                    docInputs.forEach(input => {
-                        if (input.files.length > 0) {
-                            // Find the label text closest to this input
-                            const label = input.closest('.bg-white').querySelector('label.text-heading').innerText.replace('*', '').trim();
-                            this.files.push({ name: label, filename: input.files[0].name });
+                let validFiles = true;
+                for (let input of step2FileInputs) {
+                    if (input.files.length === 0) {
+                        if (input.required) {
+                            const id = input.id.replace('dokumen_', '');
+                            this.dokumenErrors[id] = 'Dokumen ini wajib diunggah.';
+                            validFiles = false;
                         }
-                    });
-
-                    this.step = 3;
-                    window.scrollTo({ top: document.querySelector('#form-container').offsetTop - 100, behavior: 'smooth' });
+                    } else {
+                        const fileSize = input.files[0].size;
+                        if (fileSize > 2 * 1024 * 1024) {
+                            const id = input.id.replace('dokumen_', '');
+                            this.dokumenErrors[id] = 'Ukuran file maksimal 2MB.';
+                            validFiles = false;
+                        }
+                    }
                 }
+
+                if (!validFiles) {
+                    // Scroll to the first error container
+                    const firstErrorKey = Object.keys(this.dokumenErrors)[0];
+                    const firstErrorInput = document.getElementById('dokumen_' + firstErrorKey);
+                    if (firstErrorInput) {
+                        window.scrollTo({ top: firstErrorInput.closest('.bg-white').offsetTop - 120, behavior: 'smooth' });
+                    }
+                    return;
+                }
+
+                // Collect form data for summary
+                this.formData = {
+                    nik: form.querySelector('input[name="nik"]').value,
+                    nama_lengkap: form.querySelector('input[name="nama_lengkap"]').value,
+                    tempat_lahir: form.querySelector('input[name="tempat_lahir"]').value,
+                    tanggal_lahir: form.querySelector('input[name="tanggal_lahir"]').value,
+                    jenis_kelamin: form.querySelector('select[name="jenis_kelamin"]').value === 'L' ? 'Laki-laki' : (form.querySelector('select[name="jenis_kelamin"]').value === 'P' ? 'Perempuan' : '-'),
+                    nama_organisasi: form.querySelector('input[name="nama_organisasi"]').value,
+                    nomor_sk: form.querySelector('input[name="nomor_sk"]').value,
+                    tanggal_sk: form.querySelector('input[name="tanggal_sk"]').value,
+                    no_hp: form.querySelector('input[name="no_hp"]').value,
+                    email: form.querySelector('input[name="email"]').value,
+                    alamat: form.querySelector('textarea[name="alamat"]').value,
+                };
+
+                // Collect files for summary
+                this.files = [];
+                const fotoInput = form.querySelector('input[name="foto"]');
+                if (fotoInput.files.length > 0) {
+                    this.files.push({ name: 'Pas Foto Pemohon', filename: fotoInput.files[0].name });
+                }
+                
+                step2FileInputs.forEach(input => {
+                    if (input.files.length > 0) {
+                        // Find the label text closest to this input
+                        const label = input.closest('.bg-white').querySelector('label.text-heading').innerText.replace('*', '').trim();
+                        this.files.push({ name: label, filename: input.files[0].name });
+                    }
+                });
+
+                this.step = 3;
+                window.scrollTo({ top: document.querySelector('#form-container').offsetTop - 100, behavior: 'smooth' });
             },
             prevStep2() {
                 this.step = 2;

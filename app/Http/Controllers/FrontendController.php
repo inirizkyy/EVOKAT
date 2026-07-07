@@ -109,7 +109,7 @@ class FrontendController extends Controller
                 \Illuminate\Support\Facades\Mail::to($permohonan->pemohon->email, $permohonan->pemohon->nama_lengkap)->send(new \App\Mail\PermohonanDiajukanMail($permohonan));
                 // Kirim notifikasi ke admin
                 \Illuminate\Support\Facades\Mail::to('adminadvokat@gmail.com', 'Admin EVOKAT')->send(new \App\Mail\NotifikasiAdminMail($permohonan));
-            } catch (\Exception $mailException) {
+            } catch (\Throwable $mailException) {
                 // Log or ignore email error so it doesn't break the submission
                 \Illuminate\Support\Facades\Log::error('Gagal mengirim email permohonan: ' . $mailException->getMessage());
             }
@@ -149,12 +149,13 @@ class FrontendController extends Controller
     public function downloadFinalSurat($nomor_permohonan)
     {
         $permohonan = Permohonan::where('nomor_permohonan', $nomor_permohonan)->firstOrFail();
-        if ($permohonan->status !== 'Disetujui' && $permohonan->status !== 'Selesai') {
+        if (!in_array($permohonan->status, ['Disetujui', 'Dijadwalkan Sumpah', 'Selesai'])) {
             abort(403, 'Surat final belum tersedia.');
         }
         if (!$permohonan->file_surat || !\Illuminate\Support\Facades\Storage::disk('public')->exists($permohonan->file_surat)) {
             abort(404, 'File surat tidak ditemukan.');
         }
-        return \Illuminate\Support\Facades\Storage::disk('public')->download($permohonan->file_surat, 'Surat_Final_' . $permohonan->nomor_permohonan . '.pdf');
+        $safeName = 'Surat_Final_' . str_replace('/', '_', $permohonan->nomor_permohonan) . '.pdf';
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($permohonan->file_surat, $safeName);
     }
 }

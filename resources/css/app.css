@@ -76,7 +76,7 @@
   }
 
   html {
-    font-size: 110%; /* Skala seluruh UI menjadi lebih besar untuk aksesibilitas */
+    font-size: 115%; /* Skala seluruh UI menjadi lebih besar untuk aksesibilitas */
   }
 
   body {
@@ -103,5 +103,14 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply text-heading font-semibold;
+  }
+}
+
+@layer utilities {
+  .text-xs {
+    font-size: 0.8rem; /* default: 0.75rem */
+  }
+  .text-sm {
+    font-size: 0.92rem; /* default: 0.875rem */
   }
 }

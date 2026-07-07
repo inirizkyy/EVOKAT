@@ -22,8 +22,8 @@
                     <div class="mb-5">
                         <label class="block text-[14px] font-medium text-heading mb-2">ID Permohonan <span class="text-fg-danger">*</span></label>
                         <select name="permohonan_id" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all" required>
-                            <option value="">-- Pilih Permohonan (Hanya yang berstatus Disetujui) --</option>
-                            @foreach(\App\Models\Permohonan::whereIn('status', ['Disetujui', 'Dijadwalkan Sumpah'])->with('pemohon')->get() as $p)
+                            <option value="">-- Pilih Permohonan --</option>
+                            @foreach(\App\Models\Permohonan::whereIn('status', ['Diproses', 'Disetujui', 'Dijadwalkan Sumpah'])->with('pemohon')->get() as $p)
                                 <option value="{{ $p->id }}" {{ old('permohonan_id', $jadwal->permohonan_id ?? '') == $p->id ? 'selected' : '' }}>
                                     {{ $p->nomor_permohonan }} - {{ $p->pemohon->nama_lengkap }}
                                 </option>

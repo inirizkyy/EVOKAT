@@ -72,6 +72,8 @@
                             <span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-solid fa-folder-open mr-1"></i>Verifikasi Berkas Fisik</span>
                         @elseif($permohonan->status == 'Diproses')
                             <span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-info-soft border border-border-info-subtle text-fg-info"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Diproses</span>
+                        @elseif($permohonan->status == 'Dijadwalkan Sumpah')
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-success-soft border border-border-success-subtle text-fg-success-strong"><i class="fa-regular fa-calendar-check mr-1"></i>Dijadwalkan Sumpah</span>
                         @else
                             <span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning">{{ $permohonan->status }}</span>
                         @endif
@@ -161,7 +163,6 @@
                         <label class="block text-[14px] font-medium text-heading mb-2">Status Verifikasi</label>
                         <select name="status" x-model="selectedStatus" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all" required>
                             <option value="">-- Pilih Status --</option>
-                            <option value="Disetujui">Disetujui (Dokumen Lengkap &amp; Valid)</option>
                             <option value="Verifikasi Berkas Fisik">Verifikasi Berkas Fisik (Jadwalkan Pengecekan Fisik)</option>
                             <option value="Ditolak">Ditolak (Ada Kekurangan/Tidak Valid)</option>
                         </select>
@@ -296,15 +297,27 @@
                     $hasActiveTemplate = \App\Models\SuratTemplate::where('is_active', true)->exists();
                     $isDocx = $permohonan->file_surat ? Str::endsWith($permohonan->file_surat, ['.docx', '.doc']) : $hasActiveTemplate;
                 @endphp
-                <div class="mb-4">
-                    <a href="{{ route('admin.permohonan.download-surat', $permohonan->id) }}" class="inline-flex items-center px-4 py-2.5 rounded-base text-sm font-bold bg-brand text-white shadow-sm hover:shadow-md active:shadow-inset transition-all border border-brand">
+                <form action="{{ route('admin.permohonan.download-surat', $permohonan->id) }}" method="GET" class="mb-6 space-y-4 max-w-md">
+                    <div>
+                        <label class="block text-[14px] font-bold text-heading mb-2">Jabatan Penandatangan <span class="text-fg-danger">*</span></label>
+                        <select name="jabatan" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all" required>
+                            <option value="">Pilih Jabatan Penandatangan</option>
+                            <option value="PANITERA" {{ old('jabatan', request('jabatan')) === 'PANITERA' ? 'selected' : '' }}>PANITERA</option>
+                            <option value="PLH. PANITERA" {{ old('jabatan', request('jabatan')) === 'PLH. PANITERA' ? 'selected' : '' }}>PLH. PANITERA</option>
+                            <option value="PLT. PANITERA" {{ old('jabatan', request('jabatan')) === 'PLT. PANITERA' ? 'selected' : '' }}>PLT. PANITERA</option>
+                        </select>
+                        @error('jabatan')
+                            <div class="text-xs text-fg-danger mt-1 font-bold">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-4 py-2.5 rounded-base text-sm font-bold bg-brand text-white shadow-sm hover:shadow-md active:shadow-inset transition-all border border-brand hover:opacity-90">
                         @if($isDocx)
                             <i class="fa-solid fa-file-word mr-2"></i> Download Draf Surat Pengantar (Word)
                         @else
                             <i class="fa-solid fa-file-pdf mr-2"></i> Download Draf Surat Pengantar (PDF)
                         @endif
-                    </a>
-                </div>
+                    </button>
+                </form>
 
                 <form action="{{ route('admin.permohonan.verifikasi', $permohonan->id) }}" method="POST" enctype="multipart/form-data" class="pt-4 border-t border-border-default space-y-4">
                     @csrf

@@ -64,4 +64,37 @@ class Permohonan extends Model
     {
         return $this->hasOne(BukuRegistrasiAdvokat::class, 'permohonan_id');
     }
+
+    public function syncStatusAndNotify()
+    {
+        $hasJadwal = $this->jadwalSumpah()->exists() &&
+                     !empty($this->jadwalSumpah->tanggal) &&
+                     !empty($this->jadwalSumpah->jam);
+
+        $hasFinalSurat = !empty($this->file_surat) &&
+                         \Illuminate\Support\Str::contains($this->file_surat, 'surat_final_') &&
+                         \Illuminate\Support\Facades\Storage::disk('public')->exists($this->file_surat);
+
+        if ($hasJadwal && $hasFinalSurat) {
+            if ($this->status !== 'Dijadwalkan Sumpah' && $this->status !== 'Selesai' && $this->status !== 'Ditolak') {
+                $this->status = 'Dijadwalkan Sumpah';
+                $this->save();
+
+                try {
+                    $jadwal = $this->jadwalSumpah;
+                    \Illuminate\Support\Facades\Mail::to($this->pemohon->email, $this->pemohon->nama_lengkap)
+                        ->send(new \App\Mail\JadwalSumpahMail($jadwal));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Gagal mengirim email jadwal sumpah dari syncStatusAndNotify: ' . $e->getMessage());
+                }
+                return true;
+            }
+        } else {
+            if ($this->status === 'Dijadwalkan Sumpah') {
+                $this->status = 'Diproses';
+                $this->save();
+            }
+        }
+        return false;
+    }
 }
