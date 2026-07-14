@@ -19,11 +19,14 @@
                     <tr>
                         <th class="px-6 py-4 font-medium">No</th>
                         <th class="px-6 py-4 font-medium">Nomor Registrasi</th>
-                        <th class="px-6 py-4 font-medium">Nama Pemohon</th>
-                        <th class="px-6 py-4 font-medium">NIK</th>
                         <th class="px-6 py-4 font-medium">Organisasi</th>
-                        <th class="px-6 py-4 font-medium">Tanggal Pengajuan</th>
+                        <th class="px-6 py-4 font-medium">Nomor SK</th>
+                        <th class="px-6 py-4 font-medium">Jumlah Anggota</th>
+                        <th class="px-6 py-4 font-medium">No. HP</th>
+                        <th class="px-6 py-4 font-medium">Email</th>
+                        <th class="px-6 py-4 font-medium">Berkas</th>
                         <th class="px-6 py-4 font-medium">Status</th>
+                        <th class="px-6 py-4 font-medium">Tanggal Pengajuan</th>
                         <th class="px-6 py-4 font-medium">Aksi</th>
                     </tr>
                 </thead>
@@ -46,11 +49,14 @@
             columns: [
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 {data: 'nomor_permohonan', name: 'nomor_permohonan'},
-                {data: 'nama_pemohon', name: 'pemohon.nama_lengkap'},
-                {data: 'nik', name: 'pemohon.nik'},
-                {data: 'organisasi', name: 'pemohon.organisasi.nama_organisasi'},
-                {data: 'tanggal_pengajuan', name: 'tanggal_pengajuan'},
+                {data: 'organisasi', name: 'organisasi.nama_organisasi'},
+                {data: 'nomor_sk', name: 'nomor_sk'},
+                {data: 'jumlah_anggota', name: 'jumlah_anggota', orderable: false, searchable: false},
+                {data: 'no_hp_organisasi', name: 'no_hp_organisasi'},
+                {data: 'email_organisasi', name: 'email_organisasi'},
+                {data: 'status_dokumen', name: 'status_dokumen', orderable: false, searchable: false},
                 {data: 'status_badge', name: 'status'},
+                {data: 'tanggal_pengajuan', name: 'tanggal_pengajuan'},
                 {data: 'action', name: 'action', orderable: false, searchable: false},
             ]
         });

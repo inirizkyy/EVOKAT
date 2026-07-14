@@ -30,7 +30,7 @@
             </tr>
             <tr>
                 <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Waktu Pengajuan</strong></td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ \Carbon\Carbon::parse($permohonan->created_at)->format('d F Y H:i:s') }} WIB</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ \Carbon\Carbon::parse($permohonan->created_at)->translatedFormat('d F Y H:i:s') }} WIB</td>
             </tr>
         </table>
 

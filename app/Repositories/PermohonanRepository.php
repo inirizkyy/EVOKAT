@@ -33,7 +33,16 @@ class PermohonanRepository extends BaseRepository implements PermohonanRepositor
 
     public function getWithRelations($id)
     {
-        return $this->model->with(['pemohon.organisasi', 'dokumenPersyaratan.masterPersyaratan', 'riwayatStatus', 'jadwalSumpah', 'verifikasi'])->find($id);
+        return $this->model->with([
+            'pemohon.organisasi',
+            'pemohons.organisasi',
+            'pemohons.dokumenPersyaratan.masterPersyaratan',
+            'dokumenPersyaratan.masterPersyaratan',
+            'riwayatStatus',
+            'jadwalSumpah',
+            'verifikasi',
+            'organisasi'
+        ])->find($id);
     }
 
     public function updateStatus($id, $status, $catatan, $adminId)

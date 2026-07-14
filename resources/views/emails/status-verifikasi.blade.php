@@ -27,45 +27,53 @@
         {{-- Isi Surat --}}
         <div style="padding: 24px 32px;">
             <p style="margin: 0 0 16px;">Yth.</p>
-            <p style="margin: 0 0 4px; font-weight: bold;">{{ $permohonan->pemohon->nama_lengkap }}</p>
-            <p style="margin: 0 0 16px; color: #555; font-size: 13px;">{{ $permohonan->pemohon->alamat ?? '' }}</p>
+            <p style="margin: 0 0 4px; font-weight: bold;">Pimpinan {{ $permohonan->organisasi->nama_organisasi ?? 'Organisasi Advokat' }}</p>
+            <p style="margin: 0 0 16px; color: #555; font-size: 13px;">Nomor SK: {{ $permohonan->nomor_sk }}</p>
 
             <p style="margin: 0 0 16px; text-align: justify;">
                 Dengan hormat,
             </p>
             <p style="margin: 0 0 16px; text-align: justify;">
-                Sehubungan dengan permohonan pengambilan Sumpah Advokat yang telah Saudara/i ajukan melalui sistem e-Advokat (EVOKAT) PT Tanjungkarang dengan nomor registrasi <strong>{{ $permohonan->nomor_permohonan }}</strong>, bersama ini kami sampaikan bahwa status permohonan Saudara/i saat ini telah diperbarui menjadi:
+                Sehubungan dengan permohonan pengambilan Sumpah Advokat kolektif yang telah Anda ajukan melalui sistem EVOKAT dengan nomor registrasi <strong>{{ $permohonan->nomor_permohonan }}</strong>, bersama ini kami sampaikan bahwa status permohonan saat ini telah diperbarui menjadi:
             </p>
 
             {{-- Status Badge Section --}}
             <div style="text-align: center; margin: 20px 0;">
                 @if($permohonan->status === 'Verifikasi Berkas Fisik')
-                    <span style="display: inline-block; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 30px; background-color: #fcf3cf; border: 1px solid #f9e79f; color: #b7950b;">
-                        <i class="fa-solid fa-folder-open" style="margin-right: 8px;"></i>Verifikasi Berkas Fisik
+                    <span style="display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 30px; background-color: #fcf3cf; border: 1px solid #f9e79f; color: #b7950b;">
+                        Verifikasi Berkas Fisik
                     </span>
-                @elseif($permohonan->status === 'Disetujui')
-                    <span style="display: inline-block; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 30px; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724;">
-                        Disetujui
+                @elseif($permohonan->status === 'Menentukan Jadwal Verifikasi')
+                    <span style="display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 30px; background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;">
+                        Jadwal Verifikasi Fisik Ditentukan
                     </span>
-                @elseif($permohonan->status === 'Ditolak')
-                    <span style="display: inline-block; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 30px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">
-                        Ditolak
+                @elseif($permohonan->status === 'Menentukan Jadwal Sumpah')
+                    <span style="display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 30px; background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;">
+                        Jadwal Sumpah Ditentukan
+                    </span>
+                @elseif($permohonan->status === 'Proses Pembuatan Surat')
+                    <span style="display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 30px; background-color: #d6d8db; border: 1px solid #e2e3e5; color: #383d41;">
+                        Proses Pembuatan Surat
+                    </span>
+                @elseif($permohonan->status === 'Surat Selesai')
+                    <span style="display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 30px; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724;">
+                        Surat Selesai (Siap Diunduh)
                     </span>
                 @elseif($permohonan->status === 'Selesai')
-                    <span style="display: inline-block; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 30px; background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;">
+                    <span style="display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 30px; background-color: #1a3c5e; border: 1px solid #1a3c5e; color: #ffffff;">
                         Selesai
                     </span>
                 @else
-                    <span style="display: inline-block; padding: 10px 24px; font-size: 16px; font-weight: bold; border-radius: 30px; background-color: #e2e3e5; border: 1px solid #d6d8db; color: #383d41;">
+                    <span style="display: inline-block; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 30px; background-color: #e2e3e5; border: 1px solid #d6d8db; color: #383d41;">
                         {{ $permohonan->status }}
                     </span>
                 @endif
             </div>
 
-            {{-- Detail Berkas Fisik (Jika Status Verifikasi Berkas Fisik) --}}
-            @if($permohonan->status === 'Verifikasi Berkas Fisik')
+            {{-- Detail Jadwal Verifikasi Fisik --}}
+            @if($permohonan->status === 'Menentukan Jadwal Verifikasi' && $permohonan->tanggal_verifikasi_fisik)
                 <p style="margin: 0 0 12px; text-align: justify;">
-                    Berkas administrasi digital Anda telah diverifikasi. Selanjutnya, Anda **diwajibkan** untuk menyerahkan berkas fisik persyaratan asli guna pencocokan data pada jadwal berikut:
+                    Rincian jadwal penyerahan dan pencocokan berkas fisik asli pemohon adalah sebagai berikut:
                 </p>
                 <div style="background: #fdfaf2; border-left: 5px solid #d4ac0d; border-radius: 4px; padding: 16px 20px; margin: 0 0 20px;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
@@ -74,13 +82,43 @@
                             <td style="padding: 5px 0; width: 4%; color: #555;">:</td>
                             <td style="padding: 5px 0; font-weight: bold;">
                                 {{ $permohonan->hari_verifikasi_fisik ?? '-' }}, 
-                                {{ $permohonan->tanggal_verifikasi_fisik ? \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->locale('id')->translatedFormat('d F Y') : '-' }}
+                                {{ \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->locale('id')->translatedFormat('d F Y') }}
                             </td>
                         </tr>
                         <tr>
                             <td style="padding: 5px 0; color: #555; vertical-align: top;">Lokasi Penyerahan</td>
                             <td style="padding: 5px 0; color: #555; vertical-align: top;">:</td>
                             <td style="padding: 5px 0; font-weight: bold;">PTSP Pengadilan Tinggi Tanjungkarang</td>
+                        </tr>
+                    </table>
+                </div>
+            @endif
+
+            {{-- Detail Jadwal Sumpah --}}
+            @if(in_array($permohonan->status, ['Menentukan Jadwal Sumpah', 'Proses Pembuatan Surat', 'Surat Selesai', 'Selesai']) && $permohonan->jadwalSumpah)
+                <p style="margin: 0 0 12px; text-align: justify;">
+                    Rincian jadwal pelaksanaan Pengambilan Sumpah Advokat adalah sebagai berikut:
+                </p>
+                <div style="background: #f4fbf4; border-left: 5px solid #2ecc71; border-radius: 4px; padding: 16px 20px; margin: 0 0 20px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <tr>
+                            <td style="padding: 5px 0; width: 30%; color: #555;">Hari / Tanggal</td>
+                            <td style="padding: 5px 0; width: 4%; color: #555;">:</td>
+                            <td style="padding: 5px 0; font-weight: bold;">
+                                {{ \Carbon\Carbon::parse($permohonan->jadwalSumpah->tanggal)->locale('id')->translatedFormat('l, d F Y') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 0; color: #555;">Waktu / Pukul</td>
+                            <td style="padding: 5px 0; color: #555;">:</td>
+                            <td style="padding: 5px 0; font-weight: bold;">
+                                {{ \Carbon\Carbon::parse($permohonan->jadwalSumpah->jam)->format('H:i') }} WIB
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px 0; color: #555; vertical-align: top;">Lokasi Pelaksanaan</td>
+                            <td style="padding: 5px 0; color: #555; vertical-align: top;">:</td>
+                            <td style="padding: 5px 0; font-weight: bold;">{{ $permohonan->jadwalSumpah->lokasi }}</td>
                         </tr>
                     </table>
                 </div>
@@ -94,24 +132,61 @@
                 </div>
             @endif
 
-            {{-- Tombol Unduh Surat Final (Jika Status Disetujui) --}}
-            @if($permohonan->status === 'Disetujui')
+            {{-- Daftar Anggota Terdaftar --}}
+            <h4 style="margin: 24px 0 12px; font-size: 15px; color: #1a3c5e; border-b: 1px solid #eee; padding-bottom: 6px;">Daftar Anggota Pemohon:</h4>
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 24px;">
+                <thead>
+                    <tr style="background-color: #f2f2f2;">
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">No</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Nama Lengkap</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">NIK</th>
+                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Verifikasi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($permohonan->pemohons as $index => $pemohon)
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">{{ $index + 1 }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">{{ $pemohon->nama_lengkap }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-family: monospace;">{{ $pemohon->nik }}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                                @if($pemohon->status_verifikasi == 'Disetujui')
+                                    <span style="color: #27ae60; font-weight: bold;">Disetujui</span>
+                                @elseif($pemohon->status_verifikasi == 'Ditolak')
+                                    <span style="color: #c0392b; font-weight: bold;">Ditolak</span>
+                                @else
+                                    <span style="color: #7f8c8d;">Pending</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            {{-- Tombol Unduh Surat Final (Jika Status Surat Selesai / Selesai) --}}
+            @if(in_array($permohonan->status, ['Surat Selesai', 'Selesai']))
                 <p style="margin: 0 0 16px; text-align: justify;">
-                    Selamat, permohonan sumpah advokat Anda telah disetujui. Surat keterangan/dokumen rekomendasi final bertanda tangan saat ini sudah siap untuk diunduh. Silakan klik tombol di bawah ini:
+                    Surat pengantar sumpah organisasi Anda telah ditandatangani dan disetujui. Silakan unduh surat resmi bertanda tangan menggunakan tombol di bawah ini:
                 </p>
                 <div style="text-align: center; margin: 25px 0;">
                     <a href="{{ url('/tracking') }}?nomor_permohonan={{ $permohonan->nomor_permohonan }}" style="background-color: #1a3c5e; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        Unduh Surat Final
+                        Unduh Surat Pengantar Resmi
+                    </a>
+                </div>
+            @else
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="{{ url('/tracking') }}?nomor_permohonan={{ $permohonan->nomor_permohonan }}" style="background-color: #7f8c8d; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">
+                        Pantau Status Pelacakan
                     </a>
                 </div>
             @endif
 
             <p style="margin: 16px 0 12px; text-align: justify;">
-                Saudara/i dapat terus memantau riwayat dan perkembangan status permohonan melalui menu <strong>Cek Status (Tracking)</strong> pada website resmi EVOKAT menggunakan Nomor Registrasi Anda.
+                Anda dapat terus memantau riwayat dan perkembangan status permohonan melalui menu <strong>Cek Status (Tracking)</strong> pada website resmi EVOKAT menggunakan Nomor Registrasi Anda.
             </p>
             
             <p style="margin: 24px 0 24px; text-align: justify;">
-                Demikian pemberitahuan ini kami sampaikan. Atas perhatian Saudara/i, kami ucapkan terima kasih.
+                Demikian pemberitahuan ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.
             </p>
 
             <p style="margin: 0 0 4px;">Hormat kami,</p>

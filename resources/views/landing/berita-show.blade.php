@@ -18,7 +18,7 @@
         <div class="flex items-center justify-center gap-4 text-sm font-medium text-body-subtle">
             <div class="flex items-center gap-2">
                 <i class="fa-regular fa-calendar text-brand"></i>
-                {{ \Carbon\Carbon::parse($berita->published_at)->format('d F Y') }}
+                {{ \Carbon\Carbon::parse($berita->published_at)->translatedFormat('d F Y') }}
             </div>
             <div class="w-1.5 h-1.5 rounded-full bg-border-strong"></div>
             <div class="flex items-center gap-2">

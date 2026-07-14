@@ -19,4 +19,9 @@ class DokumenPersyaratan extends Model
     {
         return $this->belongsTo(MasterPersyaratan::class, 'persyaratan_id');
     }
+
+    public function pemohon()
+    {
+        return $this->belongsTo(Pemohon::class, 'pemohon_id');
+    }
 }

@@ -7,7 +7,7 @@ Detail Permohonan:
 - Nama Pemohon: {{ $permohonan->pemohon->nama_lengkap }}
 - NIK: {{ $permohonan->pemohon->nik }}
 - Organisasi Advokat: {{ $permohonan->pemohon->organisasi->nama_organisasi ?? '-' }}
-- Waktu Pengajuan: {{ \Carbon\Carbon::parse($permohonan->created_at)->format('d F Y H:i:s') }} WIB
+- Waktu Pengajuan: {{ \Carbon\Carbon::parse($permohonan->created_at)->translatedFormat('d F Y H:i:s') }} WIB
 
 Silakan login ke panel admin EVOKAT untuk memeriksa kelengkapan dan keabsahan dokumen persyaratan pemohon tersebut.
 

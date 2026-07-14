@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BukuRegistrasiAdvokat;
+use App\Models\Permohonan;
+use App\Models\Pemohon;
 use Illuminate\Http\Request;
 use App\Exports\BukuRegistrasiExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -13,7 +15,7 @@ class BukuRegistrasiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan.verifikasi']);
+        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan']);
 
         // Search by name
         if ($request->filled('search_name')) {
@@ -48,9 +50,12 @@ class BukuRegistrasiController extends Controller
             $query->whereBetween('tanggal_disumpah', [$request->filter_tanggal_sumpah_start, $request->filter_tanggal_sumpah_end]);
         }
 
-        // Get status and counts
         $status = $request->query('status', 'belum_lengkap');
+
+        // Belum Lengkap: BukuRegistrasiAdvokat where nomor_bas is null
         $countBelumLengkap = (clone $query)->whereNull('nomor_bas')->count();
+
+        // Sudah Lengkap: BukuRegistrasiAdvokat where nomor_bas is not null
         $countSudahLengkap = (clone $query)->whereNotNull('nomor_bas')->count();
 
         // Apply status filter
@@ -67,8 +72,14 @@ class BukuRegistrasiController extends Controller
 
     public function show($id)
     {
-        $reg = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan.verifikasi'])->findOrFail($id);
-        return view('admin.buku-registrasi.show', compact('reg'));
+        $permohonan = Permohonan::with(['organisasi', 'pemohons.bukuRegistrasi', 'pemohons.dokumenPersyaratan'])->findOrFail($id);
+        return view('admin.buku-registrasi.show', compact('permohonan'));
+    }
+
+    public function showMember($id)
+    {
+        $reg = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'pemohon.dokumenPersyaratan', 'permohonan.verifikasi'])->findOrFail($id);
+        return view('admin.buku-registrasi.show-member', compact('reg'));
     }
 
     public function edit($id)
@@ -89,12 +100,13 @@ class BukuRegistrasiController extends Controller
         $reg = BukuRegistrasiAdvokat::findOrFail($id);
         $reg->update($request->all());
 
-        return redirect()->route('admin.buku-registrasi.index')->with('success', 'Data Buku Registrasi berhasil diperbarui.');
+        return redirect()->route('admin.buku-registrasi.show', $reg->permohonan_id)
+            ->with('success', 'Data Buku Registrasi berhasil diperbarui.');
     }
 
     public function print($id)
     {
-        $reg = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan'])->findOrFail($id);
+        $reg = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'pemohon.dokumenPersyaratan', 'permohonan'])->findOrFail($id);
         return view('admin.buku-registrasi.print', compact('reg'));
     }
 

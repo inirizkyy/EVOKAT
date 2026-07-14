@@ -43,7 +43,7 @@
                     {{ $slot }}
                     
                     <!-- Footer -->
-                    <div class="mt-16 text-center lg:text-left text-sm text-body-subtle">
+                    <div class="mt-16 text-center lg:text-left text-base text-body-subtle">
                         &copy; {{ date('Y') }} Pengadilan Tinggi Tanjungkarang. All rights reserved.
                     </div>
                 </div>

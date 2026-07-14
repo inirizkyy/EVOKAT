@@ -20,4 +20,9 @@ class Verifikasi extends Model
     {
         return $this->belongsTo(User::class, 'admin_id');
     }
+
+    public function pemohon()
+    {
+        return $this->belongsTo(Pemohon::class, 'pemohon_id');
+    }
 }

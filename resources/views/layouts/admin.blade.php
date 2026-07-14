@@ -60,6 +60,11 @@
                     <span class="font-medium text-[14px]">Persyaratan</span>
                 </a>
                 
+                <a href="{{ route('admin.organisasi.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.organisasi.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                    <i class="fa-solid fa-building-columns w-6"></i>
+                    <span class="font-medium text-[14px]">Organisasi Advokat</span>
+                </a>
+                
                 <a href="{{ route('admin.berita.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.berita.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
                     <i class="fa-solid fa-newspaper w-6"></i>
                     <span class="font-medium text-[14px]">Berita & Info</span>
@@ -145,7 +150,7 @@
                 @yield('content')
             </main>
             
-            <footer class="bg-transparent border-t border-border-default/50 text-center py-6 text-[14px] text-body-subtle">
+            <footer class="bg-transparent border-t border-border-default/50 text-center py-6 text-base text-body-subtle">
                 © {{ date('Y') }} EVOKAT Pengadilan Tinggi Tanjungkarang
             </footer>
         </div>

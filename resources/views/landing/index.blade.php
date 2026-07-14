@@ -151,7 +151,7 @@
                 <div class="p-8 flex flex-col flex-grow relative">
                     <div class="flex items-center text-xs text-body-subtle font-medium tracking-wide uppercase mb-4">
                         <i class="fa-regular fa-calendar mr-2 text-brand"></i>
-                        {{ \Carbon\Carbon::parse($berita->published_at)->format('d F Y') }}
+                        {{ \Carbon\Carbon::parse($berita->published_at)->translatedFormat('d F Y') }}
                     </div>
                     <h3 class="text-xl font-bold text-heading mb-4 line-clamp-2 leading-snug group-hover:text-brand transition-colors">{{ $berita->judul }}</h3>
                     <p class="text-[15px] text-body line-clamp-3 mb-6 leading-relaxed">{{ Str::limit(strip_tags($berita->isi), 120) }}</p>

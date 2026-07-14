@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PersyaratanController;
 use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\BukuRegistrasiController;
 use App\Http\Controllers\Admin\SuratTemplateController;
+use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,11 @@ Route::get('/faq', [FrontendController::class, 'faq']);
 Route::get('/kontak', [FrontendController::class, 'kontak']);
 Route::get('/permohonan', [FrontendController::class, 'permohonan']);
 Route::post('/permohonan', [FrontendController::class, 'storePermohonan']);
+Route::post('/organisasi/propose', [FrontendController::class, 'proposeOrganization'])->name('organisasi.propose');
+Route::get('/permohonan/{nomor_permohonan}/dokumen', [FrontendController::class, 'dokumenList'])->name('permohonan.dokumen-list')->where('nomor_permohonan', '[A-Za-z0-9\/_-]+');
+Route::get('/permohonan/{nomor_permohonan}/dokumen/{pemohon_id}', [FrontendController::class, 'dokumenUpload'])->name('permohonan.dokumen-upload')->where('nomor_permohonan', '[A-Za-z0-9\/_-]+');
+Route::post('/permohonan/{nomor_permohonan}/dokumen/{pemohon_id}', [FrontendController::class, 'storeDokumenUpload'])->name('permohonan.store-dokumen-upload')->where('nomor_permohonan', '[A-Za-z0-9\/_-]+');
+Route::post('/permohonan/{nomor_permohonan}/submit', [FrontendController::class, 'submitPermohonan'])->name('permohonan.submit')->where('nomor_permohonan', '[A-Za-z0-9\/_-]+');
 Route::get('/tracking', [FrontendController::class, 'tracking']);
 Route::post('/tracking', [FrontendController::class, 'cekTracking']);
 Route::get('/permohonan/{nomor_permohonan}/download-final', [FrontendController::class, 'downloadFinalSurat'])->name('permohonan.download-final')->where('nomor_permohonan', '[A-Za-z0-9\/_-]+');
@@ -55,15 +61,20 @@ Route::middleware('auth')->group(function () {
 // Admin CRUD
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('permohonan', PermohonanController::class);
+    Route::get('permohonan/{id}/penjadwalan', [PermohonanController::class, 'penjadwalan'])->name('permohonan.penjadwalan');
     Route::post('permohonan/{id}/verifikasi', [PermohonanController::class, 'verifikasi'])->name('permohonan.verifikasi');
+    Route::get('permohonan/member/{pemohon_id}', [PermohonanController::class, 'memberShow'])->name('permohonan.member-show');
+    Route::post('permohonan/member/{pemohon_id}/verifikasi', [PermohonanController::class, 'verifikasiMember'])->name('permohonan.verifikasi-member');
     Route::get('permohonan/{id}/download-surat', [PermohonanController::class, 'downloadSurat'])->name('permohonan.download-surat');
     Route::get('buku-registrasi/export-pdf', [BukuRegistrasiController::class, 'exportPdf'])->name('buku-registrasi.export-pdf');
     Route::get('buku-registrasi/export-excel', [BukuRegistrasiController::class, 'exportExcel'])->name('buku-registrasi.export-excel');
     Route::get('buku-registrasi/{id}/print', [BukuRegistrasiController::class, 'print'])->name('buku-registrasi.print');
+    Route::get('buku-registrasi/member/{id}', [BukuRegistrasiController::class, 'showMember'])->name('buku-registrasi.show-member');
     Route::resource('buku-registrasi', BukuRegistrasiController::class)->except(['create', 'store', 'destroy']);
     Route::resource('berita', BeritaController::class)->parameters(['berita' => 'berita']);
     Route::resource('faq', FaqController::class);
     Route::resource('persyaratan', PersyaratanController::class);
+    Route::resource('organisasi', OrganizationController::class);
     Route::resource('pengaturan', PengaturanController::class);
     
     // Surat Template

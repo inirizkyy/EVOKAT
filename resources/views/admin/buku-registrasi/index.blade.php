@@ -113,15 +113,19 @@
             </thead>
             <tbody class="bg-white/60 divide-y divide-border-default">
                 @forelse($registrasi as $index => $item)
+                @php
+                    $pemohon = $item->pemohon;
+                    $permohonan = $item->permohonan;
+                @endphp
                 <tr class="hover:bg-neutral-secondary-soft transition-colors">
                     <!-- Nomor -->
                     <td class="px-6 py-4">{{ $registrasi->firstItem() + $index }}</td>
                     
                     <!-- Foto -->
                     <td class="px-6 py-4">
-                        @if($item->pemohon && $item->pemohon->foto)
-                            <a href="{{ asset('storage/' . $item->pemohon->foto) }}" target="_blank">
-                                <img src="{{ asset('storage/' . $item->pemohon->foto) }}" alt="Foto Pemohon" class="w-12 h-16 object-cover rounded shadow-sm border border-border-default hover:scale-105 transition-transform">
+                        @if($pemohon && $pemohon->foto)
+                            <a href="{{ asset('storage/' . $pemohon->foto) }}" target="_blank">
+                                <img src="{{ asset('storage/' . $pemohon->foto) }}" alt="Foto Pemohon" class="w-12 h-16 object-cover rounded shadow-sm border border-border-default hover:scale-105 transition-transform">
                             </a>
                         @else
                             <div class="w-12 h-16 bg-neutral-secondary-soft rounded border border-border-default flex items-center justify-center text-body-subtle">
@@ -132,24 +136,24 @@
 
                     <!-- Nama & NIK -->
                     <td class="px-6 py-4 whitespace-normal">
-                        <div class="font-bold text-heading text-[15px]">{{ $item->pemohon->nama_lengkap ?? '-' }}</div>
-                        <div class="text-[13px] text-body-subtle mt-1">NIK: {{ $item->pemohon->nik ?? '-' }}</div>
+                        <div class="font-bold text-heading text-[15px]">{{ $pemohon->nama_lengkap ?? '-' }}</div>
+                        <div class="text-[13px] text-body-subtle mt-1 font-mono font-semibold">NIK: {{ $pemohon->nik ?? '-' }}</div>
                     </td>
 
                     <!-- Alamat -->
                     <td class="px-6 py-4 whitespace-normal max-w-[200px]">
-                        <span class="line-clamp-2" title="{{ $item->pemohon->alamat ?? '-' }}">{{ $item->pemohon->alamat ?? '-' }}</span>
+                        <span class="line-clamp-2" title="{{ $pemohon->alamat ?? '-' }}">{{ $pemohon->alamat ?? '-' }}</span>
                     </td>
 
                     <!-- Organisasi -->
                     <td class="px-6 py-4">
-                        <span class="font-semibold text-heading">{{ $item->pemohon->organisasi->nama_organisasi ?? '-' }}</span>
+                        <span class="font-semibold text-heading">{{ $pemohon->organisasi->nama_organisasi ?? '-' }}</span>
                     </td>
 
                     <!-- SK Advokat -->
                     <td class="px-6 py-4 whitespace-normal">
-                        <div class="font-medium text-heading">No: {{ $item->pemohon->nomor_sk ?? '-' }}</div>
-                        <div class="text-[12px] text-body-subtle mt-1">Tgl: {{ $item->pemohon->tanggal_sk ? \Carbon\Carbon::parse($item->pemohon->tanggal_sk)->translatedFormat('d M Y') : '-' }}</div>
+                        <div class="font-medium text-heading">No: {{ $pemohon->nomor_sk ?? '-' }}</div>
+                        <div class="text-[12px] text-body-subtle mt-1">Tgl: {{ $pemohon->tanggal_sk ? \Carbon\Carbon::parse($pemohon->tanggal_sk)->translatedFormat('d M Y') : '-' }}</div>
                     </td>
 
                     <!-- BAS & Sumpah -->
@@ -159,29 +163,24 @@
                             <div class="text-[14px] text-heading font-medium mt-0.5"><i class="fa-solid fa-calendar mr-1 text-brand"></i>Sumpah: {{ \Carbon\Carbon::parse($item->tanggal_disumpah)->translatedFormat('d M Y') }}</div>
                             <div class="text-[14px] text-body-subtle mt-0.5">Oleh: {{ $item->ketua_pengadilan_tinggi }}</div>
                         @else
-                            <div class="flex flex-col gap-1.5">
-                                <span class="inline-flex items-center w-fit px-2 py-0.5 rounded text-xs font-semibold bg-warning-soft border border-border-warning-subtle text-fg-warning">
-                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>Belum Lengkap
-                                </span>
-                                <a href="{{ route('admin.buku-registrasi.edit', $item->id) }}" class="text-[12px] text-brand hover:underline font-semibold flex items-center gap-1">
-                                    <i class="fa-solid fa-pen-to-square"></i> Lengkapi Data Sumpah
-                                </a>
-                            </div>
+                            <span class="inline-flex items-center w-fit px-2 py-0.5 rounded text-xs font-semibold bg-warning-soft border border-border-warning-subtle text-fg-warning">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i>Belum Lengkap
+                            </span>
                         @endif
                     </td>
 
                     <!-- Aksi -->
                     <td class="px-6 py-4 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <!-- Detail -->
-                            <a href="{{ route('admin.buku-registrasi.show', $item->id) }}" title="Lihat Detail" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-brand shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                        <div class="flex items-center justify-center gap-1.5 font-bold">
+                            <!-- Detail Member -->
+                            <a href="{{ route('admin.buku-registrasi.show-member', $item->id) }}" title="Lihat Detail Anggota" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-brand shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
                                 <i class="fa-solid fa-eye text-xs"></i>
                             </a>
-                            <!-- Edit / Lengkapi -->
+                            <!-- Edit Sumpah -->
                             <a href="{{ route('admin.buku-registrasi.edit', $item->id) }}" title="Lengkapi Data Sumpah" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-warning shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
                                 <i class="fa-solid fa-pencil text-xs"></i>
                             </a>
-                            <!-- Print -->
+                            <!-- Print Card -->
                             <a href="{{ route('admin.buku-registrasi.print', $item->id) }}" target="_blank" title="Cetak Data" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-success shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
                                 <i class="fa-solid fa-print text-xs"></i>
                             </a>

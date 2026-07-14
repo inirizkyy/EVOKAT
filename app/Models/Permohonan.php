@@ -40,6 +40,16 @@ class Permohonan extends Model
         return $this->belongsTo(Pemohon::class, 'pemohon_id');
     }
 
+    public function pemohons()
+    {
+        return $this->hasMany(Pemohon::class, 'permohonan_id');
+    }
+
+    public function organisasi()
+    {
+        return $this->belongsTo(Organization::class, 'organization_id');
+    }
+
     public function dokumenPersyaratan()
     {
         return $this->hasMany(DokumenPersyaratan::class, 'permohonan_id');
@@ -82,17 +92,12 @@ class Permohonan extends Model
 
                 try {
                     $jadwal = $this->jadwalSumpah;
-                    \Illuminate\Support\Facades\Mail::to($this->pemohon->email, $this->pemohon->nama_lengkap)
+                    \Illuminate\Support\Facades\Mail::to($this->email_organisasi, $this->organisasi->nama_organisasi ?? 'Organisasi')
                         ->send(new \App\Mail\JadwalSumpahMail($jadwal));
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Gagal mengirim email jadwal sumpah dari syncStatusAndNotify: ' . $e->getMessage());
                 }
                 return true;
-            }
-        } else {
-            if ($this->status === 'Dijadwalkan Sumpah') {
-                $this->status = 'Diproses';
-                $this->save();
             }
         }
         return false;

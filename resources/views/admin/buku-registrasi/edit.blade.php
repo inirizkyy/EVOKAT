@@ -2,7 +2,7 @@
 @section('title', 'Lengkapi Data Sumpah Advokat')
 
 @section('actions')
-<a href="{{ route('admin.buku-registrasi.index') }}" class="inline-flex items-center px-4 py-2 rounded-base text-[14px] font-medium bg-neutral-primary-soft text-brand shadow-sm hover:shadow-md hover:text-brand-strong active:shadow-inset transition-all border border-brand">
+<a href="{{ route('admin.buku-registrasi.show', $reg->permohonan_id) }}" class="inline-flex items-center px-4 py-2 rounded-base text-[14px] font-medium bg-neutral-primary-soft text-brand shadow-sm hover:shadow-md hover:text-brand-strong active:shadow-inset transition-all border border-brand">
     <i class="fas fa-arrow-left mr-2"></i> Kembali
 </a>
 @endsection
@@ -47,8 +47,8 @@
 
         <!-- Ketua Pengadilan Tinggi -->
         <div>
-            <label class="block text-[14px] font-semibold text-heading mb-2">Nama Ketua Pengadilan Tinggi yang Menyumpah <span class="text-fg-danger">*</span></label>
-            <input type="text" name="ketua_pengadilan_tinggi" value="{{ old('ketua_pengadilan_tinggi', $reg->ketua_pengadilan_tinggi) }}" required placeholder="Contoh: Dr. H. Sunaryo, S.H., M.H."
+            <label class="block text-[14px] font-semibold text-heading mb-2">Nama yang Menyumpah <span class="text-fg-danger">*</span></label>
+            <input type="text" name="ketua_pengadilan_tinggi" value="{{ old('ketua_pengadilan_tinggi', $reg->ketua_pengadilan_tinggi) }}" required placeholder="Contoh: Nama, S.H., M.H."
                    class="block w-full rounded-base border border-border-default-medium bg-white text-[14px] py-3 px-4 focus:outline-none focus:border-brand transition-all">
         </div>
 
@@ -62,7 +62,7 @@
 
         <!-- Tombol Aksi -->
         <div class="pt-4 border-t border-border-default flex justify-end gap-2">
-            <a href="{{ route('admin.buku-registrasi.index') }}" class="inline-flex justify-center items-center px-6 py-3 rounded-full text-[14px] font-bold bg-neutral-secondary-soft border border-border-default text-heading hover:bg-neutral-secondary transition-all">
+            <a href="{{ route('admin.buku-registrasi.show', $reg->permohonan_id) }}" class="inline-flex justify-center items-center px-6 py-3 rounded-full text-[14px] font-bold bg-neutral-secondary-soft border border-border-default text-heading hover:bg-neutral-secondary transition-all">
                 Batal
             </a>
             <button type="submit" class="inline-flex justify-center items-center px-8 py-3 rounded-full text-[14px] font-bold bg-brand text-white shadow-md hover:shadow-lg hover:bg-brand-strong transition-all">

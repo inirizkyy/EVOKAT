@@ -45,7 +45,7 @@
                         <td class="px-6 py-4 font-bold text-heading whitespace-normal group-hover:text-brand transition-colors">{{ $item->judul }}</td>
                         <td class="px-6 py-4">
                             @if($item->published_at)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-success-soft border border-border-success-subtle text-fg-success-strong">{{ \Carbon\Carbon::parse($item->published_at)->format('d M Y') }}</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-success-soft border border-border-success-subtle text-fg-success-strong">{{ \Carbon\Carbon::parse($item->published_at)->translatedFormat('d M Y') }}</span>
                             @else
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-neutral-secondary-medium border border-border-default text-heading">Draft</span>
                             @endif

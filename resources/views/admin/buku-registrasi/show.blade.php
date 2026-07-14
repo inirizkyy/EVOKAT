@@ -8,109 +8,165 @@
 @endsection
 
 @section('content')
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Foto Pemohon -->
-    <div class="bg-white rounded-xl shadow-sm border border-border-default p-6 flex flex-col items-center justify-center text-center h-fit">
-        <h5 class="font-bold text-heading mb-4">Foto Pemohon</h5>
-        @if($reg->pemohon && $reg->pemohon->foto)
-            <a href="{{ asset('storage/' . $reg->pemohon->foto) }}" target="_blank">
-                <img src="{{ asset('storage/' . $reg->pemohon->foto) }}" alt="Foto Pemohon" class="w-48 h-64 object-cover rounded-xl shadow-md border-2 border-border-default mb-4">
-            </a>
-        @else
-            <div class="w-48 h-64 bg-neutral-secondary-soft rounded-xl border border-border-default flex items-center justify-center text-body-subtle mb-4">
-                <i class="fa-solid fa-user text-5xl"></i>
+<div class="space-y-8">
+    <!-- Informasi Registrasi Permohonan Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-border-default p-6">
+        <h5 class="font-bold text-brand mb-4 pb-2 border-b border-border-default flex items-center gap-2">
+            <i class="fa-solid fa-id-card"></i> Informasi Identitas &amp; SK
+        </h5>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 text-sm">
+            <div>
+                <span class="block text-body-subtle font-medium">Nomor Registrasi</span>
+                <span class="text-heading font-bold font-mono text-[15px]">{{ $permohonan->nomor_permohonan }}</span>
             </div>
-        @endif
-        <h6 class="font-bold text-heading text-[16px]">{{ $reg->pemohon->nama_lengkap }}</h6>
-        <p class="text-sm text-body-subtle mt-1">NIK: {{ $reg->pemohon->nik }}</p>
-    </div>
-
-    <!-- Data Detail -->
-    <div class="lg:col-span-2 space-y-6">
-        <!-- Informasi Pendaftaran & SK -->
-        <div class="bg-white rounded-xl shadow-sm border border-border-default p-6">
-            <h5 class="font-bold text-brand mb-4 pb-2 border-b border-border-default flex items-center gap-2">
-                <i class="fa-solid fa-id-card"></i> Informasi Identitas &amp; SK
-            </h5>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                <div>
-                    <span class="block text-body-subtle font-medium">Tempat, Tanggal Lahir</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->tempat_lahir }}, {{ \Carbon\Carbon::parse($reg->pemohon->tanggal_lahir)->translatedFormat('d F Y') }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Jenis Kelamin</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan' }}</span>
-                </div>
-                <div class="sm:col-span-2">
-                    <span class="block text-body-subtle font-medium">Alamat Lengkap</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->alamat }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Email</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->email }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Nomor HP/WA</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->no_hp }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Organisasi Advokat</span>
-                    <span class="text-heading font-semibold text-brand-strong">{{ $reg->pemohon->organisasi->nama_organisasi ?? '-' }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Nomor Registrasi Permohonan</span>
-                    <span class="text-heading font-bold font-mono">{{ $reg->permohonan->nomor_permohonan }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Nomor SK Advokat</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->nomor_sk }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Tanggal SK Advokat</span>
-                    <span class="text-heading font-semibold">{{ \Carbon\Carbon::parse($reg->pemohon->tanggal_sk)->translatedFormat('d F Y') }}</span>
-                </div>
+            <div>
+                <span class="block text-body-subtle font-medium">Organisasi Advokat</span>
+                <span class="text-heading font-semibold text-brand-strong">{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-body-subtle font-medium">Nomor SK Organisasi</span>
+                <span class="text-heading font-semibold">{{ $permohonan->nomor_sk ?? '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-body-subtle font-medium">Tanggal SK Organisasi</span>
+                <span class="text-heading font-semibold">{{ $permohonan->tanggal_sk ? \Carbon\Carbon::parse($permohonan->tanggal_sk)->translatedFormat('d F Y') : '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-body-subtle font-medium">Nomor HP / WA</span>
+                <span class="text-heading font-semibold">{{ $permohonan->no_hp_organisasi ?? '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-body-subtle font-medium">Email Organisasi</span>
+                <span class="text-heading font-semibold">{{ $permohonan->email_organisasi ?? '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-body-subtle font-medium">Tanggal Pengajuan</span>
+                <span class="text-heading font-semibold">{{ $permohonan->tanggal_pengajuan ? \Carbon\Carbon::parse($permohonan->tanggal_pengajuan)->translatedFormat('d F Y') : '-' }}</span>
+            </div>
+            <div>
+                <span class="block text-body-subtle font-medium">Status Permohonan</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-success-soft text-fg-success-strong mt-0.5">
+                    {{ $permohonan->status }}
+                </span>
             </div>
         </div>
+    </div>
 
-        <!-- Berita Acara Sumpah (BAS) -->
-        <div class="bg-white rounded-xl shadow-sm border border-border-default p-6">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-border-default">
-                <h5 class="font-bold text-brand m-0 flex items-center gap-2">
-                    <i class="fa-solid fa-graduation-cap"></i> Berita Acara Sumpah (BAS)
-                </h5>
-                <a href="{{ route('admin.buku-registrasi.edit', $reg->id) }}" class="text-xs font-bold text-brand hover:underline">
-                    <i class="fa-solid fa-pencil"></i> Lengkapi Data
-                </a>
-            </div>
+    <!-- List Anggota Pemohon Table Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-border-default overflow-hidden">
+        <div class="px-6 py-4 bg-neutral-secondary-soft border-b border-border-default flex justify-between items-center">
+            <h5 class="font-bold text-heading flex items-center gap-2 m-0">
+                <i class="fa-solid fa-users text-brand"></i> Daftar Anggota Pemohon
+            </h5>
+            <span class="text-xs font-bold text-body-subtle">{{ $permohonan->pemohons()->whereHas('bukuRegistrasi')->count() }} Anggota Terdaftar</span>
+        </div>
+        <div class="overflow-x-auto w-full">
+            <table class="w-full text-left whitespace-nowrap text-[14px] text-body">
+                <thead class="bg-neutral-secondary-soft/50 border-b border-border-default text-body font-medium">
+                    <tr>
+                        <th class="px-6 py-3 font-medium w-[3%]">No</th>
+                        <th class="px-6 py-3 font-medium w-[8%]">Foto</th>
+                        <th class="px-6 py-3 font-medium">Nama &amp; NIK</th>
+                        <th class="px-6 py-3 font-medium">Alamat</th>
+                        <th class="px-6 py-3 font-medium">Organisasi</th>
+                        <th class="px-6 py-3 font-medium">SK Advokat</th>
+                        <th class="px-6 py-3 font-medium">BAS &amp; Sumpah</th>
+                        <th class="px-6 py-3 font-medium text-center w-[12%]">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border-default bg-white">
+                    @forelse($permohonan->pemohons()->whereHas('bukuRegistrasi')->get() as $index => $pemohon)
+                        @php
+                            $bukuReg = $pemohon->bukuRegistrasi;
+                        @endphp
+                        <tr class="hover:bg-neutral-secondary-soft/35 transition-colors">
+                            <!-- Nomor -->
+                            <td class="px-6 py-4">{{ $index + 1 }}</td>
 
-            @if($reg->nomor_bas)
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                <div>
-                    <span class="block text-body-subtle font-medium">Nomor BAS</span>
-                    <span class="text-heading font-bold font-mono text-brand-strong">{{ $reg->nomor_bas }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Tanggal Disumpah</span>
-                    <span class="text-heading font-semibold">{{ \Carbon\Carbon::parse($reg->tanggal_disumpah)->translatedFormat('d F Y') }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Ketua Pengadilan Tinggi yang Menyumpah</span>
-                    <span class="text-heading font-semibold">{{ $reg->ketua_pengadilan_tinggi }}</span>
-                </div>
-                <div>
-                    <span class="block text-body-subtle font-medium">Saksi-Saksi</span>
-                    <span class="text-heading font-semibold whitespace-normal block mt-1 bg-neutral-secondary-soft p-3 rounded-lg border border-border-default">{{ $reg->saksi }}</span>
-                </div>
-            </div>
-            @else
-            <div class="text-center py-6 text-body-subtle bg-neutral-secondary-soft rounded-lg border border-border-default border-dashed">
-                <i class="fa-solid fa-circle-info text-2xl text-warning mb-2"></i>
-                <p class="text-[13px] font-medium m-0">Data Berita Acara Sumpah (BAS) belum lengkap.</p>
-                <a href="{{ route('admin.buku-registrasi.edit', $reg->id) }}" class="inline-flex items-center px-4 py-1.5 mt-3 rounded-full text-[12px] font-bold bg-brand text-white shadow-sm hover:shadow-md hover:bg-brand-strong transition-all">
-                    Lengkapi Sekarang <i class="fa-solid fa-chevron-right ml-1"></i>
-                </a>
-            </div>
-            @endif
+                            <!-- Foto -->
+                            <td class="px-6 py-4">
+                                @if($pemohon->foto)
+                                    <a href="{{ asset('storage/' . $pemohon->foto) }}" target="_blank">
+                                        <img src="{{ asset('storage/' . $pemohon->foto) }}" alt="Foto Pemohon" class="w-12 h-16 object-cover rounded shadow-sm border border-border-default hover:scale-105 transition-transform">
+                                    </a>
+                                @else
+                                    <div class="w-12 h-16 bg-neutral-secondary-soft rounded border border-border-default flex items-center justify-center text-body-subtle">
+                                        <i class="fa-solid fa-user text-lg"></i>
+                                    </div>
+                                @endif
+                            </td>
+
+                            <!-- Nama & NIK -->
+                            <td class="px-6 py-4 whitespace-normal">
+                                <div class="font-bold text-heading text-[15px]">{{ $pemohon->nama_lengkap }}</div>
+                                <div class="text-[13px] text-body-subtle mt-1 font-mono">NIK: {{ $pemohon->nik }}</div>
+                            </td>
+
+                            <!-- Alamat -->
+                            <td class="px-6 py-4 whitespace-normal max-w-[200px]">
+                                <span class="line-clamp-2" title="{{ $pemohon->alamat ?? '-' }}">{{ $pemohon->alamat ?? '-' }}</span>
+                            </td>
+
+                            <!-- Organisasi -->
+                            <td class="px-6 py-4">
+                                <span class="font-semibold text-heading">{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</span>
+                            </td>
+
+                            <!-- SK Advokat -->
+                            <td class="px-6 py-4 whitespace-normal">
+                                <div class="font-medium text-heading">No: {{ $pemohon->nomor_sk ?? '-' }}</div>
+                                <div class="text-[12px] text-body-subtle mt-1">Tgl: {{ $pemohon->tanggal_sk ? \Carbon\Carbon::parse($pemohon->tanggal_sk)->translatedFormat('d M Y') : '-' }}</div>
+                            </td>
+
+                            <!-- BAS & Sumpah -->
+                            <td class="px-6 py-4 whitespace-normal">
+                                @if($bukuReg && $bukuReg->nomor_bas)
+                                    <div class="text-heading font-medium text-[14px]">BAS: <span class="font-mono font-semibold text-brand">{{ $bukuReg->nomor_bas }}</span></div>
+                                    <div class="text-[14px] text-heading font-medium mt-0.5"><i class="fa-solid fa-calendar mr-1 text-brand"></i>Sumpah: {{ \Carbon\Carbon::parse($bukuReg->tanggal_disumpah)->translatedFormat('d M Y') }}</div>
+                                    <div class="text-[14px] text-body-subtle mt-0.5">Oleh: {{ $bukuReg->ketua_pengadilan_tinggi }}</div>
+                                @else
+                                    <div class="flex flex-col gap-1.5">
+                                        <span class="inline-flex items-center w-fit px-2 py-0.5 rounded text-xs font-semibold bg-warning-soft border border-border-warning-subtle text-fg-warning">
+                                            <i class="fa-solid fa-triangle-exclamation mr-1"></i>Belum Lengkap
+                                        </span>
+                                        @if($bukuReg)
+                                            <a href="{{ route('admin.buku-registrasi.edit', $bukuReg->id) }}" class="text-[12px] text-brand hover:underline font-semibold flex items-center gap-1">
+                                                <i class="fa-solid fa-pen-to-square"></i> Lengkapi Data Sumpah
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
+                            </td>
+
+                            <!-- Aksi -->
+                            <td class="px-6 py-4 text-center">
+                                @if($bukuReg)
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <!-- Detail Member -->
+                                        <a href="{{ route('admin.buku-registrasi.show-member', $bukuReg->id) }}" title="Lihat Detail Anggota" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-brand shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                                            <i class="fa-solid fa-eye text-xs"></i>
+                                        </a>
+                                        <!-- Edit Sumpah -->
+                                        <a href="{{ route('admin.buku-registrasi.edit', $bukuReg->id) }}" title="Lengkapi Data Sumpah" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-warning shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                                            <i class="fa-solid fa-pencil text-xs"></i>
+                                        </a>
+                                        <!-- Print Card -->
+                                        <a href="{{ route('admin.buku-registrasi.print', $bukuReg->id) }}" target="_blank" title="Cetak Data" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-success shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                                            <i class="fa-solid fa-print text-xs"></i>
+                                        </a>
+                                    </div>
+                                @else
+                                    <span class="text-body-subtle italic text-xs">Belum Masuk Buku Registrasi</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="px-6 py-8 text-center text-body-subtle italic">Tidak ada anggota yang terdaftar dalam buku registrasi.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

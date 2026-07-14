@@ -104,46 +104,97 @@
         <!-- Isi Surat -->
         <div class="content">
             <p>
-                Berdasarkan hasil verifikasi berkas administratif secara online dan pengecekan kesesuaian berkas fisik yang telah dilaksanakan oleh Tim Panitia Pendaftaran Sumpah Advokat Pengadilan Tinggi Tanjungkarang, dengan ini menerangkan bahwa pemohon sumpah advokat di bawah ini:
+                Berdasarkan hasil verifikasi berkas administratif secara online dan pengecekan kesesuaian berkas fisik yang telah dilaksanakan oleh Tim Panitia Pendaftaran Sumpah Advokat Pengadilan Tinggi Tanjungkarang, dengan ini menerangkan bahwa:
             </p>
 
-            <table class="table-data">
-                <tr>
-                    <td style="width: 35%;">Nama Lengkap</td>
-                    <td style="width: 5%;">:</td>
-                    <td style="font-weight: bold;">{{ $permohonan->pemohon->nama_lengkap }}</td>
-                </tr>
-                <tr>
-                    <td>NIK</td>
-                    <td>:</td>
-                    <td>{{ $permohonan->pemohon->nik }}</td>
-                </tr>
-                <tr>
-                    <td>Tempat, Tanggal Lahir</td>
-                    <td>:</td>
-                    <td>{{ $permohonan->pemohon->tempat_lahir }}, {{ \Carbon\Carbon::parse($permohonan->pemohon->tanggal_lahir)->translatedFormat('d F Y') }}</td>
-                </tr>
-                <tr>
-                    <td>Alamat Lengkap</td>
-                    <td>:</td>
-                    <td>{{ $permohonan->pemohon->alamat }}</td>
-                </tr>
-                <tr>
-                    <td>Organisasi Advokat</td>
-                    <td>:</td>
-                    <td style="font-weight: bold;">{{ $permohonan->pemohon->organisasi->nama_organisasi ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td>Nomor SK Advokat</td>
-                    <td>:</td>
-                    <td>{{ $permohonan->pemohon->nomor_sk }}</td>
-                </tr>
-                <tr>
-                    <td>Tanggal SK Advokat</td>
-                    <td>:</td>
-                    <td>{{ \Carbon\Carbon::parse($permohonan->pemohon->tanggal_sk)->translatedFormat('d F Y') }}</td>
-                </tr>
-            </table>
+            @if($permohonan->pemohons->count() > 1)
+                <!-- Multiple Members Table -->
+                <p style="margin-top: 10px; margin-bottom: 10px; text-indent: 0;">
+                    Organisasi Advokat <strong>{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</strong> mengajukan anggota-anggota di bawah ini yang telah dinyatakan memenuhi syarat:
+                </p>
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 11pt; margin-bottom: 15px;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 8%;">No</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: left; width: 32%;">Nama Lengkap</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 25%;">NIK</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: left; width: 35%;">Tempat, Tanggal Lahir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($permohonan->pemohons as $index => $pemohon)
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 6px; text-align: center;">{{ $index + 1 }}</td>
+                                <td style="border: 1px solid #000; padding: 6px; font-weight: bold;">{{ $pemohon->nama_lengkap }}</td>
+                                <td style="border: 1px solid #000; padding: 6px; text-align: center; font-family: monospace;">{{ $pemohon->nik }}</td>
+                                <td style="border: 1px solid #000; padding: 6px;">{{ $pemohon->tempat_lahir }}, {{ \Carbon\Carbon::parse($pemohon->tanggal_lahir)->translatedFormat('d F Y') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                
+                <table class="table-data" style="margin-top: 10px;">
+                    <tr>
+                        <td style="width: 35%;">Organisasi Advokat</td>
+                        <td style="width: 5%;">:</td>
+                        <td style="font-weight: bold;">{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nomor SK Advokat</td>
+                        <td>:</td>
+                        <td>{{ $permohonan->nomor_sk }}</td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal SK Advokat</td>
+                        <td>:</td>
+                        <td>{{ \Carbon\Carbon::parse($permohonan->tanggal_sk)->translatedFormat('d F Y') }}</td>
+                    </tr>
+                </table>
+            @else
+                <!-- Single Member Details -->
+                @php
+                    $firstPemohon = $permohonan->pemohons->first() ?? $permohonan->pemohon;
+                @endphp
+                @if($firstPemohon)
+                    <table class="table-data">
+                        <tr>
+                            <td style="width: 35%;">Nama Lengkap</td>
+                            <td style="width: 5%;">:</td>
+                            <td style="font-weight: bold;">{{ $firstPemohon->nama_lengkap }}</td>
+                        </tr>
+                        <tr>
+                            <td>NIK</td>
+                            <td>:</td>
+                            <td>{{ $firstPemohon->nik }}</td>
+                        </tr>
+                        <tr>
+                            <td>Tempat, Tanggal Lahir</td>
+                            <td>:</td>
+                            <td>{{ $firstPemohon->tempat_lahir }}, {{ \Carbon\Carbon::parse($firstPemohon->tanggal_lahir)->translatedFormat('d F Y') }}</td>
+                        </tr>
+                        <tr>
+                            <td>Alamat Lengkap</td>
+                            <td>:</td>
+                            <td>{{ $firstPemohon->alamat ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Organisasi Advokat</td>
+                            <td>:</td>
+                            <td style="font-weight: bold;">{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Nomor SK Advokat</td>
+                            <td>:</td>
+                            <td>{{ $permohonan->nomor_sk }}</td>
+                        </tr>
+                        <tr>
+                            <td>Tanggal SK Advokat</td>
+                            <td>:</td>
+                            <td>{{ \Carbon\Carbon::parse($permohonan->tanggal_sk)->translatedFormat('d F Y') }}</td>
+                        </tr>
+                    </table>
+                @endif
+            @endif
 
             <p style="margin-top: 20px;">
                 Telah dinyatakan <strong>MEMENUHI SYARAT (MS)</strong> untuk diajukan dalam sidang terbuka pengambilan sumpah advokat pada Pengadilan Tinggi Tanjungkarang. Surat pengantar ini diterbitkan sebagai draf administratif untuk proses cetak dan penandatanganan basah oleh Ketua Pengadilan Tinggi / Pejabat yang berwenang.

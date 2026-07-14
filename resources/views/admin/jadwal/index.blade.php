@@ -31,7 +31,7 @@
                         </td>
                         <td class="px-6 py-4 font-bold text-heading">{{ $item->permohonan->pemohon->nama_lengkap }}</td>
                         <td class="px-6 py-4">
-                            <div class="flex items-center"><i class="fa-regular fa-calendar mr-2 text-brand"></i> {{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</div>
+                            <div class="flex items-center"><i class="fa-regular fa-calendar mr-2 text-brand"></i> {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</div>
                             <div class="text-xs mt-1 text-body-subtle flex items-center"><i class="fa-regular fa-clock mr-2 text-danger"></i> {{ \Carbon\Carbon::parse($item->jam)->format('H:i') }} WIB</div>
                         </td>
                         <td class="px-6 py-4">{{ $item->lokasi }}</td>

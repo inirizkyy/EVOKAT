@@ -53,6 +53,9 @@
                     
                     <div class="h-6 w-px bg-border-default mx-2"></div>
                     
+                    <a href="https://esurvey.badilum.mahkamahagung.go.id/pengadilan/400364" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-[15px] font-medium bg-blue-50 text-blue-700 shadow-sm hover:shadow-md hover:bg-blue-100 active:shadow-inset transition-all border border-blue-200 mr-2">
+                        Survei Kepuasan
+                    </a>
                     <a href="{{ url('/tracking') }}" class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-[15px] font-medium bg-neutral-primary-soft text-heading shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default mr-2">
                         Cek Status
                     </a>
@@ -85,6 +88,9 @@
                 <a href="{{ url('/kontak') }}" class="block px-4 py-3 rounded-base text-base font-medium {{ request()->is('kontak') ? 'text-brand bg-neutral-secondary-soft shadow-inset' : 'text-body hover:bg-neutral-secondary-soft' }}">Kontak</a>
                 
                 <div class="pt-4 mt-2 border-t border-border-default flex flex-col gap-3">
+                    <a href="https://esurvey.badilum.mahkamahagung.go.id/pengadilan/400364" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium bg-blue-50 text-blue-700 shadow-sm border border-blue-200/80">
+                        Survei Kepuasan
+                    </a>
                     <a href="{{ url('/tracking') }}" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium bg-neutral-primary-soft text-heading shadow-sm border border-border-default">
                         Cek Status
                     </a>
@@ -115,58 +121,69 @@
                         </div>
                         <span class="font-['Playfair_Display'] font-bold text-xl text-heading tracking-wide">EVOKAT</span>
                     </a>
-                    <p class="text-[14px] text-body-subtle leading-relaxed">
+                    <p class="text-base text-body-subtle leading-relaxed">
                         Sistem Informasi Permohonan Sumpah Advokat Pengadilan Tinggi Tanjungkarang. Melayani dengan cepat, transparan, dan akuntabel.
                     </p>
                 </div>
 
-                <!-- Tautan Cepat -->
+                <!-- Lokasi Kantor -->
                 <div>
-                    <h5 class="font-bold text-heading text-lg mb-6 relative inline-block">
-                        Tautan Cepat
+                    <h5 class="font-bold text-heading text-xl mb-6 relative inline-block">
+                        Lokasi Kantor
                         <span class="absolute bottom-[-8px] left-0 w-1/2 h-0.5 bg-brand rounded-full"></span>
                     </h5>
-                    <ul class="space-y-3">
-                        <li><a href="{{ url('/') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Beranda</a></li>
-                        <li><a href="{{ url('/informasi') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Informasi Layanan</a></li>
-                        <li><a href="{{ url('/persyaratan') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Persyaratan</a></li>
-                        <li><a href="{{ url('/faq') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> FAQ</a></li>
-                    </ul>
+                    @php
+                        $pengaturanFooter = \App\Models\PengaturanWebsite::first();
+                        $mapsSearchUrl = 'https://maps.google.com/?q=' . urlencode(($pengaturanFooter && $pengaturanFooter->alamat) ? $pengaturanFooter->alamat : 'Pengadilan Tinggi Tanjungkarang');
+                    @endphp
+                    <div class="space-y-4">
+                        <div class="w-full h-36 rounded-2xl overflow-hidden shadow-inset bg-neutral-secondary-medium border border-border-default relative group">
+                            @if($pengaturanFooter && $pengaturanFooter->maps_embed)
+                                {!! str_replace('<iframe', '<iframe class="w-full h-full border-0 grayscale group-hover:grayscale-0 transition-all duration-700"', $pengaturanFooter->maps_embed) !!}
+                            @else
+                                <iframe class="w-full h-full border-0 grayscale group-hover:grayscale-0 transition-all duration-700" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3971.970258169134!2d105.25902517565313!3d-5.421508294558231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e40da42c8d23461%3A0x9599da5ea9079133!2sPengadilan%20Tinggi%20Tanjungkarang!5e0!3m2!1sen!2sid!4v1689874839818!5m2!1sen!2sid" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            @endif
+                        </div>
+                        <a href="{{ $mapsSearchUrl }}" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[14px] font-bold bg-neutral-primary-soft text-heading shadow-sm hover:shadow-md hover:bg-neutral-secondary-soft active:shadow-inset transition-all border border-border-default hover:text-brand">
+                            <i class="fa-solid fa-up-right-from-square text-xs text-brand"></i>
+                            Buka di Google Maps
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Layanan Publik -->
                 <div>
-                    <h5 class="font-bold text-heading text-lg mb-6 relative inline-block">
+                    <h5 class="font-bold text-heading text-xl mb-6 relative inline-block">
                         Layanan Publik
                         <span class="absolute bottom-[-8px] left-0 w-1/2 h-0.5 bg-brand rounded-full"></span>
                     </h5>
                     <ul class="space-y-3">
-                        <li><a href="{{ url('/permohonan') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Ajukan Permohonan</a></li>
-                        <li><a href="{{ url('/tracking') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Cek Status</a></li>
-                        <li><a href="{{ url('/alur') }}" class="text-[14px] text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Alur Pengajuan</a></li>
+                        <li><a href="{{ url('/permohonan') }}" class="text-base text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Ajukan Permohonan</a></li>
+                        <li><a href="{{ url('/tracking') }}" class="text-base text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Cek Status</a></li>
+                        <li><a href="{{ url('/alur') }}" class="text-base text-body-subtle hover:text-brand transition-colors flex items-center"><i class="fa-solid fa-angle-right text-[10px] mr-2"></i> Alur Pengajuan</a></li>
                     </ul>
                 </div>
 
                 <!-- Kontak -->
                 <div>
-                    <h5 class="font-bold text-heading text-lg mb-6 relative inline-block">
+                    <h5 class="font-bold text-heading text-xl mb-6 relative inline-block">
                         Hubungi Kami
                         <span class="absolute bottom-[-8px] left-0 w-1/2 h-0.5 bg-brand rounded-full"></span>
                     </h5>
                     <ul class="space-y-4">
-                        <li class="flex items-start gap-3 text-[14px] text-body-subtle">
+                        <li class="flex items-start gap-3 text-base text-body-subtle">
                             <div class="mt-0.5 w-8 h-8 shrink-0 rounded-full bg-neutral-primary-soft shadow-inset border border-border-default flex items-center justify-center text-brand">
                                 <i class="fa-solid fa-location-dot"></i>
                             </div>
                             <span>Jl. Cut Mutia No.42, Bandar Lampung</span>
                         </li>
-                        <li class="flex items-center gap-3 text-[14px] text-body-subtle">
+                        <li class="flex items-center gap-3 text-base text-body-subtle">
                             <div class="w-8 h-8 shrink-0 rounded-full bg-neutral-primary-soft shadow-inset border border-border-default flex items-center justify-center text-brand">
                                 <i class="fa-solid fa-phone"></i>
                             </div>
                             <span>(0721) 482431</span>
                         </li>
-                        <li class="flex items-center gap-3 text-[14px] text-body-subtle">
+                        <li class="flex items-center gap-3 text-base text-body-subtle">
                             <div class="w-8 h-8 shrink-0 rounded-full bg-neutral-primary-soft shadow-inset border border-border-default flex items-center justify-center text-brand">
                                 <i class="fa-solid fa-envelope"></i>
                             </div>
@@ -177,17 +194,17 @@
             </div>
 
             <div class="mt-16 pt-8 border-t border-border-default flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-[13px] text-body-subtle text-center md:text-left">
+                <p class="text-sm text-body-subtle text-center md:text-left">
                     &copy; {{ date('Y') }} Pengadilan Tinggi Tanjungkarang. Hak Cipta Dilindungi.
                 </p>
                 <div class="flex gap-4">
-                    <a href="#" class="w-8 h-8 rounded-full bg-neutral-primary-soft shadow-sm border border-border-default flex items-center justify-center text-body-subtle hover:text-brand hover:shadow-md transition-all">
+                    <a href="https://www.facebook.com/pt.tanjungkarang/" class="w-8 h-8 rounded-full bg-neutral-primary-soft shadow-sm border border-border-default flex items-center justify-center text-body-subtle hover:text-brand hover:shadow-md transition-all">
                         <i class="fa-brands fa-facebook-f"></i>
                     </a>
                     <a href="#" class="w-8 h-8 rounded-full bg-neutral-primary-soft shadow-sm border border-border-default flex items-center justify-center text-body-subtle hover:text-brand hover:shadow-md transition-all">
                         <i class="fa-brands fa-twitter"></i>
                     </a>
-                    <a href="#" class="w-8 h-8 rounded-full bg-neutral-primary-soft shadow-sm border border-border-default flex items-center justify-center text-body-subtle hover:text-brand hover:shadow-md transition-all">
+                    <a href="https://www.instagram.com/pttanjungkarang/" class="w-8 h-8 rounded-full bg-neutral-primary-soft shadow-sm border border-border-default flex items-center justify-center text-body-subtle hover:text-brand hover:shadow-md transition-all">
                         <i class="fa-brands fa-instagram"></i>
                     </a>
                 </div>

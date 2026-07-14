@@ -5,7 +5,7 @@ Terima kasih, permohonan pengambilan sumpah advokat Anda telah berhasil kami ter
 Detail Pendaftaran:
 - Nomor Registrasi: {{ $permohonan->nomor_permohonan }}
 - NIK: {{ $permohonan->pemohon->nik }}
-- Tanggal Pengajuan: {{ \Carbon\Carbon::parse($permohonan->created_at)->format('d F Y H:i:s') }} WIB
+- Tanggal Pengajuan: {{ \Carbon\Carbon::parse($permohonan->created_at)->translatedFormat('d F Y H:i:s') }} WIB
 - Status Saat Ini: Menunggu Verifikasi
 
 Gunakan Nomor Registrasi di atas untuk mengecek status permohonan Anda secara berkala melalui menu Tracking di website kami.

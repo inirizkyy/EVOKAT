@@ -21,11 +21,35 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Organisasi Advokat
-        \App\Models\OrganisasiAdvokat::create([
-            'nama_organisasi' => 'PERADI',
-            'alamat' => 'Jl. Advokat No. 1, Jakarta',
-            'email' => 'info@peradi.or.id',
-            'no_telp' => '021-12345678',
+        \App\Models\Organization::create([
+            'nama_organisasi' => 'Persatuan Advokat Indonesia',
+            'singkatan' => 'PERADI',
+            'status' => 'Aktif',
+        ]);
+        \App\Models\Organization::create([
+            'nama_organisasi' => 'Kongres Advokat Indonesia',
+            'singkatan' => 'KAI',
+            'status' => 'Aktif',
+        ]);
+        \App\Models\Organization::create([
+            'nama_organisasi' => 'Asosiasi Advokat Indonesia',
+            'singkatan' => 'AAI',
+            'status' => 'Aktif',
+        ]);
+        \App\Models\Organization::create([
+            'nama_organisasi' => 'Ikatan Advokat Indonesia',
+            'singkatan' => 'IKADIN',
+            'status' => 'Aktif',
+        ]);
+        \App\Models\Organization::create([
+            'nama_organisasi' => 'Himpunan Konsultan Hukum Pasar Modal',
+            'singkatan' => 'HKHPM',
+            'status' => 'Aktif',
+        ]);
+        \App\Models\Organization::create([
+            'nama_organisasi' => 'Organisasi Usulan Baru',
+            'singkatan' => 'OUB',
+            'status' => 'Menunggu Persetujuan',
         ]);
 
         // Master Persyaratan
