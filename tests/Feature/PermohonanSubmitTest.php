@@ -53,9 +53,16 @@ class PermohonanSubmitTest extends TestCase
         $response = $this->post('/permohonan', [
             'organization_id' => $org->id,
             'nomor_sk' => 'SK/456/2026',
+            'nomor_sk_kepengurusan' => 'SK-KP/123/2026',
             'tanggal_sk' => '2026-05-05',
             'no_hp_organisasi' => '081234567890',
             'email_organisasi' => 'peradi@example.com',
+            'nomor_surat_pengantar' => '001/ORG/VII/2026',
+            'tanggal_surat_pengantar' => '2026-07-01',
+            'perihal_surat_pengantar' => 'Permohonan Sumpah',
+            'file_surat_pengantar' => UploadedFile::fake()->create('surat_pengantar.pdf', 100, 'application/pdf'),
+            'file_sk_pendirian' => UploadedFile::fake()->create('sk_pendirian.pdf', 100, 'application/pdf'),
+            'file_sk_kepengurusan' => UploadedFile::fake()->create('sk_kepengurusan.pdf', 100, 'application/pdf'),
             'members' => [
                 [
                     'nik' => '1234567890123456',
@@ -100,10 +107,9 @@ class PermohonanSubmitTest extends TestCase
         $responseSubmit->assertSessionHasNoErrors();
         $responseSubmit->assertRedirectContains('/tracking');
         $this->assertTrue(session()->has('success'));
-        $this->assertTrue(session()->has('open_survey'));
         $this->assertTrue(session()->has('nomor_permohonan'));
 
         $permohonan->refresh();
-        $this->assertEquals('Menunggu Verifikasi', $permohonan->status);
+        $this->assertEquals('Menunggu Verifikasi Admin', $permohonan->status);
     }
 }

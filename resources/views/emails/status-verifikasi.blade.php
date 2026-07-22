@@ -71,7 +71,7 @@
             </div>
 
             {{-- Detail Jadwal Verifikasi Fisik --}}
-            @if($permohonan->status === 'Menentukan Jadwal Verifikasi' && $permohonan->tanggal_verifikasi_fisik)
+            @if($permohonan->tanggal_verifikasi_fisik)
                 <p style="margin: 0 0 12px; text-align: justify;">
                     Rincian jadwal penyerahan dan pencocokan berkas fisik asli pemohon adalah sebagai berikut:
                 </p>
@@ -189,10 +189,9 @@
                 Demikian pemberitahuan ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.
             </p>
 
-            <p style="margin: 0 0 4px;">Hormat kami,</p>
-            <br>
-            <p style="margin: 0; font-weight: bold;">Panitia Pengambilan Sumpah Advokat</p>
-            <p style="margin: 0; font-size: 13px; color: #555;">EVOKAT — Sistem Pendaftaran Sumpah Advokat</p>
+            <p style="margin: 24px 0 24px; text-align: justify; font-size: 12px; color: #666; font-style: italic; border-top: 1px dashed #ddd; padding-top: 15px;">
+                *Catatan: Jika Anda tidak menemukan email pemberitahuan ini di folder Kotak Masuk (Inbox), silakan periksa folder Spam Anda.*
+            </p>
         </div>
 
         {{-- Footer --}}

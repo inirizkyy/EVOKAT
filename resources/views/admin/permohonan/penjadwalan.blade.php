@@ -45,9 +45,9 @@
                     <div>
                         <label class="block text-[14px] font-bold text-heading mb-2">Status Baru yang Diajukan</label>
                         <div class="px-4 py-3 bg-brand/5 border border-brand/20 rounded-base text-brand font-bold text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-arrow-right-long text-red-500"></i> Menentukan Jadwal Verifikasi
+                            <i class="fa-solid fa-arrow-right-long text-red-500"></i> Menunggu Verifikasi Verifikator 1
                         </div>
-                        <input type="hidden" name="status" value="Menentukan Jadwal Verifikasi">
+                        <input type="hidden" name="status" value="Menunggu Verifikasi Verifikator 1">
                     </div>
 
                     <div class="p-5 rounded-xl bg-warning-soft border border-border-warning-subtle space-y-4">
@@ -70,11 +70,11 @@
 
                     <div>
                         <label class="block text-[14px] font-medium text-heading mb-2">Catatan Keterangan</label>
-                        <textarea name="catatan" rows="4" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2.5 px-3.5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-body-subtle" placeholder="Catatan hasil verifikasi atau keterangan jadwal..."></textarea>
+                        <textarea name="catatan" rows="4" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2.5 px-3.5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-body-subtle"></textarea>
                     </div>
 
                     <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-3 rounded-base text-[15px] font-bold bg-brand text-white shadow-sm hover:shadow-md hover:opacity-95 active:shadow-inset transition-all border border-brand-softer">
-                        <i class="fas fa-save mr-2"></i> Konfirmasi Status Baru
+                        <i class="fas fa-save mr-2"></i> Simpan
                     </button>
                 </form>
             </div>

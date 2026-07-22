@@ -17,8 +17,8 @@ class FrontendController extends Controller
     {
         $stats = [
             'total' => Permohonan::count(),
-            'disetujui' => Permohonan::where('status', 'Disetujui')->count(),
-            'dijadwalkan' => Permohonan::where('status', 'Dijadwalkan Sumpah')->count(),
+            'disetujui' => Permohonan::whereIn('status', ['Siap Penjadwalan Pengecekan Berkas Fisik', 'Menentukan Jadwal Verifikasi', 'Disetujui'])->count(),
+            'dijadwalkan' => Permohonan::whereIn('status', ['Menentukan Jadwal Sumpah', 'Proses Pembuatan Surat', 'Surat Selesai', 'Dijadwalkan Sumpah'])->count(),
             'selesai' => Permohonan::where('status', 'Selesai')->count(),
         ];
         $beritaTerbaru = Berita::orderBy('created_at', 'desc')->take(3)->get();
@@ -70,10 +70,17 @@ class FrontendController extends Controller
     {
         $request->validate([
             'organization_id' => 'required|exists:organizations,id',
-            'nomor_sk' => 'required|string|max:255',
-            'tanggal_sk' => 'required|date',
+            'nomor_sk' => 'nullable|string|max:255',
+            'nomor_sk_kepengurusan' => 'nullable|string|max:255',
+            'tanggal_sk' => 'nullable|date',
             'no_hp_organisasi' => 'required|string|max:255',
             'email_organisasi' => 'required|email|max:255',
+            'nomor_surat_pengantar' => 'required|string|max:255',
+            'tanggal_surat_pengantar' => 'required|date',
+            'perihal_surat_pengantar' => 'required|string|max:500',
+            'file_surat_pengantar' => 'required|file|mimes:pdf|max:2048',
+            'file_sk_pendirian' => 'required|file|mimes:pdf|max:2048',
+            'file_sk_kepengurusan' => 'required|file|mimes:pdf|max:2048',
             'members' => 'required|array|min:1',
             'members.*.nik' => 'required|numeric|digits:16|distinct|unique:pemohons,nik',
             'members.*.nama_lengkap' => 'required|string|max:255',
@@ -95,12 +102,24 @@ class FrontendController extends Controller
             $permohonanRepo = app(\App\Repositories\Interfaces\PermohonanRepositoryInterface::class);
             $nomorPermohonan = $permohonanRepo->generateNomorRegistrasi();
  
+            // Store uploaded files
+            $pathSuratPengantar = $request->file('file_surat_pengantar')->store('permohonan/surat_pengantar', 'public');
+            $pathSkPendirian    = $request->file('file_sk_pendirian')->store('permohonan/sk_pendirian', 'public');
+            $pathSkKepengurusan = $request->file('file_sk_kepengurusan')->store('permohonan/sk_kepengurusan', 'public');
+
             $permohonan = Permohonan::create([
                 'organization_id' => $request->organization_id,
-                'nomor_sk' => $request->nomor_sk,
-                'tanggal_sk' => $request->tanggal_sk,
+                'nomor_sk' => $request->nomor_sk ?? $request->nomor_surat_pengantar,
+                'nomor_sk_kepengurusan' => $request->nomor_sk_kepengurusan,
+                'tanggal_sk' => $request->tanggal_sk ?? $request->tanggal_surat_pengantar,
                 'no_hp_organisasi' => $request->no_hp_organisasi,
                 'email_organisasi' => $request->email_organisasi,
+                'nomor_surat_pengantar' => $request->nomor_surat_pengantar,
+                'tanggal_surat_pengantar' => $request->tanggal_surat_pengantar,
+                'perihal_surat_pengantar' => $request->perihal_surat_pengantar,
+                'file_surat_pengantar' => $pathSuratPengantar,
+                'file_sk_pendirian' => $pathSkPendirian,
+                'file_sk_kepengurusan_pdf' => $pathSkKepengurusan,
                 'nomor_permohonan' => $nomorPermohonan,
                 'tanggal_pengajuan' => date('Y-m-d'),
                 'status' => 'Draft',
@@ -126,9 +145,19 @@ class FrontendController extends Controller
             }
  
             \Illuminate\Support\Facades\DB::commit();
- 
+
+            try {
+                $permohonan->load('organisasi');
+                \Illuminate\Support\Facades\Mail::to($permohonan->email_organisasi, $permohonan->organisasi->nama_organisasi ?? 'Organisasi')
+                    ->send(new \App\Mail\PermohonanDiajukanMail($permohonan));
+            } catch (\Throwable $mailException) {
+                \Illuminate\Support\Facades\Log::error('Gagal mengirim email permohonan didaftarkan: ' . $mailException->getMessage());
+            }
+
             return redirect()->route('permohonan.dokumen-list', $permohonan->nomor_permohonan)
-                ->with('success', 'Permohonan berhasil didaftarkan. Silakan unggah dokumen persyaratan.');
+                ->with('success', 'Permohonan berhasil didaftarkan. Nomor Registrasi Anda: ' . $permohonan->nomor_permohonan)
+                ->with('nomor_permohonan', $permohonan->nomor_permohonan)
+                ->with('email_terkirim', $permohonan->email_organisasi);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'Gagal mendaftarkan permohonan: ' . $e->getMessage())->withInput();
@@ -251,21 +280,30 @@ class FrontendController extends Controller
                             'permohonan_id' => $permohonan->id,
                             'file_path' => $path,
                             'status_dokumen' => 'Pending',
+                            'keterangan' => null,
                         ]
                     );
                 }
             }
 
-            if ($pemohon->status_verifikasi === 'Ditolak') {
-                $pemohon->update([
-                    'status_verifikasi' => 'Pending',
-                ]);
-            }
+            $pemohon->update([
+                'status_verifikasi' => $pemohon->status_verifikasi === 'Ditolak' ? 'Pending' : $pemohon->status_verifikasi,
+                'catatan_penolakan' => null,
+            ]);
 
-            if ($permohonan->status === 'Siap Penjadwalan Pengecekan Berkas Fisik' || $permohonan->status === 'Verifikasi Berkas Fisik') {
+            $statusPerbaikanVerifikatorMap = [
+                'Menunggu Perbaikan Dokumen Verifikator 1' => 'Menunggu Verifikasi Verifikator 1',
+                'Menunggu Perbaikan Dokumen Verifikator 2' => 'Menunggu Verifikasi Verifikator 2',
+                'Menunggu Perbaikan Dokumen Verifikator 3' => 'Menunggu Verifikasi Verifikator 3',
+                'Menunggu Perbaikan Dokumen Verifikator 4' => 'Menunggu Verifikasi Verifikator 4',
+            ];
+
+            if (array_key_exists($permohonan->status, $statusPerbaikanVerifikatorMap)) {
                 $permohonan->update([
-                    'status' => 'Menunggu Verifikasi'
+                    'status' => $statusPerbaikanVerifikatorMap[$permohonan->status]
                 ]);
+            } elseif (in_array($permohonan->status, ['Menentukan Jadwal Berkas Fisik', 'Menunggu Verifikasi Admin', 'Verifikasi Berkas Fisik'])) {
+                $permohonan->update(['status' => 'Menunggu Verifikasi Admin']);
             }
 
             \Illuminate\Support\Facades\DB::commit();
@@ -304,18 +342,19 @@ class FrontendController extends Controller
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
             $permohonan->update([
-                'status' => 'Menunggu Verifikasi',
+                'status' => 'Menunggu Verifikasi Admin',
             ]);
 
             \App\Models\RiwayatStatus::create([
                 'permohonan_id' => $permohonan->id,
                 'status_lama' => 'Draft',
-                'status_baru' => 'Menunggu Verifikasi',
+                'status_baru' => 'Menunggu Verifikasi Admin',
                 'keterangan' => 'Permohonan lengkap diajukan oleh Organisasi.',
                 'changed_by' => null,
             ]);
 
             try {
+                $permohonan->load('organisasi');
                 \Illuminate\Support\Facades\Mail::to($permohonan->email_organisasi, $permohonan->organisasi->nama_organisasi ?? 'Organisasi')
                     ->send(new \App\Mail\PermohonanDiajukanMail($permohonan));
                 \Illuminate\Support\Facades\Mail::to('adminadvokat@gmail.com', 'Admin EVOKAT')
@@ -326,9 +365,8 @@ class FrontendController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
 
-            return redirect('/tracking')
+            return redirect('/tracking?nomor_permohonan=' . urlencode($permohonan->nomor_permohonan))
                 ->with('success', 'Permohonan berhasil dikirim ke Pengadilan Tinggi. Nomor Registrasi Anda: ' . $permohonan->nomor_permohonan)
-                ->with('open_survey', true)
                 ->with('nomor_permohonan', $permohonan->nomor_permohonan);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
@@ -339,8 +377,9 @@ class FrontendController extends Controller
     public function tracking(Request $request, PermohonanService $service)
     {
         $permohonan = null;
-        if (session('nomor_permohonan')) {
-            $permohonan = $service->getPermohonanByNomor(session('nomor_permohonan'));
+        $nomor = $request->query('nomor_permohonan') ?? session('nomor_permohonan');
+        if ($nomor) {
+            $permohonan = $service->getPermohonanByNomor($nomor);
         }
         return view('landing.tracking', compact('permohonan'));
     }

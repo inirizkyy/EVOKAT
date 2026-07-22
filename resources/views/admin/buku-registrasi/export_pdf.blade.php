@@ -89,8 +89,8 @@
                 <td>{{ $item->pemohon->alamat ?? '-' }}</td>
                 <td class="text-center">{{ $item->pemohon->organisasi->nama_organisasi ?? '-' }}</td>
                 <td>
-                    No: {{ $item->pemohon->nomor_sk ?? '-' }}<br>
-                    Tgl: {{ $item->pemohon->tanggal_sk ? \Carbon\Carbon::parse($item->pemohon->tanggal_sk)->translatedFormat('d M Y') : '-' }}
+                    No: {{ $item->permohonan->nomor_sk ?? $item->pemohon->nomor_sk ?? '-' }}<br>
+                    Tgl: {{ ($item->permohonan->tanggal_sk ?? $item->pemohon->tanggal_sk) ? \Carbon\Carbon::parse($item->permohonan->tanggal_sk ?? $item->pemohon->tanggal_sk)->translatedFormat('d M Y') : '-' }}
                 </td>
                 <td>
                     @if($item->nomor_bas)

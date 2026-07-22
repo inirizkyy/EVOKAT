@@ -107,7 +107,7 @@ class PermohonanVerifikasiTest extends TestCase
         $this->assertEquals('Disetujui', $this->pemohon->status_verifikasi);
 
         $this->permohonan->refresh();
-        $this->assertEquals('Siap Penjadwalan Pengecekan Berkas Fisik', $this->permohonan->status);
+        $this->assertEquals('Menentukan Jadwal Berkas Fisik', $this->permohonan->status);
         Mail::assertNotSent(MemberRejectedMail::class);
     }
 
@@ -156,25 +156,25 @@ class PermohonanVerifikasiTest extends TestCase
         $this->permohonan->refresh();
         $this->assertEquals('Verifikasi Berkas Fisik', $this->permohonan->status);
 
-        Mail::assertQueued(MemberRejectedMail::class, function($mail) {
+        Mail::assertSent(MemberRejectedMail::class, function($mail) {
             return $mail->hasTo($this->permohonan->email_organisasi) &&
                    in_array('Pas Foto Pemohon', $mail->rejectedList);
         });
 
-        Mail::assertQueued(MemberRejectedMail::class, function($mail) {
+        Mail::assertSent(MemberRejectedMail::class, function($mail) {
             return $mail->hasTo($this->pemohon->email) &&
                    in_array('Pas Foto Pemohon', $mail->rejectedList);
         });
     }
 
-    public function test_admin_can_transition_to_menentukan_jadwal_verifikasi()
+    public function test_admin_can_transition_to_menunggu_verifikasi_verifikator_1()
     {
         $this->pemohon->update(['status_verifikasi' => 'Disetujui']);
-        $this->permohonan->update(['status' => 'Siap Penjadwalan Pengecekan Berkas Fisik']);
+        $this->permohonan->update(['status' => 'Menentukan Jadwal Berkas Fisik']);
 
         $response = $this->actingAs($this->admin)
             ->post(route('admin.permohonan.verifikasi', $this->permohonan->id), [
-                'status' => 'Menentukan Jadwal Verifikasi',
+                'status' => 'Menunggu Verifikasi Verifikator 1',
                 'catatan' => 'Jadwal penyerahan berkas fisik asli',
                 'hari_verifikasi_fisik' => 'Senin',
                 'tanggal_verifikasi_fisik' => '2026-07-06',
@@ -184,19 +184,23 @@ class PermohonanVerifikasiTest extends TestCase
         
         $this->assertDatabaseHas('permohonans', [
             'id' => $this->permohonan->id,
-            'status' => 'Menentukan Jadwal Verifikasi',
+            'status' => 'Menunggu Verifikasi Verifikator 1',
             'hari_verifikasi_fisik' => 'Senin',
             'tanggal_verifikasi_fisik' => '2026-07-06',
         ]);
+
+        Mail::assertSent(\App\Mail\JadwalBerkasFisikMail::class, function ($mail) {
+            return $mail->hasTo($this->permohonan->email_organisasi);
+        });
     }
 
-    public function test_admin_can_transition_to_menentukan_jadwal_sumpah()
+    public function test_admin_can_transition_to_proses_pembuatan_surat_by_scheduling_oath()
     {
-        $this->permohonan->update(['status' => 'Menentukan Jadwal Verifikasi']);
+        $this->permohonan->update(['status' => 'Menentukan Jadwal Sumpah']);
 
         $response = $this->actingAs($this->admin)
             ->post(route('admin.permohonan.verifikasi', $this->permohonan->id), [
-                'status' => 'Menentukan Jadwal Sumpah',
+                'status' => 'Proses Pembuatan Surat',
                 'catatan' => 'Jadwal pelaksanaan sumpah',
                 'tanggal_sumpah' => '2026-07-10',
                 'jam_sumpah' => '09:00',
@@ -207,7 +211,7 @@ class PermohonanVerifikasiTest extends TestCase
 
         $this->assertDatabaseHas('permohonans', [
             'id' => $this->permohonan->id,
-            'status' => 'Menentukan Jadwal Sumpah',
+            'status' => 'Proses Pembuatan Surat',
         ]);
 
         $this->assertDatabaseHas('jadwal_sumpahs', [
@@ -215,24 +219,6 @@ class PermohonanVerifikasiTest extends TestCase
             'tanggal' => '2026-07-10',
             'jam' => '09:00:00',
             'lokasi' => 'Gedung Pengadilan Tinggi',
-        ]);
-    }
-
-    public function test_admin_can_transition_to_proses_pembuatan_surat()
-    {
-        $this->permohonan->update(['status' => 'Menentukan Jadwal Sumpah']);
-
-        $response = $this->actingAs($this->admin)
-            ->post(route('admin.permohonan.verifikasi', $this->permohonan->id), [
-                'status' => 'Proses Pembuatan Surat',
-                'catatan' => 'Draf surat sedang dibuat',
-            ]);
-
-        $response->assertRedirect(route('admin.permohonan.show', $this->permohonan->id));
-
-        $this->assertDatabaseHas('permohonans', [
-            'id' => $this->permohonan->id,
-            'status' => 'Proses Pembuatan Surat',
         ]);
     }
 
@@ -302,6 +288,20 @@ class PermohonanVerifikasiTest extends TestCase
         $response->assertDownload('Draft_Surat_' . str_replace('/', '_', $this->permohonan->nomor_permohonan) . '.pdf');
     }
 
+    public function test_admin_can_download_draft_with_blank_signatory()
+    {
+        $this->permohonan->update(['status' => 'Proses Pembuatan Surat']);
+        $filePath = 'permohonan/surat/surat_pengantar_' . $this->permohonan->nomor_permohonan . '.pdf';
+        $this->permohonan->update(['file_surat' => $filePath]);
+        Storage::disk('public')->put($filePath, 'dummy draft pdf');
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.permohonan.download-surat', $this->permohonan->id) . '?jabatan=PANITERA&nama_penandatangan=[KOSONG]');
+
+        $response->assertStatus(200);
+        $response->assertDownload('Draft_Surat_' . str_replace('/', '_', $this->permohonan->nomor_permohonan) . '.pdf');
+    }
+
     public function test_tracking_page_shows_sedang_diproses_when_no_schedule()
     {
         $this->permohonan->update([
@@ -315,5 +315,70 @@ class PermohonanVerifikasiTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Sedang Diproses');
+    }
+
+    public function test_uploading_new_document_clears_previous_keterangan()
+    {
+        // Setup existing required documents so they don't fail validation
+        $pasFotoReq = MasterPersyaratan::where('nama_persyaratan', 'Pas Foto Pemohon')->first();
+        if ($pasFotoReq) {
+            DokumenPersyaratan::create([
+                'pemohon_id' => $this->pemohon->id,
+                'permohonan_id' => $this->permohonan->id,
+                'persyaratan_id' => $pasFotoReq->id,
+                'file_path' => 'pas_foto.jpg',
+                'status_dokumen' => 'Valid'
+            ]);
+        }
+
+        $req = MasterPersyaratan::create(['nama_persyaratan' => 'Ijazah', 'is_required' => true]);
+        
+        $dok = DokumenPersyaratan::create([
+            'pemohon_id' => $this->pemohon->id,
+            'permohonan_id' => $this->permohonan->id,
+            'persyaratan_id' => $req->id,
+            'file_path' => 'file_old.pdf',
+            'status_dokumen' => 'Tidak Valid',
+            'keterangan' => 'File tidak terbaca'
+        ]);
+
+        $file = UploadedFile::fake()->create('file_new.pdf', 500);
+
+        $response = $this->post(route('permohonan.store-dokumen-upload', [
+            'nomor_permohonan' => $this->permohonan->nomor_permohonan,
+            'pemohon_id' => $this->pemohon->id
+        ]), [
+            'dokumen' => [
+                $req->id => $file
+            ]
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        
+        $this->assertDatabaseHas('dokumen_persyaratans', [
+            'id' => $dok->id,
+            'status_dokumen' => 'Pending',
+            'keterangan' => null
+        ]);
+    }
+
+    public function test_admin_validation_page_hides_keterangan_for_pending_documents()
+    {
+        $req = MasterPersyaratan::create(['nama_persyaratan' => 'Ijazah', 'is_required' => true]);
+        
+        $dok = DokumenPersyaratan::create([
+            'pemohon_id' => $this->pemohon->id,
+            'permohonan_id' => $this->permohonan->id,
+            'persyaratan_id' => $req->id,
+            'file_path' => 'file.pdf',
+            'status_dokumen' => 'Pending',
+            'keterangan' => 'File tidak terbaca'
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.permohonan.member-show', $this->pemohon->id));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('value="File tidak terbaca"');
     }
 }

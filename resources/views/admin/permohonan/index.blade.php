@@ -46,6 +46,7 @@
             processing: true,
             serverSide: true,
             ajax: "{{ route('admin.permohonan.index') }}",
+            order: [[9, 'desc']],
             columns: [
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 {data: 'nomor_permohonan', name: 'nomor_permohonan'},

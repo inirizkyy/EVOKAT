@@ -1,17 +1,17 @@
-Yth. Bapak/Ibu {{ $permohonan->pemohon->nama_lengkap }},
+Yth. Pengurus {{ $permohonan->organisasi->nama_organisasi ?? 'Organisasi Advokat' }},
 
-Terima kasih, permohonan pengambilan sumpah advokat Anda telah berhasil kami terima dan saat ini sedang dalam proses antrean verifikasi oleh tim admin.
+Terima kasih, permohonan pengambilan sumpah advokat Anda telah berhasil kami terima dan didaftarkan ke sistem Pengadilan Tinggi Tanjungkarang.
 
 Detail Pendaftaran:
 - Nomor Registrasi: {{ $permohonan->nomor_permohonan }}
-- NIK: {{ $permohonan->pemohon->nik }}
 - Tanggal Pengajuan: {{ \Carbon\Carbon::parse($permohonan->created_at)->translatedFormat('d F Y H:i:s') }} WIB
-- Status Saat Ini: Menunggu Verifikasi
+- Status Saat Ini: {{ $permohonan->status }}
 
 Gunakan Nomor Registrasi di atas untuk mengecek status permohonan Anda secara berkala melalui menu Tracking di website kami.
 
 URL Tracking: {{ url('/tracking') }}
 
+⚠️ Jika email ini tidak masuk di Inbox, silakan periksa folder Spam atau Promosi.
+
 Hormat kami,
-Panitia Pengambilan Sumpah Advokat
-EVOKAT
+Pengadilan Tinggi Tanjungkarang - EVOKAT

@@ -86,14 +86,30 @@
     </div>
 
     <!-- Chat Button -->
-    <button id="chat-toggle-btn" class="bg-brand hover:bg-brand-soft text-white rounded-full p-4 shadow-lg transition-transform transform hover:scale-105 flex items-center justify-center focus:outline-none relative">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
-        <span id="chat-badge" class="hidden absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center -mt-1 -mr-1">
-            !
-        </span>
-    </button>
+    <div id="chat-toggle-btn" class="cursor-pointer relative flex flex-col items-center select-none transition-all duration-300 hover:scale-[1.03]" style="width: 260px;">
+        <!-- Support Avatar -->
+        <div class="relative w-20 h-20 -mb-2 z-10 drop-shadow-md hover:animate-bounce transition-transform duration-300">
+            <img src="{{ asset('img/support_avatar.png') }}" alt="Customer Support" class="w-full h-full object-cover rounded-full border border-gray-100 shadow-sm">
+            <!-- Online status pulsing dot -->
+            <span id="chat-toggle-status" class="absolute bottom-0 right-0 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white"></span>
+            </span>
+        </div>
+        
+        <!-- Kami sedang online... Bar -->
+        <div class="w-full bg-brand text-white rounded-full py-2.5 px-5 flex items-center justify-between shadow-lg border border-brand/20 relative">
+            <span id="chat-toggle-text" class="text-xs font-bold tracking-wide pl-1">Hubungi kami...</span>
+            <span class="flex items-center text-white bg-white/20 p-1 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+            </span>
+            
+            <!-- Red Badge for Unread Messages -->
+            <span id="chat-badge" class="hidden absolute -top-1 right-2 bg-red-500 rounded-full h-3.5 w-3.5 shadow-md"></span>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -133,6 +149,9 @@
         const sendBtn = document.getElementById('chat-send-btn');
         const finishBtn = document.getElementById('chat-finish-btn');
         
+        const toggleText = document.getElementById('chat-toggle-text');
+        const toggleStatus = document.getElementById('chat-toggle-status');
+        
         let chatUuid = localStorage.getItem('chat_session_uuid');
         let chatStatus = 'aktif';
         let pollingInterval = null;
@@ -147,14 +166,33 @@
                     if (data.online) {
                         statusDot.style.backgroundColor = '#22c55e'; // green
                         statusLabel.textContent = 'Online';
+                        if (toggleText) toggleText.textContent = 'Kami sedang online...';
+                        if (toggleStatus) {
+                            toggleStatus.innerHTML = `
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white"></span>
+                            `;
+                        }
                     } else {
                         statusDot.style.backgroundColor = 'rgba(255,255,255,0.4)';
                         statusLabel.textContent = 'Offline';
+                        if (toggleText) toggleText.textContent = 'Tinggalkan pesan...';
+                        if (toggleStatus) {
+                            toggleStatus.innerHTML = `
+                                <span class="relative inline-flex rounded-full h-4 w-4 bg-gray-400 border-2 border-white"></span>
+                            `;
+                        }
                     }
                 })
                 .catch(() => {
                     statusLabel.textContent = 'Offline';
                     statusDot.style.backgroundColor = 'rgba(255,255,255,0.4)';
+                    if (toggleText) toggleText.textContent = 'Tinggalkan pesan...';
+                    if (toggleStatus) {
+                        toggleStatus.innerHTML = `
+                            <span class="relative inline-flex rounded-full h-4 w-4 bg-gray-400 border-2 border-white"></span>
+                        `;
+                    }
                 });
         }
         checkAdminStatus();

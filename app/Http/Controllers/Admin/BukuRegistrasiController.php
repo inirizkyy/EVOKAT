@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BukuRegistrasiAdvokat;
 use App\Models\Permohonan;
 use App\Models\Pemohon;
+use App\Models\Leader;
 use Illuminate\Http\Request;
 use App\Exports\BukuRegistrasiExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,41 +17,7 @@ class BukuRegistrasiController extends Controller
     public function index(Request $request)
     {
         $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan']);
-
-        // Search by name
-        if ($request->filled('search_name')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->where('nama_lengkap', 'like', '%' . $request->search_name . '%');
-            });
-        }
-
-        // Search by organisasi
-        if ($request->filled('search_organisasi')) {
-            $query->whereHas('pemohon.organisasi', function ($q) use ($request) {
-                $q->where('nama_organisasi', 'like', '%' . $request->search_organisasi . '%');
-            });
-        }
-
-        // Search by Nomor SK
-        if ($request->filled('search_sk')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->where('nomor_sk', 'like', '%' . $request->search_sk . '%');
-            });
-        }
-
-        // Filter by tanggal SK
-        if ($request->filled('filter_tanggal_sk_start') && $request->filled('filter_tanggal_sk_end')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->whereBetween('tanggal_sk', [$request->filter_tanggal_sk_start, $request->filter_tanggal_sk_end]);
-            });
-        }
-
-        // Filter by tanggal disumpah
-        if ($request->filled('filter_tanggal_sumpah_start') && $request->filled('filter_tanggal_sumpah_end')) {
-            $query->whereBetween('tanggal_disumpah', [$request->filter_tanggal_sumpah_start, $request->filter_tanggal_sumpah_end]);
-        }
-
-        $status = $request->query('status', 'belum_lengkap');
+        $query = $this->applySearchFilters($request, $query);
 
         // Belum Lengkap: BukuRegistrasiAdvokat where nomor_bas is null
         $countBelumLengkap = (clone $query)->whereNull('nomor_bas')->count();
@@ -58,7 +25,7 @@ class BukuRegistrasiController extends Controller
         // Sudah Lengkap: BukuRegistrasiAdvokat where nomor_bas is not null
         $countSudahLengkap = (clone $query)->whereNotNull('nomor_bas')->count();
 
-        // Apply status filter
+        $status = $request->query('status', 'belum_lengkap');
         if ($status === 'lengkap') {
             $query->whereNotNull('nomor_bas');
         } else {
@@ -68,6 +35,59 @@ class BukuRegistrasiController extends Controller
         $registrasi = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         return view('admin.buku-registrasi.index', compact('registrasi', 'countBelumLengkap', 'countSudahLengkap', 'status'));
+    }
+
+    private function applySearchFilters(Request $request, $query)
+    {
+        // Search by name
+        if ($request->filled('search_name')) {
+            $query->whereHas('pemohon', function ($q) use ($request) {
+                $q->where('nama_lengkap', 'like', '%' . $request->search_name . '%');
+            });
+        }
+
+        // Search by organisasi
+        if ($request->filled('search_organisasi')) {
+            $searchOrg = $request->search_organisasi;
+            if ($searchOrg === '+ Diajukan') {
+                $query->whereHas('pemohon.organisasi', function ($q) {
+                    $q->where('status', 'Menunggu Persetujuan');
+                });
+            } else {
+                $query->whereHas('pemohon.organisasi', function ($q) use ($searchOrg) {
+                    $q->where('nama_organisasi', $searchOrg);
+                });
+            }
+        }
+
+        // Search by Nomor SK
+        if ($request->filled('search_sk')) {
+            $query->where(function ($query) use ($request) {
+                $query->whereHas('permohonan', function ($q) use ($request) {
+                    $q->where('nomor_sk', 'like', '%' . $request->search_sk . '%');
+                })->orWhereHas('pemohon', function ($q) use ($request) {
+                    $q->where('nomor_sk', 'like', '%' . $request->search_sk . '%');
+                });
+            });
+        }
+
+        // Filter by tanggal SK
+        if ($request->filled('filter_tanggal_sk_start') && $request->filled('filter_tanggal_sk_end')) {
+            $query->where(function ($query) use ($request) {
+                $query->whereHas('permohonan', function ($q) use ($request) {
+                    $q->whereBetween('tanggal_sk', [$request->filter_tanggal_sk_start, $request->filter_tanggal_sk_end]);
+                })->orWhereHas('pemohon', function ($q) use ($request) {
+                    $q->whereBetween('tanggal_sk', [$request->filter_tanggal_sk_start, $request->filter_tanggal_sk_end]);
+                });
+            });
+        }
+
+        // Filter by tanggal disumpah
+        if ($request->filled('filter_tanggal_sumpah_start') && $request->filled('filter_tanggal_sumpah_end')) {
+            $query->whereBetween('tanggal_disumpah', [$request->filter_tanggal_sumpah_start, $request->filter_tanggal_sumpah_end]);
+        }
+
+        return $query;
     }
 
     public function show($id)
@@ -85,24 +105,43 @@ class BukuRegistrasiController extends Controller
     public function edit($id)
     {
         $reg = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan'])->findOrFail($id);
-        return view('admin.buku-registrasi.edit', compact('reg'));
+        
+        $saksiArray = explode(';', $reg->saksi);
+        $saksi_1 = trim($saksiArray[0] ?? '');
+        $saksi_2 = trim($saksiArray[1] ?? '');
+        
+        $leaders = Leader::orderBy('name', 'asc')->get();
+
+        return view('admin.buku-registrasi.edit', compact('reg', 'saksi_1', 'saksi_2', 'leaders'));
     }
 
     public function update(Request $request, $id)
     {
+        $reg = BukuRegistrasiAdvokat::findOrFail($id);
+        
+        if ($reg->status_pemeriksa === 'Disetujui') {
+            return redirect()->route('admin.buku-registrasi.show', $reg->permohonan_id)
+                ->with('error', 'Data ini sudah disetujui oleh Pemeriksa dan dikunci.');
+        }
+
         $request->validate([
             'nomor_bas' => 'required|string|max:255',
             'tanggal_disumpah' => 'required|date',
             'ketua_pengadilan_tinggi' => 'required|string|max:255',
-            'saksi' => 'required|string',
+            'saksi_1' => 'required|string|max:255',
+            'saksi_2' => 'required|string|max:255',
         ]);
+        
+        $data = $request->except(['saksi_1', 'saksi_2']);
+        $data['saksi'] = trim($request->saksi_1) . ';' . trim($request->saksi_2);
 
-        $reg = BukuRegistrasiAdvokat::findOrFail($id);
-        $reg->update($request->all());
+        $reg->update($data);
 
         return redirect()->route('admin.buku-registrasi.show', $reg->permohonan_id)
             ->with('success', 'Data Buku Registrasi berhasil diperbarui.');
     }
+
+
 
     public function print($id)
     {
@@ -112,31 +151,8 @@ class BukuRegistrasiController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi']);
-
-        if ($request->filled('search_name')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->where('nama_lengkap', 'like', '%' . $request->search_name . '%');
-            });
-        }
-        if ($request->filled('search_organisasi')) {
-            $query->whereHas('pemohon.organisasi', function ($q) use ($request) {
-                $q->where('nama_organisasi', 'like', '%' . $request->search_organisasi . '%');
-            });
-        }
-        if ($request->filled('search_sk')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->where('nomor_sk', 'like', '%' . $request->search_sk . '%');
-            });
-        }
-        if ($request->filled('filter_tanggal_sk_start') && $request->filled('filter_tanggal_sk_end')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->whereBetween('tanggal_sk', [$request->filter_tanggal_sk_start, $request->filter_tanggal_sk_end]);
-            });
-        }
-        if ($request->filled('filter_tanggal_sumpah_start') && $request->filled('filter_tanggal_sumpah_end')) {
-            $query->whereBetween('tanggal_disumpah', [$request->filter_tanggal_sumpah_start, $request->filter_tanggal_sumpah_end]);
-        }
+        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan']);
+        $query = $this->applySearchFilters($request, $query);
 
         $status = $request->query('status');
         if ($status === 'lengkap') {
@@ -153,31 +169,8 @@ class BukuRegistrasiController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi']);
-
-        if ($request->filled('search_name')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->where('nama_lengkap', 'like', '%' . $request->search_name . '%');
-            });
-        }
-        if ($request->filled('search_organisasi')) {
-            $query->whereHas('pemohon.organisasi', function ($q) use ($request) {
-                $q->where('nama_organisasi', 'like', '%' . $request->search_organisasi . '%');
-            });
-        }
-        if ($request->filled('search_sk')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->where('nomor_sk', 'like', '%' . $request->search_sk . '%');
-            });
-        }
-        if ($request->filled('filter_tanggal_sk_start') && $request->filled('filter_tanggal_sk_end')) {
-            $query->whereHas('pemohon', function ($q) use ($request) {
-                $q->whereBetween('tanggal_sk', [$request->filter_tanggal_sk_start, $request->filter_tanggal_sk_end]);
-            });
-        }
-        if ($request->filled('filter_tanggal_sumpah_start') && $request->filled('filter_tanggal_sumpah_end')) {
-            $query->whereBetween('tanggal_disumpah', [$request->filter_tanggal_sumpah_start, $request->filter_tanggal_sumpah_end]);
-        }
+        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan']);
+        $query = $this->applySearchFilters($request, $query);
 
         $status = $request->query('status');
         if ($status === 'lengkap') {

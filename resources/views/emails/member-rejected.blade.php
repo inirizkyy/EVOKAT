@@ -42,7 +42,14 @@
                 <p style="margin: 0 0 10px; font-weight: bold; color: #721c24;">Dokumen yang perlu diperbaiki:</p>
                 <ul style="margin: 0 0 10px 20px; padding: 0; color: #721c24; font-weight: bold;">
                     @foreach($rejectedList as $item)
-                        <li style="margin-bottom: 5px;">{{ $item }}</li>
+                        <li style="margin-bottom: 8px;">
+                            {{ $item }}
+                            @if(!empty($rejectedDetails) && !empty($rejectedDetails[$item]))
+                                <div style="font-weight: normal; font-size: 13px; color: #555; margin-top: 3px; font-style: italic;">
+                                    Catatan Revisi: {{ $rejectedDetails[$item] }}
+                                </div>
+                            @endif
+                        </li>
                     @endforeach
                 </ul>
             </div>
@@ -70,6 +77,9 @@
             <br>
             <p style="margin: 0; font-weight: bold;">Panitia Pengambilan Sumpah Advokat</p>
             <p style="margin: 0; font-size: 13px; color: #555;">EVOKAT — Sistem Pendaftaran Sumpah Advokat</p>
+            <div style="background-color: #fff8e6; border: 1px solid #ffeba5; border-radius: 6px; padding: 12px 16px; margin: 20px 0; font-size: 13px; color: #856404; font-family: sans-serif;">
+                ⚠️ <strong>Perhatian:</strong> Jika email notifikasi ini tidak masuk di folder Inbox utama Anda, silakan periksa folder <strong>Spam</strong> atau <strong>Promosi</strong>.
+            </div>
         </div>
 
         {{-- Footer --}}

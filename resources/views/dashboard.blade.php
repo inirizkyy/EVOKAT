@@ -35,7 +35,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs font-bold text-fg-success uppercase tracking-wider mb-1">Disetujui & Dijadwalkan</p>
-                <h3 class="text-2xl font-bold text-heading m-0">{{ \App\Models\Permohonan::whereIn('status', ['Disetujui', 'Dijadwalkan Sumpah'])->count() }}</h3>
+                <h3 class="text-2xl font-bold text-heading m-0">{{ \App\Models\Permohonan::whereIn('status', ['Siap Penjadwalan Pengecekan Berkas Fisik', 'Menentukan Jadwal Verifikasi', 'Menentukan Jadwal Sumpah', 'Proses Pembuatan Surat', 'Surat Selesai', 'Disetujui', 'Dijadwalkan Sumpah'])->count() }}</h3>
             </div>
             <div class="w-[48px] h-[48px] rounded-full bg-success-soft flex items-center justify-center">
                 <i class="fa-solid fa-check-circle text-2xl text-fg-success"></i>

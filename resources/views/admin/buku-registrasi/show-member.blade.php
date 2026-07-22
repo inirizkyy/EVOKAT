@@ -14,10 +14,10 @@
         <h5 class="font-bold text-heading mb-4">Foto Pemohon</h5>
         @if($reg->pemohon && $reg->pemohon->foto)
             <a href="{{ asset('storage/' . $reg->pemohon->foto) }}" target="_blank">
-                <img src="{{ asset('storage/' . $reg->pemohon->foto) }}" alt="Foto Pemohon" class="w-48 h-64 object-cover rounded-xl shadow-md border-2 border-border-default mb-4">
+                <img src="{{ asset('storage/' . $reg->pemohon->foto) }}" alt="Foto Pemohon" class="w-48 h-48 object-cover rounded-xl shadow-md border-2 border-border-default mb-4" style="width: 192px !important; height: 192px !important; object-fit: cover !important;">
             </a>
         @else
-            <div class="w-48 h-64 bg-neutral-secondary-soft rounded-xl border border-border-default flex items-center justify-center text-body-subtle mb-4">
+            <div class="w-48 h-48 bg-neutral-secondary-soft rounded-xl border border-border-default flex items-center justify-center text-body-subtle mb-4">
                 <i class="fa-solid fa-user text-5xl"></i>
             </div>
         @endif
@@ -63,11 +63,11 @@
                 </div>
                 <div>
                     <span class="block text-body-subtle font-medium">Nomor SK Advokat</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->nomor_sk ?? '-' }}</span>
+                    <span class="text-heading font-semibold">{{ $reg->permohonan->nomor_sk ?? $reg->pemohon->nomor_sk ?? '-' }}</span>
                 </div>
                 <div>
                     <span class="block text-body-subtle font-medium">Tanggal SK Advokat</span>
-                    <span class="text-heading font-semibold">{{ $reg->pemohon->tanggal_sk ? \Carbon\Carbon::parse($reg->pemohon->tanggal_sk)->translatedFormat('d F Y') : '-' }}</span>
+                    <span class="text-heading font-semibold">{{ ($reg->permohonan->tanggal_sk ?? $reg->pemohon->tanggal_sk) ? \Carbon\Carbon::parse($reg->permohonan->tanggal_sk ?? $reg->pemohon->tanggal_sk)->translatedFormat('d F Y') : '-' }}</span>
                 </div>
             </div>
         </div>
@@ -78,9 +78,15 @@
                 <h5 class="font-bold text-brand m-0 flex items-center gap-2">
                     <i class="fa-solid fa-graduation-cap"></i> Berita Acara Sumpah (BAS)
                 </h5>
-                <a href="{{ route('admin.buku-registrasi.edit', $reg->id) }}" class="text-xs font-bold text-brand hover:underline">
-                    <i class="fa-solid fa-pencil"></i> Lengkapi Data
-                </a>
+                @if($reg->status_pemeriksa === 'Disetujui')
+                    <span class="text-xs font-bold text-gray-400 cursor-not-allowed">
+                        <i class="fa-solid fa-lock"></i> Terkunci
+                    </span>
+                @else
+                    <a href="{{ route('admin.buku-registrasi.edit', $reg->id) }}" class="text-xs font-bold text-brand hover:underline">
+                        <i class="fa-solid fa-pencil"></i> Lengkapi Data
+                    </a>
+                @endif
             </div>
 
             @if($reg->nomor_bas)

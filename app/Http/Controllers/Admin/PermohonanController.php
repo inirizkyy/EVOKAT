@@ -12,7 +12,7 @@ class PermohonanController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Permohonan::with(['organisasi', 'pemohons.dokumenPersyaratan'])->select('permohonans.*');
+            $data = Permohonan::with(['organisasi', 'pemohons.dokumenPersyaratan'])->select('permohonans.*')->orderBy('created_at', 'desc');
             return DataTables::eloquent($data)
                 ->addIndexColumn()
                 ->addColumn('organisasi', function($row){
@@ -60,8 +60,11 @@ class PermohonanController extends Controller
                 ->addColumn('status_badge', function($row){
                     if($row->status == 'Draft') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-neutral-secondary-medium border border-border-default text-heading">Draft</span>';
                     if($row->status == 'Menunggu Verifikasi') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-regular fa-clock mr-1"></i>Menunggu Verifikasi</span>';
-                    if($row->status == 'Verifikasi Berkas Fisik') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-solid fa-folder-open mr-1"></i>Verifikasi Fisik</span>';
-                    if($row->status == 'Menentukan Jadwal Verifikasi') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-info-soft border border-border-info-subtle text-fg-info"><i class="fa-regular fa-clock mr-1"></i>Jadwal Verifikasi</span>';
+                    if($row->status == 'Verifikasi Berkas Fisik' || $row->status == 'Menentukan Jadwal Berkas Fisik') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-solid fa-folder-open mr-1"></i>Verifikasi Fisik</span>';
+                    if($row->status == 'Menunggu Verifikasi Verifikator 1') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-regular fa-clock mr-1"></i>Verifikator 1</span>';
+                    if($row->status == 'Menunggu Verifikasi Verifikator 2') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-regular fa-clock mr-1"></i>Verifikator 2</span>';
+                    if($row->status == 'Menunggu Verifikasi Verifikator 3') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-regular fa-clock mr-1"></i>Verifikator 3</span>';
+                    if($row->status == 'Menunggu Verifikasi Verifikator 4') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-regular fa-clock mr-1"></i>Verifikator 4</span>';
                     if($row->status == 'Menentukan Jadwal Sumpah') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-info-soft border border-border-info-subtle text-fg-info"><i class="fa-regular fa-calendar-alt mr-1"></i>Jadwal Sumpah</span>';
                     if($row->status == 'Proses Pembuatan Surat') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-info-soft border border-border-info-subtle text-fg-info"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Pembuatan Surat</span>';
                     if($row->status == 'Surat Selesai') return '<span class="inline-flex items-center px-2 py-0.5 rounded-default text-xs font-medium bg-success-soft border border-border-success-subtle text-fg-success-strong"><i class="fa-regular fa-file-pdf mr-1"></i>Surat Selesai</span>';
@@ -90,7 +93,8 @@ class PermohonanController extends Controller
             'jadwalSumpah',
             'organisasi'
         ])->findOrFail($id);
-        return view('admin.permohonan.show', compact('permohonan'));
+        $rooms = \App\Models\Room::all();
+        return view('admin.permohonan.show', compact('permohonan', 'rooms'));
     }
 
     public function penjadwalan(string $id)
@@ -104,7 +108,7 @@ class PermohonanController extends Controller
             'organisasi'
         ])->findOrFail($id);
 
-        if ($permohonan->status !== 'Siap Penjadwalan Pengecekan Berkas Fisik') {
+        if ($permohonan->status !== 'Menentukan Jadwal Berkas Fisik') {
             return redirect()->route('admin.permohonan.show', $id)
                 ->with('error', 'Status permohonan tidak mendukung penjadwalan berkas fisik saat ini.');
         }
@@ -124,6 +128,16 @@ class PermohonanController extends Controller
 
     public function verifikasiMember(Request $request, $pemohon_id)
     {
+        $pemohon = \App\Models\Pemohon::with('permohonan.pemohons')->findOrFail($pemohon_id);
+        $permohonan = $pemohon->permohonan;
+
+        $hasBas = $permohonan->status === 'Selesai' && $permohonan->pemohons()->whereHas('bukuRegistrasi', function ($q) {
+            $q->whereNotNull('nomor_bas');
+        })->exists();
+        if ($hasBas && auth()->user()->role === 'admin') {
+            return back()->with('error', 'Anda tidak memiliki hak akses untuk mengubah permohonan yang telah selesai dengan BAS.');
+        }
+
         $request->validate([
             'status_verifikasi' => 'required|in:Disetujui,Ditolak',
             'dokumen' => 'required|array',
@@ -131,9 +145,6 @@ class PermohonanController extends Controller
             'keterangan_dokumen' => 'nullable|array',
             'keterangan_dokumen.*' => 'nullable|string',
         ]);
-
-        $pemohon = \App\Models\Pemohon::with('permohonan.pemohons')->findOrFail($pemohon_id);
-        $permohonan = $pemohon->permohonan;
 
         $persyaratan = \App\Models\MasterPersyaratan::all();
         $requiredCount = $persyaratan->where('is_required', true)->count();
@@ -167,50 +178,59 @@ class PermohonanController extends Controller
 
             $statusVerifikasi = $invalidDocs->count() > 0 ? 'Ditolak' : 'Disetujui';
 
+            $catatanPenolakan = null;
+            if ($statusVerifikasi === 'Ditolak') {
+                $reasons = $invalidDocs->map(function ($d) {
+                    return $d->masterPersyaratan->nama_persyaratan . ($d->keterangan ? ': ' . $d->keterangan : '');
+                })->toArray();
+                $catatanPenolakan = implode('; ', $reasons);
+            }
+
             $pemohon->update([
                 'status_verifikasi' => $statusVerifikasi,
-                'catatan_penolakan' => null,
+                'catatan_penolakan' => $catatanPenolakan,
             ]);
 
             if ($statusVerifikasi === 'Ditolak') {
                 $rejectedList = $invalidDocs->map(fn($d) => $d->masterPersyaratan->nama_persyaratan)->toArray();
+                $rejectedDetails = $invalidDocs->pluck('keterangan', 'masterPersyaratan.nama_persyaratan')->toArray();
                 try {
                     \Illuminate\Support\Facades\Mail::to($permohonan->email_organisasi)
-                        ->send(new \App\Mail\MemberRejectedMail($pemohon, $permohonan, $rejectedList));
+                        ->send(new \App\Mail\MemberRejectedMail($pemohon, $permohonan, $rejectedList, $rejectedDetails));
                     
                     \Illuminate\Support\Facades\Mail::to($pemohon->email)
-                        ->send(new \App\Mail\MemberRejectedMail($pemohon, $permohonan, $rejectedList));
+                        ->send(new \App\Mail\MemberRejectedMail($pemohon, $permohonan, $rejectedList, $rejectedDetails));
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Gagal mengirim email penolakan anggota: ' . $e->getMessage());
                 }
             }
 
-            // Sync permohonan status: if all approved, change to Siap Penjadwalan Pengecekan Berkas Fisik
+            // Sync permohonan status: if all approved, change to Menentukan Jadwal Berkas Fisik
             $allMembers = $permohonan->pemohons()->get();
             $allApproved = $allMembers->every(fn($m) => $m->status_verifikasi === 'Disetujui');
 
             $oldStatus = $permohonan->status;
             if ($allApproved) {
-                if ($oldStatus === 'Verifikasi Berkas Fisik' || $oldStatus === 'Draft' || $oldStatus === 'Menunggu Verifikasi') {
-                    $permohonan->update(['status' => 'Siap Penjadwalan Pengecekan Berkas Fisik']);
+                if (in_array($oldStatus, ['Draft', 'Menunggu Verifikasi Admin', 'Verifikasi Berkas Fisik', 'Menunggu Verifikasi'])) {
+                    $permohonan->update(['status' => 'Menentukan Jadwal Berkas Fisik']);
                     
                     \App\Models\RiwayatStatus::create([
                         'permohonan_id' => $permohonan->id,
                         'status_lama' => $oldStatus,
-                        'status_baru' => 'Siap Penjadwalan Pengecekan Berkas Fisik',
-                        'keterangan' => 'Seluruh anggota disetujui, siap menentukan jadwal.',
+                        'status_baru' => 'Menentukan Jadwal Berkas Fisik',
+                        'keterangan' => 'Seluruh anggota disetujui. Admin perlu menentukan jadwal pengecekan berkas fisik.',
                         'changed_by' => auth()->id() ?? 1,
                     ]);
                 }
             } else {
-                if ($oldStatus === 'Siap Penjadwalan Pengecekan Berkas Fisik' || $oldStatus === 'Menunggu Verifikasi') {
-                    $permohonan->update(['status' => 'Verifikasi Berkas Fisik']);
+                if (in_array($oldStatus, ['Menunggu Verifikasi Verifikator 1', 'Menunggu Verifikasi Verifikator 2', 'Menunggu Verifikasi Verifikator 3', 'Menunggu Verifikasi Verifikator 4'])) {
+                    $permohonan->update(['status' => 'Menunggu Verifikasi Admin']);
                     
                     \App\Models\RiwayatStatus::create([
                         'permohonan_id' => $permohonan->id,
                         'status_lama' => $oldStatus,
-                        'status_baru' => 'Verifikasi Berkas Fisik',
-                        'keterangan' => 'Terdapat berkas anggota yang ditolak/pending. Status direset.',
+                        'status_baru' => 'Menunggu Verifikasi Admin',
+                        'keterangan' => 'Terdapat berkas anggota yang ditolak/pending. Status dikembalikan ke Admin.',
                         'changed_by' => auth()->id() ?? 1,
                     ]);
                 }
@@ -228,44 +248,56 @@ class PermohonanController extends Controller
 
     public function verifikasi(Request $request, string $id) {
         $permohonan = Permohonan::findOrFail($id);
+
+        $hasBas = $permohonan->status === 'Selesai' && $permohonan->pemohons()->whereHas('bukuRegistrasi', function ($q) {
+            $q->whereNotNull('nomor_bas');
+        })->exists();
+        if ($hasBas && auth()->user()->role === 'admin') {
+            return back()->with('error', 'Anda tidak memiliki hak akses untuk mengubah permohonan yang telah selesai dengan BAS.');
+        }
+
         $currentStatus = $permohonan->status;
 
         $validTransitions = [
-            'Verifikasi Berkas Fisik' => 'Siap Penjadwalan Pengecekan Berkas Fisik',
-            'Siap Penjadwalan Pengecekan Berkas Fisik' => 'Menentukan Jadwal Verifikasi',
-            'Menentukan Jadwal Verifikasi' => 'Menentukan Jadwal Sumpah',
-            'Menentukan Jadwal Sumpah' => 'Proses Pembuatan Surat',
-            'Proses Pembuatan Surat' => 'Surat Selesai',
-            'Surat Selesai' => 'Selesai',
+            'Menunggu Verifikasi'                => 'Menunggu Verifikasi Admin',
+            'Menunggu Verifikasi Admin'          => 'Menentukan Jadwal Berkas Fisik',
+            'Menentukan Jadwal Berkas Fisik'     => 'Menunggu Verifikasi Verifikator 1',
+            'Menunggu Verifikasi Verifikator 1'  => 'Menunggu Verifikasi Verifikator 2',
+            'Menunggu Verifikasi Verifikator 2'  => 'Menunggu Verifikasi Verifikator 3',
+            'Menunggu Verifikasi Verifikator 3'  => 'Menunggu Verifikasi Verifikator 4',
+            'Menunggu Verifikasi Verifikator 4'  => 'Menentukan Jadwal Sumpah',
+            'Menentukan Jadwal Sumpah'           => 'Proses Pembuatan Surat',
+            'Proses Pembuatan Surat'             => 'Surat Selesai',
+            'Surat Selesai'                      => 'Selesai',
         ];
 
-        if ($currentStatus === 'Draft' || $currentStatus === 'Menunggu Verifikasi') {
-            $expectedNextStatus = 'Verifikasi Berkas Fisik';
+        if ($currentStatus === 'Draft') {
+            $expectedNextStatus = 'Menentukan Jadwal Berkas Fisik';
         } else {
             $expectedNextStatus = $validTransitions[$currentStatus] ?? null;
         }
 
-        if ($request->status !== $expectedNextStatus) {
-            return back()->with('error', 'Transisi status tidak valid. Status harus berubah berurutan dari ' . $currentStatus . ' ke ' . $expectedNextStatus . '.');
+        if ($request->status !== 'Ditolak' && $request->status !== $expectedNextStatus) {
+            return back()->with('error', 'Transisi status tidak valid. Status harus berubah berurutan dari ' . $currentStatus . ' ke ' . $expectedNextStatus . ' atau Ditolak.');
         }
 
         // Programmatic business validation
-        if ($request->status === 'Menentukan Jadwal Verifikasi') {
+        if ($request->status === 'Menunggu Verifikasi Verifikator 1') {
             $allApproved = $permohonan->pemohons()->get()->every(fn($m) => $m->status_verifikasi === 'Disetujui');
             if (!$allApproved) {
-                return back()->with('error', 'Penentuan tanggal pengecekan berkas fisik hanya dapat dilakukan apabila seluruh anggota berstatus Disetujui.');
+                return back()->with('error', 'Verifikasi ke Verifikator 1 hanya dapat dilanjutkan apabila seluruh anggota berstatus Disetujui.');
             }
         }
 
         $request->validate([
-            'status'                   => 'required|in:Verifikasi Berkas Fisik,Siap Penjadwalan Pengecekan Berkas Fisik,Menentukan Jadwal Verifikasi,Menentukan Jadwal Sumpah,Proses Pembuatan Surat,Surat Selesai,Selesai',
+            'status'                   => 'required|in:Menunggu Verifikasi Admin,Menunggu Verifikasi Verifikator 1,Menunggu Verifikasi Verifikator 2,Menunggu Verifikasi Verifikator 3,Menunggu Verifikasi Verifikator 4,Menunggu Perbaikan Dokumen Verifikator 1,Menunggu Perbaikan Dokumen Verifikator 2,Menunggu Perbaikan Dokumen Verifikator 3,Menunggu Perbaikan Dokumen Verifikator 4,Menentukan Jadwal Berkas Fisik,Menentukan Jadwal Sumpah,Proses Pembuatan Surat,Surat Selesai,Selesai,Ditolak',
             'catatan'                  => 'nullable|string',
-            'hari_verifikasi_fisik'    => 'required_if:status,Menentukan Jadwal Verifikasi|nullable|string',
-            'tanggal_verifikasi_fisik' => 'required_if:status,Menentukan Jadwal Verifikasi|nullable|date',
+            'hari_verifikasi_fisik'    => 'required_if:status,Menentukan Jadwal Berkas Fisik,Menunggu Verifikasi Verifikator 1|nullable|string',
+            'tanggal_verifikasi_fisik' => 'required_if:status,Menentukan Jadwal Berkas Fisik,Menunggu Verifikasi Verifikator 1|nullable|date',
             'surat_bertanda_tangan'    => 'required_if:status,Surat Selesai|nullable|file|mimes:pdf|max:2048',
-            'tanggal_sumpah'           => 'required_if:status,Menentukan Jadwal Sumpah|nullable|date',
-            'jam_sumpah'               => 'required_if:status,Menentukan Jadwal Sumpah|nullable',
-            'lokasi_sumpah'            => 'required_if:status,Menentukan Jadwal Sumpah|nullable|string',
+            'tanggal_sumpah'           => 'required_if:status,Proses Pembuatan Surat|nullable|date',
+            'jam_sumpah'               => 'required_if:status,Proses Pembuatan Surat|nullable',
+            'lokasi_sumpah'            => 'required_if:status,Proses Pembuatan Surat|nullable|string',
         ]);
 
         \Illuminate\Support\Facades\DB::beginTransaction();
@@ -274,7 +306,7 @@ class PermohonanController extends Controller
             $permohonan->status  = $request->status;
             $permohonan->catatan = $request->catatan;
 
-            if ($request->status === 'Menentukan Jadwal Verifikasi') {
+            if ($request->filled('tanggal_verifikasi_fisik')) {
                 $tanggal = $request->tanggal_verifikasi_fisik;
                 $permohonan->tanggal_verifikasi_fisik = $tanggal;
                 $permohonan->hari_verifikasi_fisik = $tanggal
@@ -282,8 +314,11 @@ class PermohonanController extends Controller
                     : $request->hari_verifikasi_fisik;
             }
 
-            if ($request->status === 'Menentukan Jadwal Sumpah') {
+            if ($request->status === 'Proses Pembuatan Surat') {
                 if ($request->tanggal_sumpah && $request->jam_sumpah) {
+                    if ($request->lokasi_sumpah) {
+                        \App\Models\Room::firstOrCreate(['name' => trim($request->lokasi_sumpah)]);
+                    }
                     \App\Models\JadwalSumpah::updateOrCreate(
                         ['permohonan_id' => $permohonan->id],
                         [
@@ -347,12 +382,35 @@ class PermohonanController extends Controller
                 'catatan' => $request->catatan,
             ]);
 
-            if ($request->status === 'Surat Selesai' || $request->status === 'Selesai') {
+            if ($request->status === 'Menunggu Verifikasi Admin' || $request->status === 'Surat Selesai' || $request->status === 'Selesai') {
                 try {
+                    $permohonan->load('organisasi');
                     \Illuminate\Support\Facades\Mail::to($permohonan->email_organisasi, $permohonan->organisasi->nama_organisasi ?? 'Organisasi')
                         ->send(new \App\Mail\StatusVerifikasiMail($permohonan));
                 } catch (\Exception $mailException) {
                     \Illuminate\Support\Facades\Log::error('Gagal mengirim email update status: ' . $mailException->getMessage());
+                }
+            }
+
+            if ($request->status === 'Menentukan Jadwal Berkas Fisik' || ($request->filled('tanggal_verifikasi_fisik') && $request->status === 'Menunggu Verifikasi Verifikator 1')) {
+                try {
+                    $permohonan->load('organisasi');
+                    \Illuminate\Support\Facades\Mail::to($permohonan->email_organisasi, $permohonan->organisasi->nama_organisasi ?? 'Organisasi')
+                        ->send(new \App\Mail\JadwalBerkasFisikMail($permohonan));
+                } catch (\Exception $mailException) {
+                    \Illuminate\Support\Facades\Log::error('Gagal mengirim email jadwal berkas fisik: ' . $mailException->getMessage());
+                }
+            }
+
+            if ($request->status === 'Proses Pembuatan Surat') {
+                try {
+                    $permohonan->load('jadwalSumpah', 'organisasi');
+                    if ($permohonan->jadwalSumpah) {
+                        \Illuminate\Support\Facades\Mail::to($permohonan->email_organisasi, $permohonan->organisasi->nama_organisasi ?? 'Organisasi')
+                            ->send(new \App\Mail\JadwalSumpahMail($permohonan->jadwalSumpah));
+                    }
+                } catch (\Exception $mailException) {
+                    \Illuminate\Support\Facades\Log::error('Gagal mengirim email jadwal sumpah: ' . $mailException->getMessage());
                 }
             }
 
@@ -370,24 +428,38 @@ class PermohonanController extends Controller
         if ($permohonan->status === 'Proses Pembuatan Surat') {
             $request->validate([
                 'jabatan' => 'required|in:PANITERA,PLH. PANITERA,PLT. PANITERA',
+                'nama_penandatangan' => 'nullable|string|max:255',
+                'catatan' => 'nullable|string',
             ], [
                 'jabatan.required' => 'Silakan pilih jabatan penandatangan terlebih dahulu.',
                 'jabatan.in' => 'Jabatan penandatangan tidak valid.',
             ]);
+
+            if ($request->has('catatan')) {
+                $permohonan->catatan = $request->catatan;
+                $permohonan->save();
+            }
         }
 
         if ($permohonan->status === 'Proses Pembuatan Surat') {
             $activeTemplate = \App\Models\SuratTemplate::where('is_active', true)->first();
+            $jabatan = $request->jabatan;
+            $nama_penandatangan = $request->nama_penandatangan;
+            if ($nama_penandatangan === '[KOSONG]') {
+                $nama_penandatangan = '..................................................';
+            } else {
+                $nama_penandatangan = $nama_penandatangan ?: (auth()->user()->name ?? 'Panitera');
+            }
             if ($activeTemplate && \Illuminate\Support\Facades\Storage::disk('public')->exists($activeTemplate->file_path)) {
                 try {
-                    $path = $this->generateWordDraft($permohonan, $activeTemplate, $request->jabatan);
+                    $path = $this->generateWordDraft($permohonan, $activeTemplate, $jabatan, $nama_penandatangan);
                     $permohonan->file_surat = $path;
                     $permohonan->save();
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Gagal regenerasi draf Word: ' . $e->getMessage());
                 }
             } else {
-                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.permohonan.surat_pdf', compact('permohonan'));
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.permohonan.surat_pdf', compact('permohonan', 'jabatan', 'nama_penandatangan'));
                 $fileName = 'surat_pengantar_' . $permohonan->nomor_permohonan . '.pdf';
                 $path = 'permohonan/surat/' . $fileName;
                 \Illuminate\Support\Facades\Storage::disk('public')->put($path, $pdf->output());
@@ -412,11 +484,13 @@ class PermohonanController extends Controller
     /**
      * Helper to generate Word draft from template.
      */
-    private function generateWordDraft($permohonan, $activeTemplate, $jabatan = null)
+    private function generateWordDraft($permohonan, $activeTemplate, $jabatan = null, $nama_penandatangan = null)
     {
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(storage_path('app/public/' . $activeTemplate->file_path));
         
         $templateProcessor->setValue('jabatan', $jabatan ?? '-');
+        $templateProcessor->setValue('nama_penandatangan', $nama_penandatangan ?? '-');
+        $templateProcessor->setValue('penandatangan', $nama_penandatangan ?? '-');
         
         $pemohon = $permohonan->pemohon;
         $jadwal = $permohonan->jadwalSumpah;
@@ -444,24 +518,69 @@ class PermohonanController extends Controller
         $templateProcessor->setValue('nomor_balasan', $nomorBalasan);
         $templateProcessor->setValue('nomot_balasan', $nomorBalasan);
 
-        // Process multiline notes to preserve spacing and automatically prefix bullets
-        $catatanText = $permohonan->catatan ?? '-';
+        // Clean and parse catatan lines
+        $catatanText = $permohonan->catatan ?? '';
         $lines = explode("\n", str_replace("\r", "", $catatanText));
-        $formattedLines = [];
-        foreach ($lines as $index => $line) {
+        $cleanItems = [];
+        foreach ($lines as $line) {
             $trimmed = trim($line);
             if ($trimmed === '') continue;
-            
-            // If the line already starts with a list marker (e.g. -, *, •, or 1., 2.), leave it as is
-            if (preg_match('/^([\-\*•]|\d+\.|\w\.)\s/', $trimmed)) {
-                $formattedLines[] = $trimmed;
-            } else {
-                // Otherwise, prepend a dash if it's not the first line
-                $formattedLines[] = ($index > 0 ? '- ' : '') . $trimmed;
+            $cleanLine = preg_replace('/^([\-\*•]|\d+\.|\w\.)\s*/u', '', $trimmed);
+            $cleanLine = trim($cleanLine);
+            if ($cleanLine !== '') {
+                $cleanItems[] = $cleanLine;
             }
         }
-        $formattedCatatan = count($formattedLines) > 0 ? implode('</w:t><w:br/><w:t>', $formattedLines) : '-';
-        $templateProcessor->setValue('catatan', $formattedCatatan);
+
+        // Get processed XML via Reflection
+        $reflector = new \ReflectionClass($templateProcessor);
+        $property = $reflector->getProperty('tempDocumentMainPart');
+        $property->setAccessible(true);
+        $mainXml = $property->getValue($templateProcessor);
+
+        // Pattern to match both the "Catatan :" paragraph and the "${catatan}" paragraph
+        $pattern = '/<w:p\b[^>]*>(?:(?!<\/w:p>).)*Catatan(?:(?!<\/w:p>).)*:<\/w:t><\/w:r>.*?<\/w:p>\s*<w:p\b[^>]*>(?:(?!<\/w:p>).)*\$\{catatan\}(?:(?!<\/w:p>).)*<\/w:p>/is';
+
+        if (preg_match($pattern, $mainXml, $matches)) {
+            if (empty($cleanItems)) {
+                // If there are no catatans, hide the entire block (including the heading "Catatan :")
+                $mainXml = preg_replace($pattern, '', $mainXml);
+            } else {
+                // Extract the "Catatan :" heading paragraph to keep it
+                $headingEndPos = strpos($matches[0], '</w:p>') + 6;
+                $headingParagraphXml = substr($matches[0], 0, $headingEndPos);
+                
+                // Dynamically extract the list's numId from the template's placeholder paragraph
+                if (preg_match('/<w:numId\s+w:val="(\d+)"\s*\/>/', $matches[0], $numMatches)) {
+                    $numId = $numMatches[1];
+                } else {
+                    $numId = 15; // default fallback
+                }
+                
+                // Generate Automatic Numbered List paragraphs in XML
+                $paragraphsXml = [];
+                foreach ($cleanItems as $item) {
+                    $escapedItem = htmlspecialchars($item, ENT_XML1, 'UTF-8');
+                    $paragraphsXml[] = '<w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="' . $numId . '"/></w:numPr><w:spacing w:line="276" w:lineRule="auto"/><w:ind w:left="360" w:hanging="360"/><w:jc w:val="left"/><w:rPr><w:rFonts w:ascii="Bookman Old Style" w:hAnsi="Bookman Old Style"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Bookman Old Style" w:hAnsi="Bookman Old Style"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr><w:t>' . $escapedItem . '</w:t></w:r></w:p>';
+                }
+                $listXml = implode("\n", $paragraphsXml);
+                
+                $replacement = $headingParagraphXml . "\n" . $listXml;
+                $mainXml = preg_replace($pattern, addcslashes($replacement, '\\$'), $mainXml);
+            }
+            $property->setValue($templateProcessor, $mainXml);
+        } else {
+            // Fallback if pattern not matched
+            $templateProcessor->setValue('catatan', '-');
+        }
+
+        // Process individual catatan lines (for backwards compatibility if any templates use them)
+        $templateProcessor->setValue('catatan1', $cleanItems[0] ?? '');
+        $templateProcessor->setValue('catatan_1', $cleanItems[0] ?? '');
+        $templateProcessor->setValue('catatan2', $cleanItems[1] ?? '');
+        $templateProcessor->setValue('catatan_2', $cleanItems[1] ?? '');
+        $templateProcessor->setValue('catatan3', $cleanItems[2] ?? '');
+        $templateProcessor->setValue('catatan_3', $cleanItems[2] ?? '');
 
         // Applicant info (Backward Compatibility for single placeholders)
         $pemohons = $permohonan->pemohons;

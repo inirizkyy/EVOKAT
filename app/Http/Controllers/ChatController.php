@@ -65,6 +65,17 @@ class ChatController extends Controller
 
         $session->update(['last_message_at' => now()]);
 
+        // Forward to admin email if offline
+        $isAdminOnline = \Illuminate\Support\Facades\Cache::has('admin-online');
+        if (!$isAdminOnline) {
+            try {
+                \Illuminate\Support\Facades\Mail::to('adminadvokat@gmail.com')
+                    ->send(new \App\Mail\OfflineChatMessageMail($session, $chat));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Gagal mengirim email chat offline: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'success' => true,
             'chat' => $chat
@@ -109,7 +120,7 @@ class ChatController extends Controller
 
     public function adminStatus()
     {
-        $isOnline = Auth::check();
+        $isOnline = \Illuminate\Support\Facades\Cache::has('admin-online');
         return response()->json([
             'online' => $isOnline,
             'label'  => $isOnline ? 'Online' : 'Offline',

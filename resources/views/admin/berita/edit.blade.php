@@ -42,7 +42,7 @@
                             <img src="{{ asset('storage/'.$berita->thumbnail) }}" alt="Thumbnail" class="max-h-[150px] w-auto object-cover rounded-base shadow-sm border border-border-default">
                         </div>
                         @endif
-                        <input type="file" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-base file:border-0 file:text-sm file:font-semibold file:bg-neutral-secondary-soft file:text-body hover:file:bg-neutral-tertiary-medium cursor-pointer" name="thumbnail" accept="image/jpeg, image/png, image/jpg">
+                        <input type="file" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-base file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer" name="thumbnail" accept="image/jpeg, image/png, image/jpg">
                         <div class="text-xs text-body-subtle mt-1">Biarkan kosong jika tidak ingin mengubah gambar.</div>
                         @error('thumbnail') <div class="text-xs text-fg-danger mt-1">{{ $message }}</div> @enderror
                     </div>

@@ -21,69 +21,104 @@
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <div class="w-[256px] flex-shrink-0 flex flex-col bg-neutral-primary-soft/80 backdrop-blur-md border-r border-border-default z-20">
-            <a href="{{ route('dashboard') }}" class="flex items-center p-6 mb-2 no-underline text-heading hover:text-brand transition-colors">
+            <a href="{{ in_array(Auth::user()?->role, ['verifikator1','verifikator2','verifikator3','verifikator4']) ? route(Auth::user()->role . '.dashboard') : (Auth::user()?->role === 'pemeriksa' ? route('pemeriksa.dashboard') : route('dashboard')) }}" class="flex items-center p-6 mb-2 no-underline text-heading hover:text-brand transition-colors">
                 <i class="fa-solid fa-scale-balanced text-2xl mr-3 text-brand"></i>
                 <span class="text-xl font-bold">EVOKAT</span>
             </a>
             
             <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
-                <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('dashboard') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-gauge w-6"></i>
-                    <span class="font-medium text-[14px]">Dashboard</span>
-                </a>
-                
-                <a href="{{ route('admin.permohonan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.permohonan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-file-lines w-6"></i>
-                    <span class="font-medium text-[14px]">Permohonan Sumpah</span>
-                </a>
-                
-                <a href="{{ route('admin.buku-registrasi.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.buku-registrasi.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-address-book w-6"></i>
-                    <span class="font-medium text-[14px]">Buku Registrasi Advokat</span>
-                </a>
+                @if(Auth::user()?->role === 'admin')
+                    <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('dashboard') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-gauge w-6"></i>
+                        <span class="font-medium text-[14px]">Dashboard</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.permohonan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.permohonan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-file-lines w-6"></i>
+                        <span class="font-medium text-[14px]">Permohonan Sumpah</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.buku-registrasi.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.buku-registrasi.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-address-book w-6"></i>
+                        <span class="font-medium text-[14px]">Buku Registrasi Advokat</span>
+                    </a>
 
-                <a href="{{ route('admin.chat.index') }}" class="flex items-center justify-between px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.chat.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <div class="flex items-center">
-                        <i class="fa-solid fa-comments w-6"></i>
-                        <span class="font-medium text-[14px]">Live Chat</span>
+                    <a href="{{ route('admin.chat.index') }}" class="flex items-center justify-between px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.chat.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-comments w-6"></i>
+                            <span class="font-medium text-[14px]">Live Chat</span>
+                        </div>
+                        <span id="sidebar-chat-badge" class="hidden bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"></span>
+                    </a>
+
+                    
+                    <div class="pt-6 pb-2 px-4 text-xs font-semibold uppercase tracking-wider text-body-subtle">
+                        Master Data
                     </div>
-                    <span id="sidebar-chat-badge" class="hidden bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"></span>
-                </a>
+                    
+                    <a href="{{ route('admin.persyaratan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.persyaratan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-list-check w-6"></i>
+                        <span class="font-medium text-[14px]">Persyaratan</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.organisasi.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.organisasi.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-building-columns w-6"></i>
+                        <span class="font-medium text-[14px]">Organisasi Advokat</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.faq.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.faq.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-circle-question w-6"></i>
+                        <span class="font-medium text-[14px]">FAQ</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.surat-template.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.surat-template.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-file-word w-6"></i>
+                        <span class="font-medium text-[14px]">Template Surat</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.room.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.room.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-door-open w-6"></i>
+                        <span class="font-medium text-[14px]">Ruang Sidang</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.signatory.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.signatory.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-signature w-6"></i>
+                        <span class="font-medium text-[14px]">Nama Penandatangan</span>
+                    </a>
+                    
+                    <a href="{{ route('admin.leader.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.leader.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-user-tie w-6"></i>
+                        <span class="font-medium text-[14px]">Pemimpin Sumpah</span>
+                    </a>
 
-                
-                <div class="pt-6 pb-2 px-4 text-xs font-semibold uppercase tracking-wider text-body-subtle">
-                    Master Data
-                </div>
-                
-                <a href="{{ route('admin.persyaratan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.persyaratan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-list-check w-6"></i>
-                    <span class="font-medium text-[14px]">Persyaratan</span>
-                </a>
-                
-                <a href="{{ route('admin.organisasi.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.organisasi.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-building-columns w-6"></i>
-                    <span class="font-medium text-[14px]">Organisasi Advokat</span>
-                </a>
-                
-                <a href="{{ route('admin.berita.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.berita.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-newspaper w-6"></i>
-                    <span class="font-medium text-[14px]">Berita & Info</span>
-                </a>
-                
-                <a href="{{ route('admin.faq.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.faq.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-circle-question w-6"></i>
-                    <span class="font-medium text-[14px]">FAQ</span>
-                </a>
-                
-                <a href="{{ route('admin.surat-template.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.surat-template.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-file-word w-6"></i>
-                    <span class="font-medium text-[14px]">Template Surat</span>
-                </a>
-                
-                <a href="{{ route('admin.pengaturan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.pengaturan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
-                    <i class="fa-solid fa-gear w-6"></i>
-                    <span class="font-medium text-[14px]">Pengaturan Website</span>
-                </a>
+                    <a href="{{ route('admin.pengaturan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('admin.pengaturan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-gear w-6"></i>
+                        <span class="font-medium text-[14px]">Pengaturan Website</span>
+                    </a>
+                @elseif(Auth::user()?->role === 'pemeriksa')
+                    <a href="{{ route('pemeriksa.dashboard') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs('pemeriksa.dashboard') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-gauge w-6"></i>
+                        <span class="font-medium text-[14px]">Dashboard</span>
+                    </a>
+                @elseif(in_array(Auth::user()?->role, ['verifikator1', 'verifikator2', 'verifikator3', 'verifikator4']))
+                    @php
+                        $role = Auth::user()->role;
+                    @endphp
+                    <a href="{{ route($role . '.dashboard') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs($role . '.dashboard') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-gauge w-6"></i>
+                        <span class="font-medium text-[14px]">Dashboard</span>
+                    </a>
+                    
+                    <a href="{{ route($role . '.permohonan.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs($role . '.permohonan.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-file-lines w-6"></i>
+                        <span class="font-medium text-[14px]">Permohonan Sumpah</span>
+                    </a>
+                    
+                    <a href="{{ route($role . '.buku-registrasi.index') }}" class="flex items-center px-4 py-3 rounded-base transition-all {{ request()->routeIs($role . '.buku-registrasi.*') ? 'bg-white shadow-sm border border-border-default text-brand font-semibold' : 'text-body hover:bg-white/50 hover:text-heading' }}">
+                        <i class="fa-solid fa-address-book w-6"></i>
+                        <span class="font-medium text-[14px]">Buku Registrasi Advokat</span>
+                    </a>
+                @endif
             </nav>
         </div>
 
@@ -103,8 +138,8 @@
                     <!-- User Dropdown (Alpine.js is highly recommended here, but we will use standard HTML/CSS dropdown mapping for now or stick to Alpine if we include it) -->
                     <div class="relative group">
                         <button class="flex items-center space-x-3 text-heading p-2 rounded-base hover:shadow-sm transition-all focus:outline-none">
-                            <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name ?? 'Admin' }}&background=E2E8F0&color=31344B" alt="" class="w-8 h-8 rounded-full shadow-sm">
-                            <span class="font-semibold text-[14px]">{{ Auth::user()->name ?? 'Administrator' }}</span>
+                            <img src="https://ui-avatars.com/api/?name={{ Auth::user()?->name ?? 'Admin' }}&background=E2E8F0&color=31344B" alt="" class="w-8 h-8 rounded-full shadow-sm">
+                            <span class="font-semibold text-[14px]">{{ Auth::user()?->name ?? 'Administrator' }}</span>
                             <i class="fa-solid fa-chevron-down text-body text-xs ml-1"></i>
                         </button>
                         
@@ -127,6 +162,11 @@
 
             <!-- Main Container -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6 lg:p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-semibold text-heading">@yield('title')</h2>
+                    <div>@yield('actions')</div>
+                </div>
+
                 <!-- Alerts -->
                 @if(session('success'))
                 <div class="p-4 mb-6 rounded-base border border-border-success-subtle bg-success-soft text-fg-success-strong flex items-center shadow-sm">
@@ -141,11 +181,6 @@
                     <p class="text-[14px] m-0">{{ session('error') }}</p>
                 </div>
                 @endif
-
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-3xl font-semibold text-heading">@yield('title')</h2>
-                    <div>@yield('actions')</div>
-                </div>
 
                 @yield('content')
             </main>
@@ -183,8 +218,15 @@
 
             fetchUnreadCount();
             setInterval(fetchUnreadCount, 10000); // Check every 10 seconds
+
+            // Set offline beacon when page is closed/unloaded
+            window.addEventListener('beforeunload', function () {
+                navigator.sendBeacon('{{ route('admin.set-offline') }}');
+            });
         });
     </script>
+
+
     @stack('scripts')
 </body>
 </html>

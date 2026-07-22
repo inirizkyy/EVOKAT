@@ -10,6 +10,9 @@ use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\BukuRegistrasiController;
 use App\Http\Controllers\Admin\SuratTemplateController;
 use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\SignatoryController;
+use App\Http\Controllers\Admin\LeaderController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use Illuminate\Support\Facades\Route;
@@ -50,7 +53,7 @@ Route::get('/chat/admin-status', [ChatController::class, 'adminStatus']);
 // Admin Routes
 Route::get('/admin/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'role:admin'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -58,8 +61,68 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Pemeriksa Routes
+Route::middleware(['auth', 'verified', 'role:pemeriksa'])->prefix('pemeriksa')->name('pemeriksa.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Pemeriksa\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/buku-registrasi/member/{id}', [\App\Http\Controllers\Pemeriksa\DashboardController::class, 'showMember'])->name('buku-registrasi.show-member');
+    Route::post('/buku-registrasi/{id}/approve', [\App\Http\Controllers\Pemeriksa\DashboardController::class, 'approve'])->name('buku-registrasi.approve');
+    Route::post('/buku-registrasi/{id}/unlock', [\App\Http\Controllers\Pemeriksa\DashboardController::class, 'unlock'])->name('buku-registrasi.unlock');
+});
+
+// Verifikator 1 Routes
+Route::middleware(['auth', 'verified', 'role:verifikator1'])->prefix('verifikator1')->name('verifikator1.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'dashboard'])->name('dashboard');
+    Route::get('/permohonan', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'index'])->name('permohonan.index');
+    Route::get('/permohonan/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'show'])->name('permohonan.show');
+    Route::post('/permohonan/{id}/approve', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'approve'])->name('permohonan.approve');
+    Route::post('/permohonan/{id}/reject', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'reject'])->name('permohonan.reject');
+    Route::get('/permohonan/{permohonan_id}/member/{pemohon_id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'memberShow'])->name('permohonan.member-show');
+    Route::post('/permohonan/{permohonan_id}/member/{pemohon_id}/verifikasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'verifikasiMember'])->name('permohonan.member-verifikasi');
+    Route::get('/buku-registrasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'bukuRegistrasiIndex'])->name('buku-registrasi.index');
+    Route::get('/buku-registrasi/member/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'showBukuMember'])->name('buku-registrasi.show-member');
+});
+
+// Verifikator 2 Routes
+Route::middleware(['auth', 'verified', 'role:verifikator2'])->prefix('verifikator2')->name('verifikator2.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'dashboard'])->name('dashboard');
+    Route::get('/permohonan', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'index'])->name('permohonan.index');
+    Route::get('/permohonan/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'show'])->name('permohonan.show');
+    Route::post('/permohonan/{id}/approve', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'approve'])->name('permohonan.approve');
+    Route::post('/permohonan/{id}/reject', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'reject'])->name('permohonan.reject');
+    Route::get('/permohonan/{permohonan_id}/member/{pemohon_id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'memberShow'])->name('permohonan.member-show');
+    Route::post('/permohonan/{permohonan_id}/member/{pemohon_id}/verifikasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'verifikasiMember'])->name('permohonan.member-verifikasi');
+    Route::get('/buku-registrasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'bukuRegistrasiIndex'])->name('buku-registrasi.index');
+    Route::get('/buku-registrasi/member/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'showBukuMember'])->name('buku-registrasi.show-member');
+});
+
+// Verifikator 3 Routes
+Route::middleware(['auth', 'verified', 'role:verifikator3'])->prefix('verifikator3')->name('verifikator3.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'dashboard'])->name('dashboard');
+    Route::get('/permohonan', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'index'])->name('permohonan.index');
+    Route::get('/permohonan/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'show'])->name('permohonan.show');
+    Route::post('/permohonan/{id}/approve', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'approve'])->name('permohonan.approve');
+    Route::post('/permohonan/{id}/reject', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'reject'])->name('permohonan.reject');
+    Route::get('/permohonan/{permohonan_id}/member/{pemohon_id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'memberShow'])->name('permohonan.member-show');
+    Route::post('/permohonan/{permohonan_id}/member/{pemohon_id}/verifikasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'verifikasiMember'])->name('permohonan.member-verifikasi');
+    Route::get('/buku-registrasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'bukuRegistrasiIndex'])->name('buku-registrasi.index');
+    Route::get('/buku-registrasi/member/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'showBukuMember'])->name('buku-registrasi.show-member');
+});
+
+// Verifikator 4 Routes
+Route::middleware(['auth', 'verified', 'role:verifikator4'])->prefix('verifikator4')->name('verifikator4.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'dashboard'])->name('dashboard');
+    Route::get('/permohonan', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'index'])->name('permohonan.index');
+    Route::get('/permohonan/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'show'])->name('permohonan.show');
+    Route::post('/permohonan/{id}/approve', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'approve'])->name('permohonan.approve');
+    Route::post('/permohonan/{id}/reject', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'reject'])->name('permohonan.reject');
+    Route::get('/permohonan/{permohonan_id}/member/{pemohon_id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'memberShow'])->name('permohonan.member-show');
+    Route::post('/permohonan/{permohonan_id}/member/{pemohon_id}/verifikasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'verifikasiMember'])->name('permohonan.member-verifikasi');
+    Route::get('/buku-registrasi', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'bukuRegistrasiIndex'])->name('buku-registrasi.index');
+    Route::get('/buku-registrasi/member/{id}', [\App\Http\Controllers\Verifikator\PermohonanController::class, 'showBukuMember'])->name('buku-registrasi.show-member');
+});
+
 // Admin CRUD
-Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\TrackAdminActivity::class])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('permohonan', PermohonanController::class);
     Route::get('permohonan/{id}/penjadwalan', [PermohonanController::class, 'penjadwalan'])->name('permohonan.penjadwalan');
     Route::post('permohonan/{id}/verifikasi', [PermohonanController::class, 'verifikasi'])->name('permohonan.verifikasi');
@@ -76,11 +139,22 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::resource('persyaratan', PersyaratanController::class);
     Route::resource('organisasi', OrganizationController::class);
     Route::resource('pengaturan', PengaturanController::class);
+    Route::resource('room', RoomController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('signatory', SignatoryController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('leader', LeaderController::class)->only(['index', 'store', 'destroy']);
     
     // Surat Template
     Route::post('surat-template/{id}/activate', [SuratTemplateController::class, 'activate'])->name('surat-template.activate');
     Route::get('surat-template/{id}/download', [SuratTemplateController::class, 'download'])->name('surat-template.download');
     Route::resource('surat-template', SuratTemplateController::class)->only(['index', 'store', 'destroy']);
+
+    // Beacon to set offline
+    Route::post('set-offline', function() {
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            \Illuminate\Support\Facades\Cache::forget('admin-online');
+        }
+        return response()->json(['success' => true]);
+    })->name('set-offline');
 
     // Chat Routes (Admin)
     Route::get('chat', [AdminChatController::class, 'index'])->name('chat.index');

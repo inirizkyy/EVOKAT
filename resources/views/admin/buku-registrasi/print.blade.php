@@ -44,7 +44,7 @@
             border: 1px solid #ccc;
             padding: 5px;
             width: 120px;
-            height: 160px;
+            height: 120px;
             object-fit: cover;
         }
         
@@ -136,12 +136,12 @@
         <tr>
             <td class="label">Nomor SK Advokat</td>
             <td class="divider">:</td>
-            <td>{{ $reg->pemohon->nomor_sk }}</td>
+            <td>{{ $reg->permohonan->nomor_sk ?? $reg->pemohon->nomor_sk ?? '-' }}</td>
         </tr>
         <tr>
             <td class="label">Tanggal SK Advokat</td>
             <td class="divider">:</td>
-            <td>{{ \Carbon\Carbon::parse($reg->pemohon->tanggal_sk)->translatedFormat('d F Y') }}</td>
+            <td>{{ ($reg->permohonan->tanggal_sk ?? $reg->pemohon->tanggal_sk) ? \Carbon\Carbon::parse($reg->permohonan->tanggal_sk ?? $reg->pemohon->tanggal_sk)->translatedFormat('d F Y') : '-' }}</td>
         </tr>
         <tr>
             <td colspan="3" style="border-top: 1px solid #ccc; padding-top: 15px; margin-top: 10px; font-weight: bold; color: #1a3c5e;">DATA SIDANG SUMPAH &amp; BAS</td>
@@ -176,7 +176,7 @@
             Petugas Registrasi,
         </div>
         <div class="font-bold" style="text-decoration: underline;">
-            {{ Auth::user()->name ?? 'Administrator' }}
+            {{ Auth::user()?->name ?? 'Administrator' }}
         </div>
         <div>NIP. .........................................</div>
     </div>

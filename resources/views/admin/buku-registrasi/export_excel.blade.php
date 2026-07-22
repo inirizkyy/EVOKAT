@@ -32,8 +32,8 @@
             <td style="border: 1px solid #000; mso-number-format:'\@';">{{ $item->pemohon->nik ?? '-' }}</td>
             <td style="border: 1px solid #000;">{{ $item->pemohon->alamat ?? '-' }}</td>
             <td style="border: 1px solid #000;">{{ $item->pemohon->organisasi->nama_organisasi ?? '-' }}</td>
-            <td style="border: 1px solid #000;">{{ $item->pemohon->nomor_sk ?? '-' }}</td>
-            <td style="border: 1px solid #000;">{{ $item->pemohon->tanggal_sk ? \Carbon\Carbon::parse($item->pemohon->tanggal_sk)->format('Y-m-d') : '-' }}</td>
+            <td style="border: 1px solid #000;">{{ $item->permohonan->nomor_sk ?? $item->pemohon->nomor_sk ?? '-' }}</td>
+            <td style="border: 1px solid #000;">{{ ($item->permohonan->tanggal_sk ?? $item->pemohon->tanggal_sk) ? \Carbon\Carbon::parse($item->permohonan->tanggal_sk ?? $item->pemohon->tanggal_sk)->format('Y-m-d') : '-' }}</td>
             <td style="border: 1px solid #000;">{{ $item->nomor_bas ?? '-' }}</td>
             <td style="border: 1px solid #000;">{{ $item->tanggal_disumpah ? \Carbon\Carbon::parse($item->tanggal_disumpah)->format('Y-m-d') : '-' }}</td>
             <td style="border: 1px solid #000;">{{ $item->ketua_pengadilan_tinggi ?? '-' }}</td>

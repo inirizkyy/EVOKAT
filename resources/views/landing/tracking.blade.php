@@ -16,27 +16,37 @@
                 <i class="fa-solid fa-magnifying-glass-chart"></i>
             </div>
 
-            @if(session('nomor_permohonan'))
-            {{-- Banner khusus setelah submit form permohonan --}}
-            <div class="mb-8 rounded-2xl border border-border-success-subtle bg-success-soft relative z-10 overflow-hidden">
+            @php
+                $displayNomor = session('nomor_permohonan') ?? request()->query('nomor_permohonan') ?? (isset($permohonan) ? $permohonan->nomor_permohonan : null);
+            @endphp
+
+            @if($displayNomor)
+            {{-- Banner khusus setelah submit form / tracking permohonan --}}
+            <div class="mb-8 rounded-2xl border border-border-success-subtle bg-success-soft relative z-10 overflow-hidden shadow-sm">
                 <div class="px-6 pt-6 pb-4 flex items-center gap-3 border-b border-border-success-subtle">
                     <div class="w-9 h-9 rounded-full bg-white border border-border-success-subtle flex items-center justify-center text-fg-success-strong flex-shrink-0">
                         <i class="fa-solid fa-circle-check text-lg"></i>
                     </div>
                     <div>
-                        <p class="font-bold text-fg-success-strong text-[15px]">Permohonan Berhasil Diajukan!</p>
-                        <p class="text-[13px] text-fg-success">Simpan nomor registrasi Anda di bawah ini untuk keperluan pelacakan.</p>
+                        <p class="font-bold text-fg-success-strong text-[15px]">Permohonan Berhasil Ditemukan / Diajukan!</p>
+                        <p class="text-[13px] text-fg-success">
+                            {{ session('success') ?? 'Permohonan berhasil terdaftar di Pengadilan Tinggi.' }}<br>
+                            Simpan nomor registrasi Anda di bawah ini untuk keperluan pelacakan.
+                        </p>
                     </div>
                 </div>
                 <div class="px-6 py-5 flex flex-col items-center gap-3">
                     <p class="text-[13px] font-medium text-fg-success uppercase tracking-widest">Nomor Registrasi Anda</p>
                     <div class="flex items-center gap-3">
-                        <span id="nomorRegistrasi" class="font-mono text-2xl sm:text-3xl font-bold text-fg-success-strong tracking-widest">{{ session('nomor_permohonan') }}</span>
+                        <span id="nomorRegistrasi" class="font-mono text-2xl sm:text-3xl font-bold text-fg-success-strong tracking-widest">{{ $displayNomor }}</span>
                         <button type="button" onclick="copyNomor()" title="Salin nomor" class="w-9 h-9 rounded-full border border-border-success-subtle bg-white text-fg-success hover:text-fg-success-strong hover:shadow-md transition-all flex items-center justify-center flex-shrink-0">
                             <i id="copyIcon" class="fa-regular fa-copy text-base"></i>
                         </button>
                     </div>
-                    <p class="text-[12px] text-fg-success">Nomor ini juga telah dikirimkan ke email organisasi Anda.</p>
+                    <p class="text-[14px] sm:text-[15px] font-bold text-fg-success-strong text-center">Nomor Registrasi ini juga telah dikirimkan ke email.</p>
+                    <p class="text-[12px] sm:text-[13px] text-fg-danger-strong text-center font-semibold mt-1">
+                        <i class="fa-solid fa-circle-exclamation mr-1 text-fg-danger-strong"></i> Apabila email tidak masuk di Inbox utama, silakan periksa folder <strong>Spam</strong> atau <strong>Promosi</strong>.
+                    </p>
                 </div>
             </div>
             @elseif(session('success'))
@@ -61,7 +71,7 @@
                         <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-brand text-body-subtle">
                             <i class="fa-solid fa-magnifying-glass text-xl"></i>
                         </div>
-                        <input type="text" class="block w-full rounded-full border-2 border-border-default-medium bg-white shadow-lg text-[18px] sm:text-[20px] text-center text-heading py-5 px-16 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all font-mono tracking-widest placeholder:tracking-normal placeholder:text-[16px]" name="nomor_permohonan" required placeholder="Contoh: ADV-20260701-0001" value="{{ session('nomor_permohonan') ?? (isset($permohonan) ? $permohonan->nomor_permohonan : '') }}">
+                        <input type="text" class="block w-full rounded-full border-2 border-border-default-medium bg-white shadow-lg text-[18px] sm:text-[20px] text-center text-heading py-5 px-16 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all font-mono tracking-widest placeholder:tracking-normal placeholder:text-[16px]" name="nomor_permohonan" required placeholder="Contoh: ADV-20260701-0001" value="{{ $displayNomor ?? '' }}">
                     </div>
                 </div>
                 <div class="text-center mb-8">
@@ -112,24 +122,30 @@
                         <span class="sm:w-3/5">
                             @if($permohonan->status == 'Draft')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-neutral-secondary-medium border border-border-default text-heading shadow-sm">Draft</span>
-                            @elseif($permohonan->status == 'Menunggu Verifikasi')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-regular fa-clock mr-1.5"></i>Menunggu Verifikasi</span>
-                            @elseif($permohonan->status == 'Verifikasi Berkas Fisik' || $permohonan->status == 'Siap Penjadwalan Pengecekan Berkas Fisik')
-                                @if(!$permohonan->tanggal_verifikasi_fisik)
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm"><i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Sedang Diproses</span>
-                                @else
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-solid fa-folder-open mr-1.5"></i>Verifikasi Berkas Fisik</span>
-                                @endif
-                            @elseif($permohonan->status == 'Menentukan Jadwal Verifikasi')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm"><i class="fa-regular fa-clock mr-1.5"></i>Jadwal Verifikasi Fisik</span>
+                            @elseif($permohonan->status == 'Menunggu Verifikasi Admin')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-regular fa-clock mr-1.5"></i>Verifikasi Admin</span>
+                            @elseif(str_starts_with($permohonan->status, 'Menunggu Perbaikan Dokumen'))
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-danger-soft border border-border-danger-subtle text-fg-danger-strong shadow-sm"><i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Perbaikan Dokumen</span>
+                            @elseif($permohonan->status == 'Menunggu Verifikasi Verifikator 1')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-regular fa-clock mr-1.5"></i>Verifikator 1</span>
+                            @elseif($permohonan->status == 'Menunggu Verifikasi Verifikator 2')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-regular fa-clock mr-1.5"></i>Verifikator 2</span>
+                            @elseif($permohonan->status == 'Menunggu Verifikasi Verifikator 3')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-regular fa-clock mr-1.5"></i>Verifikator 3</span>
+                            @elseif($permohonan->status == 'Menunggu Verifikasi Verifikator 4')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-regular fa-clock mr-1.5"></i>Verifikator 4</span>
+                            @elseif($permohonan->status == 'Menentukan Jadwal Berkas Fisik')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning shadow-sm"><i class="fa-solid fa-calendar-check mr-1.5"></i>Proses Pengecekan Berkas Fisik</span>
                             @elseif($permohonan->status == 'Menentukan Jadwal Sumpah')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm"><i class="fa-regular fa-calendar mr-1.5"></i>Menentukan Jadwal Sumpah</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm"><i class="fa-regular fa-calendar mr-1.5"></i>Jadwal Sumpah</span>
                             @elseif($permohonan->status == 'Proses Pembuatan Surat')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm"><i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Pembuatan Surat</span>
                             @elseif($permohonan->status == 'Surat Selesai')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-success-soft border border-border-success-subtle text-fg-success-strong shadow-sm"><i class="fa-solid fa-circle-check mr-1.5"></i>Surat Selesai</span>
                             @elseif($permohonan->status == 'Selesai')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-brand-softer border border-border-brand-subtle text-fg-brand-strong shadow-sm"><i class="fa-solid fa-flag-checkered mr-1.5"></i>Selesai</span>
+                            @elseif($permohonan->status == 'Ditolak')
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-danger-soft border border-border-danger-subtle text-fg-danger-strong shadow-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i>Ditolak</span>
                             @else
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-info-soft border border-border-info-subtle text-fg-info shadow-sm">{{ $permohonan->status }}</span>
                             @endif
@@ -142,9 +158,10 @@
                         <span class="text-heading sm:w-3/5 font-semibold">{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</span>
                     </div>
                     <div class="flex flex-col sm:flex-row border-b border-border-default border-dashed pb-3">
-                        <span class="text-body-subtle font-medium sm:w-2/5">Nomor SK</span>
+                        <span class="text-body-subtle font-medium sm:w-2/5">Nomor SK Pendirian</span>
                         <span class="text-heading sm:w-3/5">{{ $permohonan->nomor_sk }}</span>
                     </div>
+
                     <div class="flex flex-col sm:flex-row pb-3">
                         <span class="text-body-subtle font-medium sm:w-2/5">Email Organisasi</span>
                         <span class="text-heading sm:w-3/5">{{ $permohonan->email_organisasi }}</span>
@@ -152,10 +169,37 @@
                 </div>
             </div>
 
-            @if($permohonan->catatan)
-            <div class="mb-8 p-5 rounded-xl bg-warning-soft border border-border-warning-subtle text-fg-warning flex flex-col gap-2">
-                <h5 class="font-bold flex items-center gap-2"><i class="fa-solid fa-bell"></i> Catatan Verifikasi Permohonan:</h5>
-                <p class="text-[14px] leading-relaxed ml-6">{{ $permohonan->catatan }}</p>
+            @if($permohonan->catatan && !in_array($permohonan->status, ['Proses Pembuatan Surat', 'Surat Selesai', 'Selesai']))
+            <div class="mb-8 p-5 rounded-xl bg-warning-soft border border-border-warning-subtle text-heading flex flex-col gap-2">
+                <h5 class="font-bold flex items-center gap-2 text-fg-warning"><i class="fa-solid fa-bell"></i> Catatan Verifikasi Permohonan:</h5>
+                <p class="text-[14px] leading-relaxed ml-6 text-body">{{ $permohonan->catatan }}</p>
+            </div>
+            @endif
+
+            @if(str_starts_with($permohonan->status, 'Menunggu Perbaikan Dokumen'))
+            <div class="mb-8 p-6 rounded-2xl bg-danger-soft border border-border-danger-subtle text-fg-danger-strong relative overflow-hidden">
+                <i class="fa-solid fa-circle-exclamation absolute -right-4 -bottom-4 text-8xl text-fg-danger opacity-10 pointer-events-none"></i>
+                <h5 class="font-bold text-lg mb-2 flex items-center gap-2 text-fg-danger-strong">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Perbaikan Dokumen Diperlukan
+                </h5>
+                <p class="text-[14px] leading-relaxed mb-4">
+                    Verifikator menemukan dokumen yang tidak valid atau butuh perbaikan. Silakan unggah ulang dokumen yang ditolak agar proses verifikasi dapat dilanjutkan.
+                </p>
+                <a href="{{ route('permohonan.dokumen-list', $permohonan->nomor_permohonan) }}" class="inline-flex items-center px-5 py-2.5 rounded-full text-xs font-bold text-white shadow-md hover:shadow-lg transition-all" style="background-color: #dc2626 !important; color: #ffffff !important; border: 1px solid #b91c1c !important;">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Perbaiki &amp; Upload Dokumen
+                </a>
+            </div>
+            @endif
+
+            @if($permohonan->status == 'Verifikasi Berkas Fisik')
+            <div class="mb-8 p-6 rounded-2xl bg-[#fff3cd] border border-[#ffeeba] text-[#856404] relative overflow-hidden">
+                <i class="fa-solid fa-file-shield absolute -right-4 -bottom-4 text-8xl text-[#856404] opacity-10 pointer-events-none"></i>
+                <h5 class="font-bold text-lg mb-2 flex items-center gap-2 text-[#856404]">
+                    <i class="fa-solid fa-spinner fa-spin mr-1"></i> Pemeriksaan Berkas Sedang Diproses
+                </h5>
+                <p class="text-[14px] leading-relaxed">
+                    Pegawai Pengadilan Tinggi sedang melakukan verifikasi dan pencocokan berkas (seperti Ijazah SH, Sertifikat UPA, KTP, Surat Magang, dll.) milik para pemohon. Pastikan berkas yang diserahkan telah sesuai dan lengkap.
+                </p>
             </div>
             @endif
 
@@ -164,7 +208,7 @@
             <div class="mb-8 p-6 rounded-2xl bg-success-soft border border-border-success-subtle text-fg-success-strong relative overflow-hidden">
                 <i class="fa-solid fa-file-circle-check absolute -right-4 -bottom-4 text-8xl text-success opacity-10 pointer-events-none"></i>
                 <h5 class="font-bold text-lg mb-4 flex items-center gap-2 text-fg-success-strong">
-                    <i class="fa-solid fa-file-arrow-down"></i> Surat Pengantar Final
+                    <i class="fa-solid fa-file-arrow-down"></i> Surat Balasan
                 </h5>
                 <div class="h-px w-full bg-border-success-subtle mb-4"></div>
                 <p class="text-[14px] mb-4">Surat pengantar sumpah organisasi Anda telah ditandatangani dan disetujui. Silakan unduh surat pengantar resmi menggunakan tombol di bawah ini.</p>
@@ -174,24 +218,24 @@
             </div>
             @endif
 
-            @if(in_array($permohonan->status, ['Menentukan Jadwal Verifikasi', 'Menentukan Jadwal Sumpah', 'Proses Pembuatan Surat', 'Surat Selesai', 'Selesai']) && $permohonan->tanggal_verifikasi_fisik)
-            <div class="mb-8 p-6 rounded-2xl bg-warning-soft border border-border-warning-subtle text-fg-warning relative overflow-hidden">
+            @if($permohonan->tanggal_verifikasi_fisik && in_array($permohonan->status, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik']))
+            <div class="mb-8 p-6 rounded-2xl bg-warning-soft border border-border-warning-subtle text-heading relative overflow-hidden">
                 <i class="fa-regular fa-folder-open absolute -right-4 -bottom-4 text-8xl text-fg-warning opacity-10 pointer-events-none"></i>
-                <h5 class="font-bold text-lg mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-days"></i> Jadwal Pengecekan Berkas Fisik
+                <h5 class="font-bold text-lg mb-4 flex items-center gap-2 text-heading">
+                    <i class="fa-solid fa-calendar-days text-fg-warning"></i> Jadwal Pengecekan Berkas Fisik
                 </h5>
                 <div class="h-px w-full bg-border-warning-subtle mb-4"></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
                     <div>
                         <span class="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Hari</span>
-                        <span class="block text-xl font-bold text-fg-warning">{{ $permohonan->hari_verifikasi_fisik ?? '-' }}</span>
+                        <span class="block text-xl font-bold text-heading">{{ $permohonan->hari_verifikasi_fisik ?? '-' }}</span>
                     </div>
                     <div>
                         <span class="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Tanggal</span>
-                        <span class="block text-xl font-bold text-fg-warning">{{ \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->translatedFormat('d F Y') }}</span>
+                        <span class="block text-xl font-bold text-heading">{{ \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->translatedFormat('d F Y') }}</span>
                     </div>
                 </div>
-                <p class="text-[13px] mt-4 opacity-80 relative z-10">Perwakilan Organisasi / Anggota yang bersangkutan wajib datang membawa seluruh berkas fisik asli sesuai jadwal di atas.</p>
+                <p class="text-[13px] mt-4 opacity-80 relative z-10 text-body">Perwakilan Organisasi / Anggota yang bersangkutan wajib datang membawa seluruh berkas fisik asli sesuai jadwal di atas.</p>
             </div>
             @endif
 
@@ -250,8 +294,12 @@
                                 </td>
                                 <td class="px-5 py-4">{{ $pemohon->email }}</td>
                                 <td class="px-5 py-4 text-center">
-                                    @if($pemohon->status_verifikasi == 'Disetujui')
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-success-soft border border-border-success-subtle text-fg-success-strong">✔ Disetujui</span>
+                                    @if($pemohon->status_verifikasi == 'Disetujui' || in_array($permohonan->status, ['Menentukan Jadwal Sumpah', 'Proses Pembuatan Surat', 'Surat Selesai', 'Selesai']))
+                                        @if(in_array($permohonan->status, ['Menentukan Jadwal Berkas Fisik', 'Menunggu Verifikasi Admin', 'Menunggu Verifikasi Verifikator 1', 'Menunggu Verifikasi Verifikator 2', 'Menunggu Verifikasi Verifikator 3', 'Menunggu Verifikasi Verifikator 4', 'Menunggu Verifikasi']))
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-warning-soft border border-border-warning-subtle text-fg-warning"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Sedang Diproses</span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-success-soft border border-border-success-subtle text-fg-success-strong">✔ Disetujui</span>
+                                        @endif
                                     @elseif($pemohon->status_verifikasi == 'Ditolak')
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-danger-soft border border-border-danger-subtle text-fg-danger-strong">✖ Ditolak</span>
                                     @else
@@ -298,7 +346,7 @@
                             <div class="text-xs text-body-subtle mb-2">
                                 Dari status: <span class="px-1.5 py-0.5 bg-neutral-secondary-medium rounded text-heading">{{ $riwayat->status_lama }}</span>
                             </div>
-                            @if($riwayat->keterangan)
+                            @if($riwayat->keterangan && !in_array($riwayat->status_baru, ['Proses Pembuatan Surat', 'Surat Selesai', 'Selesai']))
                             <p class="text-[13px] text-body bg-neutral-primary-soft p-2.5 rounded-lg border border-border-default shadow-inset mt-3 whitespace-normal break-words">
                                 {{ $riwayat->keterangan }}
                             </p>
@@ -318,6 +366,7 @@
 
     </div>
 </section>
+
 @endsection
 
 @push('scripts')

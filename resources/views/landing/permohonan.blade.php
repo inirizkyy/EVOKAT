@@ -80,7 +80,7 @@
                 <p class="text-[15px] text-body-subtle mt-2">Masukkan informasi resmi Organisasi Advokat pengusung.</p>
             </div>
 
-            <form action="{{ url('/permohonan') }}" method="POST" id="permohonan-form" x-data="permohonanForm()">
+            <form action="{{ url('/permohonan') }}" method="POST" id="permohonan-form" x-data="permohonanForm()" enctype="multipart/form-data">
                 @csrf
                 
                 <!-- DATA ORGANISASI -->
@@ -102,20 +102,46 @@
                         @enderror
                     </div>
                     <div class="group">
-                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Nomor SK Advokat <span class="text-fg-danger">*</span></label>
-                        <input type="text" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="nomor_sk" value="{{ old('nomor_sk') }}" required placeholder="Contoh: SK/123/2026">
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Nomor Surat Pengantar Organisasi <span class="text-fg-danger">*</span></label>
+                        <input type="text" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="nomor_surat_pengantar" value="{{ old('nomor_surat_pengantar') }}" required placeholder="Contoh: 001/ORG/VII/2026">
+                        @error('nomor_surat_pengantar')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div class="group">
-                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Tanggal SK Advokat <span class="text-fg-danger">*</span></label>
-                        <input type="date" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="tanggal_sk" value="{{ old('tanggal_sk') }}" required>
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Tanggal Surat Pengantar <span class="text-fg-danger">*</span></label>
+                        <input type="date" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="tanggal_surat_pengantar" value="{{ old('tanggal_surat_pengantar') }}" required>
+                        @error('tanggal_surat_pengantar')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
                     </div>
+
                     <div class="group">
-                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Nomor HP / WhatsApp Organisasi <span class="text-fg-danger">*</span></label>
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Nomor HP Organisasi <span class="text-fg-danger">*</span></label>
                         <input type="text" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="no_hp_organisasi" value="{{ old('no_hp_organisasi') }}" required placeholder="08xxxxxxxxxx">
                     </div>
-                    <div class="group md:col-span-2">
+                    <div class="group">
                         <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Email Aktif Organisasi <span class="text-fg-danger">*</span></label>
                         <input type="email" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="email_organisasi" value="{{ old('email_organisasi') }}" required placeholder="email.organisasi@example.com">
+                    </div>
+                    <div class="group md:col-span-2">
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Perihal Surat Pengantar <span class="text-fg-danger">*</span></label>
+                        <input type="text" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft shadow-inset text-[16px] text-heading py-4 px-5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all" name="perihal_surat_pengantar" value="{{ old('perihal_surat_pengantar') }}" required placeholder="Contoh: Permohonan Sumpah Advokat Baru">
+                        @error('perihal_surat_pengantar')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="group md:col-span-2">
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Upload Surat Pengantar Organisasi (PDF) <span class="text-fg-danger">*</span></label>
+                        <input type="file" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft text-[15px] text-heading py-3 px-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-brand/90" name="file_surat_pengantar" accept=".pdf" required>
+                        <p class="text-xs text-body-subtle mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
+                        @error('file_surat_pengantar')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="group">
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Upload SK Pendirian Advokat (PDF) <span class="text-fg-danger">*</span></label>
+                        <input type="file" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft text-[15px] text-heading py-3 px-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-brand/90" name="file_sk_pendirian" accept=".pdf" required>
+                        <p class="text-xs text-body-subtle mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
+                        @error('file_sk_pendirian')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="group">
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Upload SK Kepengurusan Advokat (PDF) <span class="text-fg-danger">*</span></label>
+                        <input type="file" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft text-[15px] text-heading py-3 px-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-brand/90" name="file_sk_kepengurusan" accept=".pdf" required>
+                        <p class="text-xs text-body-subtle mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
+                        @error('file_sk_kepengurusan')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
                     </div>
                 </div>
 

@@ -8,6 +8,12 @@
 @endsection
 
 @section('content')
+@php
+    $permohonan = $pemohon->permohonan;
+    $isCompletedWithBas = ($permohonan->status === 'Selesai') && $permohonan->pemohons()->whereHas('bukuRegistrasi', function ($q) {
+        $q->whereNotNull('nomor_bas');
+    })->exists();
+@endphp
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8" x-data="verifikasiForm()">
     
     <!-- Kolom Kiri: Profil Anggota -->
@@ -49,6 +55,7 @@
         <!-- Form Verifikasi Dokumen dan Keputusan -->
         <form action="{{ route('admin.permohonan.verifikasi-member', $pemohon->id) }}" method="POST">
             @csrf
+            <fieldset @disabled(($isCompletedWithBas || $pemohon->status_verifikasi === 'Disetujui') && auth()->user()->role === 'admin') class="space-y-8 w-full {{ $pemohon->status_verifikasi === 'Disetujui' ? 'bg-gray-100/50 p-4 rounded-xl opacity-80' : '' }}">
             
             <!-- Dokumen Persyaratan -->
             <div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col mb-8">
@@ -67,11 +74,21 @@
                             </thead>
                             <tbody class="bg-white font-medium">
                                 @foreach($pemohon->dokumenPersyaratan as $dok)
+                                    @php
+                                        $isValid = $dok->status_dokumen === 'Valid';
+                                    @endphp
+                                    @if($isValid)
+                                        <input type="hidden" name="dokumen[{{ $dok->id }}]" value="Valid">
+                                        <input type="hidden" name="keterangan_dokumen[{{ $dok->id }}]" value="{{ $dok->keterangan }}">
+                                    @endif
                                     <!-- Row Utama Dokumen -->
-                                    <tr class="hover:bg-neutral-secondary-soft/50 transition-colors duration-150">
+                                    <tr class="transition-colors duration-150 {{ $isValid ? 'bg-gray-100 opacity-60' : 'hover:bg-neutral-secondary-soft/50' }}">
                                         <td class="px-6 pt-4 pb-2 whitespace-normal font-semibold text-heading border-t border-border-default">
                                             {{ $dok->masterPersyaratan->nama_persyaratan }}
                                             @if($dok->masterPersyaratan->is_required) <span class="text-fg-danger">*</span> @endif
+                                            @if($isValid)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-success text-white ml-2">Sudah Valid</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 pt-4 pb-2 text-center border-t border-border-default">
                                             @if($dok->file_path)
@@ -85,26 +102,26 @@
                                         <td class="px-6 pt-4 pb-2 border-t border-border-default">
                                             <div class="flex items-center gap-4">
                                                 <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                                    <input type="radio" name="dokumen[{{ $dok->id }}]" value="Valid" {{ old("dokumen.{$dok->id}", $dok->status_dokumen) == 'Valid' ? 'checked' : '' }} required @change="updateStatus()" class="text-success focus:ring-success w-4 h-4">
+                                                    <input type="radio" name="dokumen[{{ $dok->id }}]" value="Valid" {{ old("dokumen.{$dok->id}", $dok->status_dokumen) == 'Valid' ? 'checked' : '' }} required @change="updateStatus()" class="text-success focus:ring-success w-4 h-4" @disabled($isValid)>
                                                     <span class="text-xs text-heading font-bold">Valid</span>
                                                 </label>
                                                 <label class="inline-flex items-center gap-1.5 cursor-pointer">
-                                                    <input type="radio" name="dokumen[{{ $dok->id }}]" value="Tidak Valid" {{ old("dokumen.{$dok->id}", $dok->status_dokumen) == 'Tidak Valid' ? 'checked' : '' }} required @change="updateStatus()" class="text-danger focus:ring-danger w-4 h-4">
+                                                    <input type="radio" name="dokumen[{{ $dok->id }}]" value="Tidak Valid" {{ old("dokumen.{$dok->id}", $dok->status_dokumen) == 'Tidak Valid' ? 'checked' : '' }} required @change="updateStatus()" class="text-danger focus:ring-danger w-4 h-4" @disabled($isValid)>
                                                     <span class="text-xs text-heading font-bold">Tidak Valid</span>
                                                 </label>
                                             </div>
                                         </td>
                                     </tr>
                                     <!-- Row Catatan / Alasan di Bawahnya -->
-                                    <tr class="hover:bg-neutral-secondary-soft/50 transition-colors duration-150 border-b border-border-default">
+                                    <tr class="transition-colors duration-150 border-b border-border-default {{ $isValid ? 'bg-gray-100 opacity-60' : 'hover:bg-neutral-secondary-soft/50' }}">
                                         <td colspan="3" class="px-6 pb-4 pt-1">
                                             <div class="flex flex-col gap-1.5">
                                                 <label class="text-[11px] font-bold text-body-subtle flex items-center gap-1">
                                                     <i class="fa-regular fa-comment-dots text-brand"></i>
                                                     <span>Catatan / Alasan:</span>
                                                 </label>
-                                                <input type="text" name="keterangan_dokumen[{{ $dok->id }}]" value="{{ old("keterangan_dokumen.{$dok->id}", $dok->keterangan) }}" placeholder="Tulis alasan jika berkas tidak valid atau butuh revisi..."
-                                                       class="block w-full rounded border border-border-default bg-white text-xs py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all font-normal shadow-sm">
+                                                <input type="text" name="keterangan_dokumen[{{ $dok->id }}]" value="{{ old("keterangan_dokumen.{$dok->id}", $dok->status_dokumen === 'Pending' ? '' : $dok->keterangan) }}" placeholder="Tulis alasan jika berkas tidak valid atau butuh revisi..."
+                                                       class="block w-full rounded border border-border-default bg-white text-xs py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all font-normal shadow-sm" @disabled($isValid)>
                                             </div>
                                         </td>
                                     </tr>
@@ -136,8 +153,7 @@
                 <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-3 rounded-base text-[16px] font-bold bg-brand text-white shadow-sm hover:shadow-md active:shadow-inset transition-all border border-brand hover:opacity-95">
                     <i class="fa-solid fa-circle-check mr-2"></i> Simpan Keputusan Verifikasi Anggota
                 </button>
-            </div>
-            
+            </fieldset>
         </form>
 
     </div>

@@ -21,6 +21,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                if (Auth::user()->role === 'pemeriksa') {
+                    return redirect('/pemeriksa/dashboard');
+                } elseif (in_array(Auth::user()->role, ['verifikator1', 'verifikator2', 'verifikator3', 'verifikator4'])) {
+                    return redirect('/' . Auth::user()->role . '/dashboard');
+                }
                 return redirect(RouteServiceProvider::HOME);
             }
         }

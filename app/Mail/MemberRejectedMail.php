@@ -9,22 +9,24 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class MemberRejectedMail extends Mailable implements ShouldQueue
+class MemberRejectedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $pemohon;
     public $permohonan;
     public $rejectedList;
+    public $rejectedDetails;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($pemohon, $permohonan, $rejectedList)
+    public function __construct($pemohon, $permohonan, $rejectedList, $rejectedDetails = null)
     {
         $this->pemohon = $pemohon;
         $this->permohonan = $permohonan;
         $this->rejectedList = $rejectedList;
+        $this->rejectedDetails = $rejectedDetails;
     }
 
     /**

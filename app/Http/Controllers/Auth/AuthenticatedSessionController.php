@@ -29,6 +29,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        if (Auth::user()->role === 'pemeriksa') {
+            return redirect()->intended('/pemeriksa/dashboard');
+        } elseif (in_array(Auth::user()->role, ['verifikator1', 'verifikator2', 'verifikator3', 'verifikator4'])) {
+            return redirect()->intended('/' . Auth::user()->role . '/dashboard');
+        }
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 
@@ -37,6 +43,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            \Illuminate\Support\Facades\Cache::forget('admin-online');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

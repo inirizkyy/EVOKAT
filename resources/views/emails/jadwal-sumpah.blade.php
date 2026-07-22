@@ -27,19 +27,18 @@
         {{-- Isi Surat --}}
         <div style="padding: 24px 32px;">
             <p style="margin: 0 0 16px;">Yth.</p>
-            <p style="margin: 0 0 4px; font-weight: bold;">{{ $jadwal->permohonan->pemohon->nama_lengkap }}</p>
-            <p style="margin: 0 0 16px; color: #555; font-size: 13px;">{{ $jadwal->permohonan->pemohon->alamat ?? '' }}</p>
+            <p style="margin: 0 0 4px; font-weight: bold;">Pengurus {{ $jadwal->permohonan->organisasi->nama_organisasi ?? $jadwal->permohonan->pemohon->nama_lengkap ?? 'Organisasi Advokat' }}</p>
 
             <p style="margin: 0 0 16px; text-align: justify;">
                 Dengan hormat,
             </p>
             <p style="margin: 0 0 16px; text-align: justify;">
-                Sehubungan dengan permohonan pengambilan Sumpah Advokat yang telah Saudara/i ajukan dengan nomor registrasi
-                <strong>{{ $jadwal->permohonan->nomor_permohonan }}</strong>, dengan ini kami sampaikan bahwa berkas permohonan Saudara/i
+                Sehubungan dengan permohonan pengambilan Sumpah Advokat yang telah diajukan dengan nomor registrasi
+                <strong>{{ $jadwal->permohonan->nomor_permohonan }}</strong>, dengan ini kami sampaikan bahwa berkas permohonan
                 telah <strong style="color: #1a7c3e;">dinyatakan lengkap dan memenuhi syarat</strong>.
             </p>
             <p style="margin: 0 0 20px; text-align: justify;">
-                Saudara/i dijadwalkan untuk mengikuti Pengambilan Sumpah Advokat pada:
+                Anggota pemohon dijadwalkan untuk mengikuti Pengambilan Sumpah Advokat pada:
             </p>
 
             {{-- Info Jadwal --}}
@@ -75,29 +74,24 @@
                 </table>
             </div>
 
-            {{-- Data Pemohon --}}
-            <p style="margin: 0 0 10px; font-weight: bold; font-size: 13px; color: #1a3c5e;">Data Pemohon:</p>
+            {{-- Data Permohonan --}}
+            <p style="margin: 0 0 10px; font-weight: bold; font-size: 13px; color: #1a3c5e;">Data Permohonan:</p>
             <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; padding: 12px 20px; margin: 0 0 20px; font-size: 13px;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="padding: 4px 0; width: 38%; color: #666;">Nama Lengkap</td>
+                        <td style="padding: 4px 0; width: 38%; color: #666;">No. Permohonan</td>
                         <td style="width:4%">:</td>
-                        <td style="padding: 4px 0;">{{ $jadwal->permohonan->pemohon->nama_lengkap }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 4px 0; color: #666;">NIK</td>
-                        <td>:</td>
-                        <td style="padding: 4px 0;">{{ $jadwal->permohonan->pemohon->nik }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 4px 0; color: #666;">No. Permohonan</td>
-                        <td>:</td>
                         <td style="padding: 4px 0;">{{ $jadwal->permohonan->nomor_permohonan }}</td>
                     </tr>
                     <tr>
                         <td style="padding: 4px 0; color: #666;">Organisasi Advokat</td>
                         <td>:</td>
-                        <td style="padding: 4px 0;">{{ $jadwal->permohonan->pemohon->organisasi->nama_organisasi ?? '-' }}</td>
+                        <td style="padding: 4px 0;">{{ $jadwal->permohonan->organisasi->nama_organisasi ?? $jadwal->permohonan->pemohon->organisasi->nama_organisasi ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 0; color: #666;">Jumlah Anggota</td>
+                        <td>:</td>
+                        <td style="padding: 4px 0;">{{ $jadwal->permohonan->pemohons->count() ?? 1 }} Orang</td>
                     </tr>
                 </table>
             </div>
@@ -108,6 +102,10 @@
             </p>
             <p style="margin: 0 0 24px; text-align: justify;">
                 Demikian surat pemberitahuan ini kami sampaikan. Atas perhatian dan kehadiran Saudara/i, kami ucapkan terima kasih.
+            </p>
+
+            <p style="margin: 24px 0 24px; text-align: justify; font-size: 12px; color: #666; font-style: italic; border-top: 1px dashed #ddd; padding-top: 15px;">
+                *Catatan: Jika Anda tidak menemukan email pemberitahuan ini di folder Kotak Masuk (Inbox), silakan periksa folder Spam atau Promosi Anda.*
             </p>
 
             <p style="margin: 0 0 4px;">Hormat kami,</p>

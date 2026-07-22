@@ -17,7 +17,37 @@
                 <i class="fa-solid fa-scale-balanced"></i>
             </div>
 
-            @if(session('success'))
+            @if(session('nomor_permohonan'))
+            <!-- Registration Banner Notification -->
+            <div class="mb-8 rounded-2xl border border-border-success-subtle bg-success-soft relative z-10 overflow-hidden shadow-sm">
+                <div class="px-6 pt-6 pb-4 flex items-center gap-3 border-b border-border-success-subtle">
+                    <div class="w-9 h-9 rounded-full bg-white border border-border-success-subtle flex items-center justify-center text-fg-success-strong flex-shrink-0">
+                        <i class="fa-solid fa-circle-check text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-fg-success-strong text-[16px]">Permohonan Berhasil Didaftarkan!</p>
+                        <p class="text-[13px] text-fg-success">
+                            Berikut adalah Nomor Registrasi resmi permohonan Anda. Nomor ini telah dikirimkan ke email organisasi.
+                        </p>
+                    </div>
+                </div>
+                <div class="px-6 py-5 flex flex-col items-center gap-3">
+                    <p class="text-[13px] font-medium text-fg-success uppercase tracking-widest">Nomor Registrasi Anda</p>
+                    <div class="flex items-center gap-3">
+                        <span id="nomorRegistrasi" class="font-mono text-2xl sm:text-3xl font-bold text-fg-success-strong tracking-widest">{{ session('nomor_permohonan') }}</span>
+                        <button type="button" onclick="copyNomor()" title="Salin nomor" class="w-9 h-9 rounded-full border border-border-success-subtle bg-white text-fg-success hover:text-fg-success-strong hover:shadow-md transition-all flex items-center justify-center flex-shrink-0">
+                            <i id="copyIcon" class="fa-regular fa-copy text-base"></i>
+                        </button>
+                    </div>
+                    <p class="text-[14px] sm:text-[15px] font-bold text-fg-success-strong text-center">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Nomor Registrasi ini telah dikirimkan ke email: <strong>{{ session('email_terkirim') ?? $permohonan->email_organisasi }}</strong>
+                    </p>
+                    <p class="text-[12px] sm:text-[13px] text-fg-danger-strong text-center font-semibold mt-1">
+                        <i class="fa-solid fa-circle-exclamation mr-1 text-fg-danger-strong"></i> Apabila email tidak masuk di Inbox utama, silakan periksa folder <strong>Spam</strong> atau <strong>Promosi</strong>.
+                    </p>
+                </div>
+            </div>
+            @elseif(session('success'))
             <div class="mb-8 p-4 rounded-xl bg-success-soft border border-border-success-subtle text-fg-success-strong flex items-start gap-3">
                 <i class="fa-solid fa-circle-check mt-1"></i>
                 <p class="text-[14px]">{{ session('success') }}</p>
@@ -118,7 +148,7 @@
             </div>
 
             <!-- SUBMIT FORM -->
-            <form action="{{ route('permohonan.submit', $permohonan->nomor_permohonan) }}" method="POST" class="pt-6 border-t border-border-default flex flex-col sm:flex-row justify-between items-center gap-4">
+            <form id="submitForm" action="{{ route('permohonan.submit', $permohonan->nomor_permohonan) }}" method="POST" class="pt-6 border-t border-border-default flex flex-col sm:flex-row justify-between items-center gap-4">
                 @csrf
                 <div class="text-center sm:text-left">
                     <p class="text-[14px] text-body font-medium">Nomor Registrasi Sementara: <strong class="font-mono text-brand">{{ $permohonan->nomor_permohonan }}</strong></p>
@@ -133,3 +163,24 @@
     </div>
 </section>
 @endsection
+
+@push('scripts')
+<script>
+function copyNomor() {
+    const element = document.getElementById('nomorRegistrasi');
+    if (!element) return;
+    const nomor = element.textContent.trim();
+    navigator.clipboard.writeText(nomor).then(() => {
+        const icon = document.getElementById('copyIcon');
+        if (icon) {
+            icon.classList.remove('fa-regular', 'fa-copy');
+            icon.classList.add('fa-solid', 'fa-check');
+            setTimeout(() => {
+                icon.classList.remove('fa-solid', 'fa-check');
+                icon.classList.add('fa-regular', 'fa-copy');
+            }, 2000);
+        }
+    });
+}
+</script>
+@endpush

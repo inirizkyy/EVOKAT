@@ -20,6 +20,14 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
+        // Pemeriksa User
+        \App\Models\User::factory()->create([
+            'name' => 'Pemeriksa',
+            'email' => 'pemeriksa@eadvokat.id',
+            'password' => Hash::make('password'),
+            'role' => 'pemeriksa',
+        ]);
+
         // Organisasi Advokat
         \App\Models\Organization::create([
             'nama_organisasi' => 'Persatuan Advokat Indonesia',
@@ -85,5 +93,21 @@ class DatabaseSeeder extends Seeder
             'pertanyaan' => 'Bagaimana cara mengajukan permohonan sumpah advokat?',
             'jawaban' => 'Silakan klik tombol Ajukan Permohonan pada halaman utama, lalu isi formulir dan unggah dokumen persyaratan yang diminta.',
         ]);
+
+        // Seed Courtrooms
+        $rooms = [
+            'Ruang Sidang Utama Pengadilan Tinggi Tanjungkarang',
+            'Aula Pengadilan Tinggi Tanjungkarang',
+        ];
+        foreach ($rooms as $room) {
+            \App\Models\Room::firstOrCreate(['name' => $room]);
+        }
+
+        $signatories = ['Administrator', 'Pemeriksa'];
+        foreach ($signatories as $sig) {
+            \App\Models\Signatory::firstOrCreate(['name' => $sig]);
+        }
+
+        $this->call(VerifikatorSeeder::class);
     }
 }

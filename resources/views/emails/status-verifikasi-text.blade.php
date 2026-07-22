@@ -10,7 +10,7 @@ Sehubungan dengan permohonan pengambilan Sumpah Advokat yang telah Saudara/i aju
 
 [{{ $permohonan->status }}]
 
-@if($permohonan->status === 'Verifikasi Berkas Fisik')
+@if($permohonan->tanggal_verifikasi_fisik)
 Berkas administrasi digital Anda telah diverifikasi. Selanjutnya, Anda diwajibkan untuk menyerahkan berkas fisik persyaratan asli guna pencocokan data pada jadwal berikut:
 - Hari/Tanggal Penyerahan: {{ $permohonan->hari_verifikasi_fisik ?? '-' }}, {{ $permohonan->tanggal_verifikasi_fisik ? \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->locale('id')->translatedFormat('d F Y') : '-' }}
 - Lokasi Penyerahan: PTSP Pengadilan Tinggi Tanjungkarang

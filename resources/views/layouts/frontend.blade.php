@@ -53,9 +53,7 @@
                     
                     <div class="h-6 w-px bg-border-default mx-2"></div>
                     
-                    <a href="https://esurvey.badilum.mahkamahagung.go.id/pengadilan/400364" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-[15px] font-medium bg-blue-50 text-blue-700 shadow-sm hover:shadow-md hover:bg-blue-100 active:shadow-inset transition-all border border-blue-200 mr-2">
-                        Survei Kepuasan
-                    </a>
+
                     <a href="{{ url('/tracking') }}" class="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-[15px] font-medium bg-neutral-primary-soft text-heading shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default mr-2">
                         Cek Status
                     </a>
@@ -88,9 +86,7 @@
                 <a href="{{ url('/kontak') }}" class="block px-4 py-3 rounded-base text-base font-medium {{ request()->is('kontak') ? 'text-brand bg-neutral-secondary-soft shadow-inset' : 'text-body hover:bg-neutral-secondary-soft' }}">Kontak</a>
                 
                 <div class="pt-4 mt-2 border-t border-border-default flex flex-col gap-3">
-                    <a href="https://esurvey.badilum.mahkamahagung.go.id/pengadilan/400364" target="_blank" rel="noopener noreferrer" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium bg-blue-50 text-blue-700 shadow-sm border border-blue-200/80">
-                        Survei Kepuasan
-                    </a>
+
                     <a href="{{ url('/tracking') }}" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-full text-base font-medium bg-neutral-primary-soft text-heading shadow-sm border border-border-default">
                         Cek Status
                     </a>
@@ -110,6 +106,7 @@
     </main>
 
     <!-- Footer -->
+    @if(!request()->is('/'))
     <footer class="mt-auto bg-neutral-primary border-t border-border-default pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
@@ -129,7 +126,7 @@
                 <!-- Lokasi Kantor -->
                 <div>
                     <h5 class="font-bold text-heading text-xl mb-6 relative inline-block">
-                        Lokasi Kantor
+                        Peta Lokasi
                         <span class="absolute bottom-[-8px] left-0 w-1/2 h-0.5 bg-brand rounded-full"></span>
                     </h5>
                     @php
@@ -211,8 +208,10 @@
             </div>
         </div>
     </footer>
+    @endif
 
     <x-chat-widget />
+
     @stack('scripts')
 </body>
 </html>

@@ -28,8 +28,15 @@
             <!-- Cari Organisasi -->
             <div>
                 <label class="block text-[13px] font-medium text-heading mb-1.5">Organisasi Advokat</label>
-                <input type="text" name="search_organisasi" value="{{ request('search_organisasi') }}" placeholder="Cari organisasi..."
-                       class="block w-full rounded-base border border-border-default-medium bg-white text-[13px] py-2 px-3 focus:outline-none focus:border-brand transition-all">
+                <select name="search_organisasi" class="block w-full rounded-base border border-border-default-medium bg-white text-[13px] py-2 px-3 focus:outline-none focus:border-brand transition-all">
+                    <option value="">-- Semua Organisasi --</option>
+                    @foreach(\App\Models\Organization::all() as $org)
+                        <option value="{{ $org->nama_organisasi }}" {{ request('search_organisasi') == $org->nama_organisasi ? 'selected' : '' }}>
+                            {{ $org->nama_organisasi }} @if($org->status === 'Menunggu Persetujuan') (Diajukan) @endif
+                        </option>
+                    @endforeach
+                    <option value="+ Diajukan" {{ request('search_organisasi') == '+ Diajukan' ? 'selected' : '' }}>+ Diajukan (Menunggu Persetujuan)</option>
+                </select>
             </div>
 
             <!-- Cari SK -->
@@ -125,10 +132,10 @@
                     <td class="px-6 py-4">
                         @if($pemohon && $pemohon->foto)
                             <a href="{{ asset('storage/' . $pemohon->foto) }}" target="_blank">
-                                <img src="{{ asset('storage/' . $pemohon->foto) }}" alt="Foto Pemohon" class="w-12 h-16 object-cover rounded shadow-sm border border-border-default hover:scale-105 transition-transform">
+                                <img src="{{ asset('storage/' . $pemohon->foto) }}" alt="Foto Pemohon" class="w-12 h-12 object-cover rounded shadow-sm border border-border-default hover:scale-105 transition-transform" style="width: 48px !important; height: 48px !important; min-width: 48px !important; min-height: 48px !important; max-width: 48px !important; max-height: 48px !important; object-fit: cover !important; aspect-ratio: 1/1 !important;">
                             </a>
                         @else
-                            <div class="w-12 h-16 bg-neutral-secondary-soft rounded border border-border-default flex items-center justify-center text-body-subtle">
+                            <div class="w-12 h-12 bg-neutral-secondary-soft rounded border border-border-default flex items-center justify-center text-body-subtle">
                                 <i class="fa-solid fa-user text-lg"></i>
                             </div>
                         @endif
@@ -152,8 +159,8 @@
 
                     <!-- SK Advokat -->
                     <td class="px-6 py-4 whitespace-normal">
-                        <div class="font-medium text-heading">No: {{ $pemohon->nomor_sk ?? '-' }}</div>
-                        <div class="text-[12px] text-body-subtle mt-1">Tgl: {{ $pemohon->tanggal_sk ? \Carbon\Carbon::parse($pemohon->tanggal_sk)->translatedFormat('d M Y') : '-' }}</div>
+                        <div class="font-medium text-heading">No: {{ $permohonan->nomor_sk ?? $pemohon->nomor_sk ?? '-' }}</div>
+                        <div class="text-[12px] text-body-subtle mt-1">Tgl: {{ ($permohonan->tanggal_sk ?? $pemohon->tanggal_sk) ? \Carbon\Carbon::parse($permohonan->tanggal_sk ?? $pemohon->tanggal_sk)->translatedFormat('d M Y') : '-' }}</div>
                     </td>
 
                     <!-- BAS & Sumpah -->
@@ -177,9 +184,15 @@
                                 <i class="fa-solid fa-eye text-xs"></i>
                             </a>
                             <!-- Edit Sumpah -->
-                            <a href="{{ route('admin.buku-registrasi.edit', $item->id) }}" title="Lengkapi Data Sumpah" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-warning shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
-                                <i class="fa-solid fa-pencil text-xs"></i>
-                            </a>
+                            @if($item->status_pemeriksa === 'Disetujui')
+                                <span title="Data Terkunci (Sudah Disetujui Pemeriksa)" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60">
+                                    <i class="fa-solid fa-lock text-xs"></i>
+                                </span>
+                            @else
+                                <a href="{{ route('admin.buku-registrasi.edit', $item->id) }}" title="Lengkapi Data Sumpah" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-warning shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                                    <i class="fa-solid fa-pencil text-xs"></i>
+                                </a>
+                            @endif
                             <!-- Print Card -->
                             <a href="{{ route('admin.buku-registrasi.print', $item->id) }}" target="_blank" title="Cetak Data" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-success shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
                                 <i class="fa-solid fa-print text-xs"></i>
