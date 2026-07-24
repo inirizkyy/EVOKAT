@@ -176,10 +176,14 @@
                                             </span>
                                         </div>
                                     @endif
-                                    <label for="dokumen_{{ $pasFotoPersyaratan->id }}" class="flex items-center justify-center w-full px-4 py-2.5 border-2 border-border-default-medium border-dashed bg-neutral-primary hover:bg-neutral-secondary-soft transition-colors hover:border-brand rounded-xl cursor-pointer">
+                                    <div id="preview-container-{{ $pasFotoPersyaratan->id }}" class="hidden mb-2 flex flex-col items-center justify-center p-2 bg-emerald-50/50 border border-emerald-300 rounded-xl">
+                                        <img id="preview-img-{{ $pasFotoPersyaratan->id }}" src="" alt="Pratinjau Foto" class="h-28 object-cover rounded shadow-sm mb-1">
+                                        <span class="text-[11px] font-bold text-emerald-700">Pratinjau Foto Baru</span>
+                                    </div>
+                                    <label id="dokumen-label-{{ $pasFotoPersyaratan->id }}" for="dokumen_{{ $pasFotoPersyaratan->id }}" class="flex items-center justify-center w-full px-4 py-2.5 border-2 border-border-default-medium border-dashed bg-neutral-primary hover:bg-neutral-secondary-soft transition-colors hover:border-brand rounded-xl cursor-pointer">
                                         <div class="flex items-center justify-center gap-2 w-full overflow-hidden">
                                             <i class="fa-solid fa-upload text-brand/70 text-base flex-shrink-0"></i>
-                                            <span id="dokumen-name-{{ $pasFotoPersyaratan->id }}" class="text-[13px] font-bold text-body hover:text-brand truncate w-full text-center transition-colors">
+                                            <span id="dokumen-name-{{ $pasFotoPersyaratan->id }}" class="text-[13px] font-bold text-heading hover:text-brand truncate w-full text-center transition-colors">
                                                 {{ $origPasFotoLabel }}
                                             </span>
                                         </div>
@@ -258,10 +262,10 @@
                                             <span class="truncate" title="{{ basename($tempDoc) }}">Tersimpan sementara: {{ basename($tempDoc) }}</span>
                                         </div>
                                     @endif
-                                    <label for="dokumen_{{ $p->id }}" class="flex items-center justify-center w-full px-4 py-3 border-2 border-border-default-medium border-dashed bg-neutral-primary hover:bg-neutral-secondary-soft transition-colors hover:border-brand group-hover:bg-white rounded-xl cursor-pointer">
+                                    <label id="dokumen-label-{{ $p->id }}" for="dokumen_{{ $p->id }}" class="flex items-center justify-center w-full px-4 py-3 border-2 border-border-default-medium border-dashed bg-neutral-primary hover:bg-neutral-secondary-soft transition-all hover:border-brand group-hover:bg-white rounded-xl cursor-pointer">
                                         <div class="flex items-center justify-center gap-2 w-full overflow-hidden">
                                             <i class="fa-solid fa-upload text-brand/70 text-lg flex-shrink-0"></i>
-                                            <span id="dokumen-name-{{ $p->id }}" class="text-[14px] font-bold text-body group-hover:text-brand truncate w-full text-center transition-colors">
+                                            <span id="dokumen-name-{{ $p->id }}" class="text-[14px] font-bold text-heading group-hover:text-brand truncate w-full text-center transition-colors">
                                                 {{ $origDocLabel }}
                                             </span>
                                         </div>
@@ -297,6 +301,91 @@
 <script>
     function showLoading() {
         showGlobalLoading('Mengunggah Berkas Dokumen...', 'Proses unggah file memerlukan waktu beberapa saat tergantung ukuran berkas.');
+    }
+
+    function validateFileSize(input, id) {
+        const errorDiv = document.getElementById('file-error-' + id);
+        const nameSpan = document.getElementById('dokumen-name-' + id);
+        const labelBox = document.getElementById('dokumen-label-' + id);
+        const previewContainer = document.getElementById('preview-container-' + id);
+        const previewImg = document.getElementById('preview-img-' + id);
+        const originalLabel = input.getAttribute('data-original-label') || 'Pilih File...';
+
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
+            errorDiv.innerHTML = '';
+        }
+
+        if (previewContainer) {
+            previewContainer.classList.add('hidden');
+        }
+
+        if (!input.files || input.files.length === 0) {
+            if (nameSpan) {
+                nameSpan.innerHTML = originalLabel;
+            }
+            if (labelBox) {
+                labelBox.classList.remove('border-emerald-500', 'bg-emerald-50/60');
+            }
+            return true;
+        }
+
+        const file = input.files[0];
+        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+
+        // Helper to format file size
+        let formattedSize = '';
+        if (file.size < 1024 * 1024) {
+            formattedSize = (file.size / 1024).toFixed(1) + ' KB';
+        } else {
+            formattedSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        // Validate File Size
+        if (file.size > maxSize) {
+            input.value = '';
+            if (nameSpan) nameSpan.innerHTML = originalLabel;
+            if (labelBox) labelBox.classList.remove('border-emerald-500', 'bg-emerald-50/60');
+            if (errorDiv) {
+                errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1.5 text-danger"></i> Ukuran berkas <strong>"${file.name}"</strong> (${formattedSize}) melebihi batas maksimum 2MB. Silakan pilih berkas yang lebih kecil.`;
+                errorDiv.classList.remove('hidden');
+            }
+            return false;
+        }
+
+        // Validate Extension / Mime
+        const accept = input.getAttribute('accept');
+        if (accept) {
+            const allowedExts = accept.split(',').map(ext => ext.trim().toLowerCase().replace('.', ''));
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            if (!allowedExts.includes(fileExt)) {
+                input.value = '';
+                if (nameSpan) nameSpan.innerHTML = originalLabel;
+                if (labelBox) labelBox.classList.remove('border-emerald-500', 'bg-emerald-50/60');
+                if (errorDiv) {
+                    errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1.5 text-danger"></i> Format berkas <strong>"${file.name}"</strong> tidak diizinkan. Gunakan format: <strong>${accept}</strong>`;
+                    errorDiv.classList.remove('hidden');
+                }
+                return false;
+            }
+        }
+
+        // Display Selected File Name & Size
+        if (nameSpan) {
+            nameSpan.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> <span class="text-emerald-800 font-bold">${file.name}</span> <span class="text-gray-500 font-normal text-xs">(${formattedSize})</span>`;
+        }
+
+        if (labelBox) {
+            labelBox.classList.add('border-emerald-500', 'bg-emerald-50/60');
+        }
+
+        // Live image preview if applicable
+        if (file.type.startsWith('image/') && previewContainer && previewImg) {
+            previewImg.src = URL.createObjectURL(file);
+            previewContainer.classList.remove('hidden');
+        }
+
+        return true;
     }
 </script>
 @endpush
