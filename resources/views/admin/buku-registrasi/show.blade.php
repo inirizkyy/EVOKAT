@@ -24,11 +24,11 @@
                 <span class="text-heading font-semibold text-brand-strong">{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</span>
             </div>
             <div>
-                <span class="block text-body-subtle font-medium">Nomor SK Organisasi</span>
+                <span class="block text-body-subtle font-medium">Nomor Surat Pengantar Organisasi </span>
                 <span class="text-heading font-semibold">{{ $permohonan->nomor_sk ?? '-' }}</span>
             </div>
             <div>
-                <span class="block text-body-subtle font-medium">Tanggal SK Organisasi</span>
+                <span class="block text-body-subtle font-medium">Tanggal Surat Pengantar</span>
                 <span class="text-heading font-semibold">{{ $permohonan->tanggal_sk ? \Carbon\Carbon::parse($permohonan->tanggal_sk)->translatedFormat('d F Y') : '-' }}</span>
             </div>
             <div>
@@ -130,9 +130,15 @@
                                             <i class="fa-solid fa-triangle-exclamation mr-1"></i>Belum Lengkap
                                         </span>
                                         @if($bukuReg)
-                                            <a href="{{ route('admin.buku-registrasi.edit', $bukuReg->id) }}" class="text-[12px] text-brand hover:underline font-semibold flex items-center gap-1">
-                                                <i class="fa-solid fa-pen-to-square"></i> Lengkapi Data Sumpah
-                                            </a>
+                                            @if($permohonan->status === 'Selesai')
+                                                <a href="{{ route('admin.buku-registrasi.edit', $bukuReg->id) }}" class="text-[12px] text-brand hover:underline font-semibold flex items-center gap-1">
+                                                    <i class="fa-solid fa-pen-to-square"></i> Lengkapi Data Sumpah
+                                                </a>
+                                            @else
+                                                <span title="Permohonan belum berstatus Selesai (Tidak dapat diisi)" class="text-[12px] text-gray-400 font-semibold flex items-center gap-1 cursor-not-allowed">
+                                                    <i class="fa-solid fa-lock"></i> Menunggu Status Selesai
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 @endif
@@ -151,15 +157,33 @@
                                             <span title="Data Terkunci (Sudah Disetujui Pemeriksa)" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60">
                                                 <i class="fa-solid fa-lock text-xs"></i>
                                             </span>
-                                        @else
+                                        @elseif($permohonan->status === 'Selesai')
                                             <a href="{{ route('admin.buku-registrasi.edit', $bukuReg->id) }}" title="Lengkapi Data Sumpah" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-warning shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
                                                 <i class="fa-solid fa-pencil text-xs"></i>
                                             </a>
+                                        @else
+                                            <button type="button" disabled title="Permohonan belum berstatus Selesai (Tidak dapat diisi)" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60">
+                                                <i class="fa-solid fa-lock text-xs"></i>
+                                            </button>
                                         @endif
                                         <!-- Print Card -->
                                         <a href="{{ route('admin.buku-registrasi.print', $bukuReg->id) }}" target="_blank" title="Cetak Data" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-success shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
                                             <i class="fa-solid fa-print text-xs"></i>
                                         </a>
+                                        <!-- Hapus Data -->
+                                        @if($bukuReg->status_pemeriksa === 'Disetujui')
+                                            <span title="Data Terkunci (Sudah Disetujui Pemeriksa)" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60">
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                            </span>
+                                        @else
+                                            <form action="{{ route('admin.buku-registrasi.destroy', $bukuReg->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data buku registrasi {{ addslashes($pemohon->nama_lengkap ?? '') }}?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" title="Hapus Data" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-danger hover:bg-danger hover:text-white shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                                                    <i class="fa-solid fa-trash text-xs"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 @else
                                     <span class="text-body-subtle italic text-xs">Belum Masuk Buku Registrasi</span>

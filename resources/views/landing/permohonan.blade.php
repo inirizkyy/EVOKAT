@@ -80,7 +80,9 @@
                 <p class="text-[15px] text-body-subtle mt-2">Masukkan informasi resmi Organisasi Advokat pengusung.</p>
             </div>
 
-            <form action="{{ url('/permohonan') }}" method="POST" id="permohonan-form" x-data="permohonanForm()" enctype="multipart/form-data">
+            <form action="{{ url('/permohonan') }}" method="POST" id="permohonan-form" x-data="permohonanForm()" enctype="multipart/form-data"
+                  data-loading-title="Menyimpan Data Organisasi &amp; Anggota..."
+                  data-loading-sub="Harap tunggu, Anda akan diarahkan ke halaman kelengkapan berkas.">
                 @csrf
                 
                 <!-- DATA ORGANISASI -->
@@ -95,6 +97,10 @@
                                     {{ $org->nama_organisasi }} @if($org->singkatan) ({{ $org->singkatan }}) @endif
                                 </option>
                             @endforeach
+                            @if(old('organization_id') && is_string(old('organization_id')) && str_starts_with(old('organization_id'), 'new:'))
+                                @php $oldProposedName = substr(old('organization_id'), 4); @endphp
+                                <option value="{{ old('organization_id') }}" selected>{{ $oldProposedName }} (Usulan Baru)</option>
+                            @endif
                             <option value="other" class="text-brand font-bold">+ Organisasi belum tersedia? Ajukan Penambahan</option>
                         </select>
                         @error('organization_id')
@@ -126,21 +132,78 @@
                         @error('perihal_surat_pengantar')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div class="group md:col-span-2">
-                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Upload Surat Pengantar Organisasi (PDF) <span class="text-fg-danger">*</span></label>
-                        <input type="file" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft text-[15px] text-heading py-3 px-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-brand/90" name="file_surat_pengantar" accept=".pdf" required>
-                        <p class="text-xs text-body-subtle mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">
+                            Upload Surat Pengantar Organisasi (PDF) <span class="text-fg-danger">*</span>
+                        </label>
+                        @php
+                            $tempSurat = session('temp_permohonan_files.file_surat_pengantar');
+                            $tempSuratPath = is_array($tempSurat) ? ($tempSurat['path'] ?? null) : $tempSurat;
+                            $tempSuratName = is_array($tempSurat) ? ($tempSurat['name'] ?? basename($tempSuratPath)) : basename($tempSuratPath);
+                            $hasTempSurat = $tempSuratPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($tempSuratPath);
+                        @endphp
+                        <label for="file_surat_pengantar" class="flex items-center gap-4 w-full p-2 rounded-2xl border border-border-default-medium bg-neutral-primary-soft hover:bg-neutral-secondary-soft transition-all cursor-pointer">
+                            <span class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-bold shadow-sm flex-shrink-0 hover:bg-brand/90 transition-all">
+                                Choose File
+                            </span>
+                            <span id="label_surat_pengantar" class="text-[14.5px] font-semibold text-heading truncate flex-grow">
+                                {{ $hasTempSurat ? $tempSuratName : 'No file chosen' }}
+                            </span>
+                            <input id="file_surat_pengantar" type="file" class="hidden" name="file_surat_pengantar" accept=".pdf" {{ $hasTempSurat ? '' : 'required' }} onchange="document.getElementById('label_surat_pengantar').textContent = this.files[0] ? this.files[0].name : '{{ $hasTempSurat ? addslashes($tempSuratName) : "No file chosen" }}'">
+                        </label>
+                        @if($hasTempSurat)
+                            <input type="hidden" name="has_temp_file_surat_pengantar" value="1">
+                        @endif
+                        <p class="text-xs text-fg-danger font-medium mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
                         @error('file_surat_pengantar')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div class="group">
-                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Upload SK Pendirian Advokat (PDF) <span class="text-fg-danger">*</span></label>
-                        <input type="file" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft text-[15px] text-heading py-3 px-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-brand/90" name="file_sk_pendirian" accept=".pdf" required>
-                        <p class="text-xs text-body-subtle mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">
+                            Upload SK Pendirian Advokat (PDF) <span class="text-fg-danger">*</span>
+                        </label>
+                        @php
+                            $tempPendirian = session('temp_permohonan_files.file_sk_pendirian');
+                            $tempPendirianPath = is_array($tempPendirian) ? ($tempPendirian['path'] ?? null) : $tempPendirian;
+                            $tempPendirianName = is_array($tempPendirian) ? ($tempPendirian['name'] ?? basename($tempPendirianPath)) : basename($tempPendirianPath);
+                            $hasTempPendirian = $tempPendirianPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($tempPendirianPath);
+                        @endphp
+                        <label for="file_sk_pendirian" class="flex items-center gap-4 w-full p-2 rounded-2xl border border-border-default-medium bg-neutral-primary-soft hover:bg-neutral-secondary-soft transition-all cursor-pointer">
+                            <span class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-bold shadow-sm flex-shrink-0 hover:bg-brand/90 transition-all">
+                                Choose File
+                            </span>
+                            <span id="label_sk_pendirian" class="text-[14.5px] font-semibold text-heading truncate flex-grow">
+                                {{ $hasTempPendirian ? $tempPendirianName : 'No file chosen' }}
+                            </span>
+                            <input id="file_sk_pendirian" type="file" class="hidden" name="file_sk_pendirian" accept=".pdf" {{ $hasTempPendirian ? '' : 'required' }} onchange="document.getElementById('label_sk_pendirian').textContent = this.files[0] ? this.files[0].name : '{{ $hasTempPendirian ? addslashes($tempPendirianName) : "No file chosen" }}'">
+                        </label>
+                        @if($hasTempPendirian)
+                            <input type="hidden" name="has_temp_file_sk_pendirian" value="1">
+                        @endif
+                        <p class="text-xs text-fg-danger font-medium mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
                         @error('file_sk_pendirian')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div class="group">
-                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">Upload SK Kepengurusan Advokat (PDF) <span class="text-fg-danger">*</span></label>
-                        <input type="file" class="block w-full rounded-xl border border-border-default-medium bg-neutral-primary-soft text-[15px] text-heading py-3 px-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-brand/90" name="file_sk_kepengurusan" accept=".pdf" required>
-                        <p class="text-xs text-body-subtle mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
+                        <label class="block text-[15px] font-bold text-heading mb-3 group-focus-within:text-brand transition-colors">
+                            Upload SK Kepengurusan Advokat (PDF) <span class="text-fg-danger">*</span>
+                        </label>
+                        @php
+                            $tempKepengurusan = session('temp_permohonan_files.file_sk_kepengurusan');
+                            $tempKepengurusanPath = is_array($tempKepengurusan) ? ($tempKepengurusan['path'] ?? null) : $tempKepengurusan;
+                            $tempKepengurusanName = is_array($tempKepengurusan) ? ($tempKepengurusan['name'] ?? basename($tempKepengurusanPath)) : basename($tempKepengurusanPath);
+                            $hasTempKepengurusan = $tempKepengurusanPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($tempKepengurusanPath);
+                        @endphp
+                        <label for="file_sk_kepengurusan" class="flex items-center gap-4 w-full p-2 rounded-2xl border border-border-default-medium bg-neutral-primary-soft hover:bg-neutral-secondary-soft transition-all cursor-pointer">
+                            <span class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-bold shadow-sm flex-shrink-0 hover:bg-brand/90 transition-all">
+                                Choose File
+                            </span>
+                            <span id="label_sk_kepengurusan" class="text-[14.5px] font-semibold text-heading truncate flex-grow">
+                                {{ $hasTempKepengurusan ? $tempKepengurusanName : 'No file chosen' }}
+                            </span>
+                            <input id="file_sk_kepengurusan" type="file" class="hidden" name="file_sk_kepengurusan" accept=".pdf" {{ $hasTempKepengurusan ? '' : 'required' }} onchange="document.getElementById('label_sk_kepengurusan').textContent = this.files[0] ? this.files[0].name : '{{ $hasTempKepengurusan ? addslashes($tempKepengurusanName) : "No file chosen" }}'">
+                        </label>
+                        @if($hasTempKepengurusan)
+                            <input type="hidden" name="has_temp_file_sk_kepengurusan" value="1">
+                        @endif
+                        <p class="text-xs text-fg-danger font-medium mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>Format: PDF, maks. 2MB</p>
                         @error('file_sk_kepengurusan')<div class="text-xs text-fg-danger mt-1">{{ $message }}</div>@enderror
                     </div>
                 </div>
@@ -232,44 +295,30 @@
             show: false, 
             proposeName: '', 
             proposeError: '', 
-            proposeLoading: false,
-            async submitProposal() {
+            submitProposal() {
                 if (!this.proposeName.trim()) {
                     this.proposeError = 'Nama organisasi wajib diisi.';
                     return;
                 }
-                this.proposeLoading = true;
-                this.proposeError = '';
-                try {
-                    const response = await fetch('{{ route("organisasi.propose") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ nama_organisasi: this.proposeName })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        const select = document.getElementById('orgSelect');
-                        const opt = document.createElement('option');
-                        opt.value = data.id;
-                        opt.textContent = data.nama_organisasi + ' (Usulan)';
-                        
-                        select.insertBefore(opt, select.lastElementChild);
-                        select.value = data.id;
-                        
-                        this.show = false;
-                        this.proposeName = '';
-                        alert('Pengajuan organisasi berhasil dikirim! Menunggu persetujuan admin.');
-                    } else {
-                        this.proposeError = data.message || 'Gagal mengajukan organisasi.';
-                    }
-                } catch (e) {
-                    this.proposeError = 'Terjadi kesalahan koneksi internet atau organisasi sudah diajukan.';
-                } finally {
-                    this.proposeLoading = false;
+                const name = this.proposeName.trim();
+                const newValue = 'new:' + name;
+                const select = document.getElementById('orgSelect');
+                
+                let existingOpt = Array.from(select.options).find(opt => opt.value.toLowerCase() === newValue.toLowerCase() || opt.text.toLowerCase().startsWith(name.toLowerCase()));
+                
+                if (existingOpt) {
+                    select.value = existingOpt.value;
+                } else {
+                    const opt = document.createElement('option');
+                    opt.value = newValue;
+                    opt.textContent = name + ' (Usulan Baru)';
+                    select.insertBefore(opt, select.lastElementChild);
+                    select.value = newValue;
                 }
+                
+                this.show = false;
+                this.proposeName = '';
+                this.proposeError = '';
             }
          }"
          x-show="show"
@@ -294,8 +343,12 @@
                 <div>
                     <label class="block text-[13px] font-medium text-heading mb-1.5">Nama Organisasi <span class="text-fg-danger">*</span></label>
                     <input type="text" x-model="proposeName" 
+                           @keydown.enter.prevent="submitProposal()"
                            class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2.5 px-3.5 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                           placeholder="Contoh: PERADI Perjuangan">
+                           placeholder="Contoh: Perhimpunan Advokat Indonesia (PERADI)">
+                    <p class="text-[12px] text-fg-danger font-medium mt-1.5 leading-normal">
+                        <i class="fa-solid fa-circle-info text-fg-danger mr-1"></i>Format penulisan: <strong>Nama Organisasi (Nama Singkatan Organisasi)</strong>
+                    </p>
                 </div>
                 <div x-show="proposeError" class="text-xs text-fg-danger font-medium" x-text="proposeError"></div>
             </div>
@@ -305,11 +358,8 @@
                         class="px-4 py-2 rounded-base text-sm font-medium border border-border-default text-body hover:bg-neutral-secondary-soft transition-all">
                     Batal
                 </button>
-                <button type="button" @click="submitProposal()" :disabled="proposeLoading"
-                        class="inline-flex items-center px-4 py-2 rounded-base text-sm font-bold bg-brand text-white border border-brand hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                    <template x-if="proposeLoading">
-                        <i class="fa-solid fa-spinner fa-spin mr-2"></i>
-                    </template>
+                <button type="button" @click="submitProposal()"
+                        class="inline-flex items-center px-4 py-2 rounded-base text-sm font-bold bg-brand text-white border border-brand hover:opacity-95 transition-all">
                     Ajukan
                 </button>
             </div>

@@ -80,8 +80,10 @@
                 </div>
             </div>
 
-            <!-- UPLOAD FORM -->
-            <form action="{{ route('permohonan.store-dokumen-upload', [$permohonan->nomor_permohonan, $pemohon->id]) }}" method="POST" enctype="multipart/form-data" id="upload-form" onsubmit="showLoading()">
+            <form action="{{ route('permohonan.store-dokumen-upload', [$permohonan->nomor_permohonan, $pemohon->id]) }}" method="POST" enctype="multipart/form-data" id="upload-form"
+                  data-loading-title="Mengunggah Berkas Dokumen..."
+                  data-loading-sub="Proses unggah file memerlukan waktu beberapa saat tergantung ukuran berkas."
+                  onsubmit="showLoading()">
                 @csrf
 
                 <!-- Member Profil Card -->
@@ -160,14 +162,28 @@
                                 @endif
 
                                 @if(!$isValid)
+                                    @php
+                                        $tempPasFoto = session("temp_dokumen_upload.{$pemohon->id}.{$pasFotoPersyaratan->id}");
+                                        $hasTempPasFoto = $tempPasFoto && \Illuminate\Support\Facades\Storage::disk('public')->exists($tempPasFoto);
+                                        $origPasFotoLabel = $hasTempPasFoto ? 'Ganti Foto (Tersimpan)...' : ($uploaded ? 'Ganti Foto...' : 'Unggah Foto...');
+                                    @endphp
+                                    <div id="file-error-{{ $pasFotoPersyaratan->id }}" class="hidden mb-2 p-2.5 rounded-lg bg-danger-soft border border-border-danger-subtle text-[12px] text-fg-danger-strong font-medium"></div>
+                                    @if($hasTempPasFoto)
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-success-soft border border-border-success-subtle mb-2">
+                                            <i class="fa-solid fa-file-circle-check text-fg-success-strong text-sm"></i>
+                                            <span class="text-[12px] font-bold text-fg-success-strong truncate" title="{{ basename($tempPasFoto) }}">
+                                                Tersimpan sementara: {{ basename($tempPasFoto) }}
+                                            </span>
+                                        </div>
+                                    @endif
                                     <label for="dokumen_{{ $pasFotoPersyaratan->id }}" class="flex items-center justify-center w-full px-4 py-2.5 border-2 border-border-default-medium border-dashed bg-neutral-primary hover:bg-neutral-secondary-soft transition-colors hover:border-brand rounded-xl cursor-pointer">
                                         <div class="flex items-center justify-center gap-2 w-full overflow-hidden">
                                             <i class="fa-solid fa-upload text-brand/70 text-base flex-shrink-0"></i>
                                             <span id="dokumen-name-{{ $pasFotoPersyaratan->id }}" class="text-[13px] font-bold text-body hover:text-brand truncate w-full text-center transition-colors">
-                                                {{ $uploaded ? "Ganti Foto..." : "Unggah Foto..." }}
+                                                {{ $origPasFotoLabel }}
                                             </span>
                                         </div>
-                                        <input id="dokumen_{{ $pasFotoPersyaratan->id }}" type="file" class="hidden" name="dokumen[{{ $pasFotoPersyaratan->id }}]" {{ ($pasFotoPersyaratan->is_required && !$uploaded) ? 'required' : '' }} accept=".jpg,.jpeg,.png" onchange="document.getElementById('dokumen-name-{{ $pasFotoPersyaratan->id }}').textContent = this.files[0] ? this.files[0].name : '{{ $uploaded ? "Ganti Foto..." : "Unggah Foto..." }}'">
+                                        <input id="dokumen_{{ $pasFotoPersyaratan->id }}" type="file" class="hidden" name="dokumen[{{ $pasFotoPersyaratan->id }}]" {{ ($pasFotoPersyaratan->is_required && !$uploaded && !$hasTempPasFoto) ? 'required' : '' }} accept=".jpg,.jpeg,.png" data-original-label="{{ $origPasFotoLabel }}" onchange="validateFileSize(this, {{ $pasFotoPersyaratan->id }})">
                                     </label>
                                 @endif
                             </div>
@@ -231,15 +247,25 @@
                                         $isPasFoto = (strpos(strtolower($p->nama_persyaratan), 'pas foto') !== false);
                                         $acceptMime = $isPasFoto ? '.jpg,.jpeg,.png' : '.pdf';
                                         $fileLabel = $isPasFoto ? 'JPG, JPEG, PNG' : 'PDF';
+                                        $tempDoc = session("temp_dokumen_upload.{$pemohon->id}.{$p->id}");
+                                        $hasTempDoc = $tempDoc && \Illuminate\Support\Facades\Storage::disk('public')->exists($tempDoc);
+                                        $origDocLabel = $hasTempDoc ? "Ganti File (Tersimpan {$fileLabel})..." : ($uploaded ? "Ganti File ({$fileLabel})..." : "Pilih File ({$fileLabel})...");
                                     @endphp
+                                    <div id="file-error-{{ $p->id }}" class="hidden mb-2 p-2.5 rounded-lg bg-danger-soft border border-border-danger-subtle text-[12px] text-fg-danger-strong font-medium"></div>
+                                    @if($hasTempDoc)
+                                        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-success-soft border border-border-success-subtle text-[12.5px] font-bold text-fg-success-strong mb-2">
+                                            <i class="fa-solid fa-file-circle-check text-base"></i>
+                                            <span class="truncate" title="{{ basename($tempDoc) }}">Tersimpan sementara: {{ basename($tempDoc) }}</span>
+                                        </div>
+                                    @endif
                                     <label for="dokumen_{{ $p->id }}" class="flex items-center justify-center w-full px-4 py-3 border-2 border-border-default-medium border-dashed bg-neutral-primary hover:bg-neutral-secondary-soft transition-colors hover:border-brand group-hover:bg-white rounded-xl cursor-pointer">
                                         <div class="flex items-center justify-center gap-2 w-full overflow-hidden">
                                             <i class="fa-solid fa-upload text-brand/70 text-lg flex-shrink-0"></i>
                                             <span id="dokumen-name-{{ $p->id }}" class="text-[14px] font-bold text-body group-hover:text-brand truncate w-full text-center transition-colors">
-                                                {{ $uploaded ? "Ganti File ({$fileLabel})..." : "Pilih File ({$fileLabel})..." }}
+                                                {{ $origDocLabel }}
                                             </span>
                                         </div>
-                                        <input id="dokumen_{{ $p->id }}" type="file" class="hidden" name="dokumen[{{ $p->id }}]" {{ ($p->is_required && !$uploaded) ? 'required' : '' }} accept="{{ $acceptMime }}" onchange="document.getElementById('dokumen-name-{{ $p->id }}').textContent = this.files[0] ? this.files[0].name : '{{ $uploaded ? "Ganti File ({$fileLabel})..." : "Pilih File ({$fileLabel})..." }}'">
+                                        <input id="dokumen_{{ $p->id }}" type="file" class="hidden" name="dokumen[{{ $p->id }}]" {{ ($p->is_required && !$uploaded && !$hasTempDoc) ? 'required' : '' }} accept="{{ $acceptMime }}" data-original-label="{{ $origDocLabel }}" onchange="validateFileSize(this, {{ $p->id }})">
                                     </label>
                                 @endif
                             </div>
@@ -270,7 +296,7 @@
 @push('scripts')
 <script>
     function showLoading() {
-        document.getElementById('loading-overlay').classList.remove('hidden');
+        showGlobalLoading('Mengunggah Berkas Dokumen...', 'Proses unggah file memerlukan waktu beberapa saat tergantung ukuran berkas.');
     }
 </script>
 @endpush

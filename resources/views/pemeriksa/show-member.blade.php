@@ -96,12 +96,12 @@
                 </div>
                 <div class="sm:col-span-2">
                     @php
-                        $saksiArray = explode(';', $reg->saksi);
+                        $saksiArray = explode(';', $reg->saksi ?? '');
                     @endphp
                     <span class="block text-body-subtle font-medium">Saksi-saksi</span>
-                    <span class="text-heading font-semibold">
-                        1. {{ $saksiArray[0] ?? '-' }}<br>
-                        2. {{ $saksiArray[1] ?? '-' }}
+                    <span class="text-heading font-semibold block mt-0.5">
+                        1. {{ trim($saksiArray[0] ?? '-') }}<br>
+                        2. {{ trim($saksiArray[1] ?? '-') }}
                     </span>
                 </div>
                 <div>

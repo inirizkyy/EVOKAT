@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Berita;
 use App\Models\Faq;
 use App\Models\Permohonan;
@@ -61,6 +62,18 @@ class FrontendController extends Controller
 
     public function permohonan()
     {
+        // Hanya bersihkan temp files jika buka halaman baru (bukan redirect dari validation error)
+        if (!session()->has('errors') && !session()->has('error') && !old('_token') && session()->has('temp_permohonan_files')) {
+            $tempFiles = session('temp_permohonan_files', []);
+            foreach ($tempFiles as $fileData) {
+                $path = is_array($fileData) ? ($fileData['path'] ?? null) : $fileData;
+                if ($path && Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+            session()->forget('temp_permohonan_files');
+        }
+
         $organisasi = Organization::where('status', 'Aktif')->get();
         $persyaratan = MasterPersyaratan::all();
         return view('landing.permohonan', compact('organisasi', 'persyaratan'));
@@ -68,8 +81,53 @@ class FrontendController extends Controller
 
     public function storePermohonan(Request $request, PermohonanService $service)
     {
+        // Simpan file ke temp storage SEBELUM validasi agar tidak hilang saat error
+        $tempFiles = session('temp_permohonan_files', []);
+
+        $fileFields = ['file_surat_pengantar', 'file_sk_pendirian', 'file_sk_kepengurusan'];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field) && $request->file($field)->isValid()) {
+                // Hapus file temp lama jika ada
+                $oldPath = is_array($tempFiles[$field] ?? null) ? ($tempFiles[$field]['path'] ?? null) : ($tempFiles[$field] ?? null);
+                if (!empty($oldPath) && Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+                $storedPath = $request->file($field)->store('permohonan/temp', 'public');
+                $tempFiles[$field] = [
+                    'path' => $storedPath,
+                    'name' => $request->file($field)->getClientOriginalName(),
+                ];
+            }
+        }
+        session(['temp_permohonan_files' => $tempFiles]);
+        session()->save();
+
+        $tempSuratPath = is_array($tempFiles['file_surat_pengantar'] ?? null) ? ($tempFiles['file_surat_pengantar']['path'] ?? null) : ($tempFiles['file_surat_pengantar'] ?? null);
+        $tempPendirianPath = is_array($tempFiles['file_sk_pendirian'] ?? null) ? ($tempFiles['file_sk_pendirian']['path'] ?? null) : ($tempFiles['file_sk_pendirian'] ?? null);
+        $tempKepengurusanPath = is_array($tempFiles['file_sk_kepengurusan'] ?? null) ? ($tempFiles['file_sk_kepengurusan']['path'] ?? null) : ($tempFiles['file_sk_kepengurusan'] ?? null);
+
+        $hasTempSurat = !empty($tempSuratPath) && Storage::disk('public')->exists($tempSuratPath);
+        $hasTempPendirian = !empty($tempPendirianPath) && Storage::disk('public')->exists($tempPendirianPath);
+        $hasTempKepengurusan = !empty($tempKepengurusanPath) && Storage::disk('public')->exists($tempKepengurusanPath);
+
         $request->validate([
-            'organization_id' => 'required|exists:organizations,id',
+            'organization_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (is_numeric($value)) {
+                        if (!Organization::where('id', $value)->whereNull('deleted_at')->exists()) {
+                            $fail('Organisasi yang dipilih tidak valid.');
+                        }
+                    } elseif (is_string($value) && str_starts_with($value, 'new:')) {
+                        $name = trim(substr($value, 4));
+                        if (empty($name) || strlen($name) > 255) {
+                            $fail('Nama usulan organisasi tidak boleh kosong dan maksimal 255 karakter.');
+                        }
+                    } else {
+                        $fail('Pilihan organisasi tidak valid.');
+                    }
+                }
+            ],
             'nomor_sk' => 'nullable|string|max:255',
             'nomor_sk_kepengurusan' => 'nullable|string|max:255',
             'tanggal_sk' => 'nullable|date',
@@ -78,9 +136,9 @@ class FrontendController extends Controller
             'nomor_surat_pengantar' => 'required|string|max:255',
             'tanggal_surat_pengantar' => 'required|date',
             'perihal_surat_pengantar' => 'required|string|max:500',
-            'file_surat_pengantar' => 'required|file|mimes:pdf|max:2048',
-            'file_sk_pendirian' => 'required|file|mimes:pdf|max:2048',
-            'file_sk_kepengurusan' => 'required|file|mimes:pdf|max:2048',
+            'file_surat_pengantar' => ($hasTempSurat ? 'nullable' : 'required') . '|file|mimes:pdf|max:2048',
+            'file_sk_pendirian' => ($hasTempPendirian ? 'nullable' : 'required') . '|file|mimes:pdf|max:2048',
+            'file_sk_kepengurusan' => ($hasTempKepengurusan ? 'nullable' : 'required') . '|file|mimes:pdf|max:2048',
             'members' => 'required|array|min:1',
             'members.*.nik' => 'required|numeric|digits:16|distinct|unique:pemohons,nik',
             'members.*.nama_lengkap' => 'required|string|max:255',
@@ -97,18 +155,61 @@ class FrontendController extends Controller
             'members.*.email.unique' => 'Email :input sudah terdaftar di sistem.',
         ]);
 
+        // Inisialisasi variabel file path sebelum DB transaction & try block
+        $pathSuratPengantar = null;
+        $pathSkPendirian = null;
+        $pathSkKepengurusan = null;
+
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
+            // Resolusi Organization ID (Buat baru atau gunakan yang ada secara case-insensitive)
+            $orgInput = $request->organization_id;
+            $finalOrganizationId = null;
+
+            if (is_numeric($orgInput)) {
+                $finalOrganizationId = (int)$orgInput;
+            } elseif (is_string($orgInput) && str_starts_with($orgInput, 'new:')) {
+                $proposedName = trim(substr($orgInput, 4));
+
+                $existingOrg = Organization::whereRaw('LOWER(nama_organisasi) = ?', [strtolower($proposedName)])
+                    ->whereNull('deleted_at')
+                    ->first();
+
+                if ($existingOrg) {
+                    $finalOrganizationId = $existingOrg->id;
+                } else {
+                    $newOrg = Organization::create([
+                        'nama_organisasi' => $proposedName,
+                        'status' => 'Menunggu Persetujuan',
+                    ]);
+                    $finalOrganizationId = $newOrg->id;
+                }
+            }
+
             $permohonanRepo = app(\App\Repositories\Interfaces\PermohonanRepositoryInterface::class);
             $nomorPermohonan = $permohonanRepo->generateNomorRegistrasi();
- 
-            // Store uploaded files
-            $pathSuratPengantar = $request->file('file_surat_pengantar')->store('permohonan/surat_pengantar', 'public');
-            $pathSkPendirian    = $request->file('file_sk_pendirian')->store('permohonan/sk_pendirian', 'public');
-            $pathSkKepengurusan = $request->file('file_sk_kepengurusan')->store('permohonan/sk_kepengurusan', 'public');
+
+            // Store / move uploaded files from temp
+            if (!empty($tempSuratPath) && Storage::disk('public')->exists($tempSuratPath)) {
+                $target = 'permohonan/surat_pengantar/' . basename($tempSuratPath);
+                Storage::disk('public')->move($tempSuratPath, $target);
+                $pathSuratPengantar = $target;
+            }
+
+            if (!empty($tempPendirianPath) && Storage::disk('public')->exists($tempPendirianPath)) {
+                $target = 'permohonan/sk_pendirian/' . basename($tempPendirianPath);
+                Storage::disk('public')->move($tempPendirianPath, $target);
+                $pathSkPendirian = $target;
+            }
+
+            if (!empty($tempKepengurusanPath) && Storage::disk('public')->exists($tempKepengurusanPath)) {
+                $target = 'permohonan/sk_kepengurusan/' . basename($tempKepengurusanPath);
+                Storage::disk('public')->move($tempKepengurusanPath, $target);
+                $pathSkKepengurusan = $target;
+            }
 
             $permohonan = Permohonan::create([
-                'organization_id' => $request->organization_id,
+                'organization_id' => $finalOrganizationId,
                 'nomor_sk' => $request->nomor_sk ?? $request->nomor_surat_pengantar,
                 'nomor_sk_kepengurusan' => $request->nomor_sk_kepengurusan,
                 'tanggal_sk' => $request->tanggal_sk ?? $request->tanggal_surat_pengantar,
@@ -124,11 +225,11 @@ class FrontendController extends Controller
                 'tanggal_pengajuan' => date('Y-m-d'),
                 'status' => 'Draft',
             ]);
- 
+
             foreach ($request->members as $memberData) {
                 $pemohon = \App\Models\Pemohon::create([
                     'permohonan_id' => $permohonan->id,
-                    'organization_id' => $request->organization_id,
+                    'organization_id' => $finalOrganizationId,
                     'nik' => $memberData['nik'],
                     'nama_lengkap' => $memberData['nama_lengkap'],
                     'tempat_lahir' => $memberData['tempat_lahir'],
@@ -143,8 +244,11 @@ class FrontendController extends Controller
                     'permohonan_id' => $permohonan->id,
                 ]);
             }
- 
+
             \Illuminate\Support\Facades\DB::commit();
+
+            // Clear temp session after success
+            session()->forget('temp_permohonan_files');
 
             try {
                 $permohonan->load('organisasi');
@@ -160,6 +264,30 @@ class FrontendController extends Controller
                 ->with('email_terkirim', $permohonan->email_organisasi);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
+
+            // Hapus / kembalikan file yang terlanjur dipindahkan jika transaksi gagal
+            if (!empty($pathSuratPengantar) && Storage::disk('public')->exists($pathSuratPengantar)) {
+                if (!empty($tempSuratPath)) {
+                    Storage::disk('public')->move($pathSuratPengantar, $tempSuratPath);
+                } else {
+                    Storage::disk('public')->delete($pathSuratPengantar);
+                }
+            }
+            if (!empty($pathSkPendirian) && Storage::disk('public')->exists($pathSkPendirian)) {
+                if (!empty($tempPendirianPath)) {
+                    Storage::disk('public')->move($pathSkPendirian, $tempPendirianPath);
+                } else {
+                    Storage::disk('public')->delete($pathSkPendirian);
+                }
+            }
+            if (!empty($pathSkKepengurusan) && Storage::disk('public')->exists($pathSkKepengurusan)) {
+                if (!empty($tempKepengurusanPath)) {
+                    Storage::disk('public')->move($pathSkKepengurusan, $tempKepengurusanPath);
+                } else {
+                    Storage::disk('public')->delete($pathSkKepengurusan);
+                }
+            }
+
             return back()->with('error', 'Gagal mendaftarkan permohonan: ' . $e->getMessage())->withInput();
         }
     }
@@ -238,38 +366,63 @@ class FrontendController extends Controller
         $permohonan = Permohonan::where('nomor_permohonan', $nomor_permohonan)->firstOrFail();
         $pemohon = \App\Models\Pemohon::where('id', $pemohon_id)->where('permohonan_id', $permohonan->id)->firstOrFail();
 
+        $sessionKey = "temp_dokumen_upload.{$pemohon_id}";
+        $tempDokumen = session($sessionKey, []);
+
+        if ($request->hasFile('dokumen')) {
+            foreach ($request->file('dokumen') as $persyaratanId => $file) {
+                if ($file && $file->isValid()) {
+                    if (!empty($tempDokumen[$persyaratanId]) && Storage::disk('public')->exists($tempDokumen[$persyaratanId])) {
+                        Storage::disk('public')->delete($tempDokumen[$persyaratanId]);
+                    }
+                    $tempDokumen[$persyaratanId] = $file->store('permohonan/temp_dokumen/' . $nomor_permohonan . '/' . $pemohon_id, 'public');
+                }
+            }
+        }
+        session([$sessionKey => $tempDokumen]);
+        session()->save();
+
         $rules = [];
+        $messages = [
+            'dokumen.*.max'   => 'Ukuran file untuk :attribute melebihi batas maksimum 2MB.',
+            'dokumen.*.mimes' => 'Format file :attribute tidak valid. Gunakan PDF untuk dokumen, atau JPG/PNG untuk pas foto.',
+        ];
+        $attributes = [];
+
         $persyaratan = MasterPersyaratan::all();
         foreach ($persyaratan as $p) {
-            $exists = $pemohon->dokumenPersyaratan()->where('persyaratan_id', $p->id)->exists();
+            $existsInDb = $pemohon->dokumenPersyaratan()->where('persyaratan_id', $p->id)->exists();
+            $hasTemp = !empty($tempDokumen[$p->id]) && Storage::disk('public')->exists($tempDokumen[$p->id]);
             $isPasFoto = (strpos(strtolower($p->nama_persyaratan), 'pas foto') !== false);
             $mimes = $isPasFoto ? 'jpg,jpeg,png' : 'pdf';
             
-            if ($p->is_required && !$exists) {
+            $attributes["dokumen.{$p->id}"] = '"' . $p->nama_persyaratan . '"';
+
+            if ($p->is_required && !$existsInDb && !$hasTemp) {
                 $rules["dokumen.{$p->id}"] = "required|file|mimes:{$mimes}|max:2048";
             } else {
                 $rules["dokumen.{$p->id}"] = "nullable|file|mimes:{$mimes}|max:2048";
             }
         }
 
-        $request->validate($rules);
+        $request->validate($rules, $messages, $attributes);
 
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            $dokumenData = $request->file('dokumen');
-            if ($dokumenData) {
-                foreach ($dokumenData as $persyaratanId => $file) {
-                    if (!$file) continue;
+            if (!empty($tempDokumen)) {
+                foreach ($tempDokumen as $persyaratanId => $tempPath) {
+                    if (!Storage::disk('public')->exists($tempPath)) continue;
 
                     $oldDokumen = \App\Models\DokumenPersyaratan::where('pemohon_id', $pemohon->id)
                         ->where('persyaratan_id', $persyaratanId)
                         ->first();
 
-                    if ($oldDokumen && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldDokumen->file_path)) {
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($oldDokumen->file_path);
+                    if ($oldDokumen && Storage::disk('public')->exists($oldDokumen->file_path)) {
+                        Storage::disk('public')->delete($oldDokumen->file_path);
                     }
 
-                    $path = $file->store('permohonan/dokumen/' . $nomor_permohonan . '/' . $pemohon->id, 'public');
+                    $finalPath = 'permohonan/dokumen/' . $nomor_permohonan . '/' . $pemohon->id . '/' . basename($tempPath);
+                    Storage::disk('public')->move($tempPath, $finalPath);
 
                     \App\Models\DokumenPersyaratan::updateOrCreate(
                         [
@@ -278,7 +431,7 @@ class FrontendController extends Controller
                         ],
                         [
                             'permohonan_id' => $permohonan->id,
-                            'file_path' => $path,
+                            'file_path' => $finalPath,
                             'status_dokumen' => 'Pending',
                             'keterangan' => null,
                         ]
@@ -307,6 +460,8 @@ class FrontendController extends Controller
             }
 
             \Illuminate\Support\Facades\DB::commit();
+
+            session()->forget($sessionKey);
 
             if ($permohonan->status !== 'Draft') {
                 return redirect('/tracking')

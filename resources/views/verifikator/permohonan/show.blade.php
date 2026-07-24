@@ -324,7 +324,7 @@ class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <p class="text-xs text-body leading-relaxed font-semibold">Tinjau seluruh dokumen di sebelah kiri. Berikan keputusan verifikasi untuk permohonan ini.</p>
                 
                 <div class="space-y-4">
-                    <form id="verifikasiForm" :action="actionUrl" method="POST" class="space-y-4">
+                    <form id="verifikasiForm" :action="actionUrl" method="POST" class="space-y-4" onsubmit="handleVerifikasiSubmit(event, this)">
                         @csrf
                         <input type="hidden" name="catatan" :value="notes">
                         
@@ -356,7 +356,7 @@ class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                                 <span class="flex items-center font-bold" style="color: #ffffff !important;"><i class="fa-solid fa-circle-check mr-2"></i> Setujui Permohonan</span>
                             </template>
                             <template x-if="decision === 'tidak_valid'">
-                                <span class="flex items-center font-bold" style="color: #ffffff !important;"><i class="fa-solid fa-circle-xmark mr-2"></i> Tandai Dokumen Tidak Valid</span>
+                                <span class="flex items-center font-bold" style="color: #ffffff !important;"><i class="fa-solid fa-circle-xmark mr-2"></i> Tolak Permohonan</span>
                             </template>
                             <template x-if="!decision">
                                 <span class="font-semibold" style="color: #6b7280 !important;">Pilih Keputusan (Valid / Tidak Valid) Terlebih Dahulu</span>
@@ -392,17 +392,41 @@ class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             </div>
         @endif
 
+        @if($permohonan->tanggal_verifikasi_fisik && !in_array($permohonan->status, ['Proses Pembuatan Surat', 'Surat Selesai', 'Selesai', 'Ditolak']))
+            <div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col p-6 space-y-3">
+                <h6 class="m-0 font-bold text-heading text-base border-b border-border-default pb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-brand"></i> Jadwal Pengecekan Berkas Fisik
+                </h6>
+                <div class="text-xs space-y-2 text-body">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-body-subtle">Hari:</span>
+                        <span class="font-bold text-heading">{{ $permohonan->hari_verifikasi_fisik ?? \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->locale('id')->isoFormat('dddd') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-body-subtle">Tanggal:</span>
+                        <span class="font-bold text-heading">{{ \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->translatedFormat('d F Y') }}</span>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Riwayat Status Timeline -->
         <div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col p-6">
             <h6 class="font-bold text-heading mb-4">Riwayat Status Permohonan</h6>
-            <div class="max-h-[350px] overflow-y-auto pr-2 pl-1 py-1 custom-scrollbar">
+            <div class="max-h-[300px] overflow-y-auto pr-2 pl-1 py-1 custom-scrollbar" style="max-height: 300px; overflow-y: auto;">
                 <div class="relative border-l border-brand ml-2 space-y-6 pb-2" style="border-left: 2px solid var(--color-brand, #8b1e1e); margin-left: 8px; position: relative;">
                     @forelse($permohonan->riwayatStatus()->orderBy('changed_at', 'desc')->get() as $riwayat)
                     <div class="relative pl-6" style="position: relative; padding-left: 24px;">
                         <div class="absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full bg-brand -translate-x-1/2" style="background-color: var(--color-brand, #8b1e1e);"></div>
                         <div class="text-[13px] text-heading font-bold">{{ $riwayat->status_baru }}</div>
                         <div class="text-[11px] text-body-subtle">{{ \Carbon\Carbon::parse($riwayat->changed_at)->translatedFormat('d M Y - H:i') }}</div>
-                        @if($riwayat->keterangan)
+                        @php
+                            $isPhysicalNote = $riwayat->keterangan && (
+                                str_contains(strtolower($riwayat->keterangan), 'mohon bawa') || 
+                                str_contains(strtolower($riwayat->keterangan), 'berkas fisik')
+                            );
+                        @endphp
+                        @if($riwayat->keterangan && !str_starts_with($riwayat->status_baru, 'Menunggu Verifikasi Verifikator') && !($isPhysicalNote && !in_array($riwayat->status_baru, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik'])))
                             <div class="text-[12px] text-body mt-1.5 bg-white p-2 rounded border border-border-default shadow-sm font-medium whitespace-normal break-words">{{ $riwayat->keterangan }}</div>
                         @endif
                     </div>
@@ -416,3 +440,23 @@ class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function handleVerifikasiSubmit(e, form) {
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+        return;
+    }
+    const isApprove = form.action && form.action.includes('approve');
+    const title = isApprove ? 'Memproses Persetujuan Verifikator...' : 'Memproses Catatan Perbaikan & Mengirim Email...';
+    const sub   = isApprove ? 'Harap tunggu, verifikasi permohonan sedang disetujui.' : 'Harap tunggu, notifikasi perbaikan berkas sedang dikirimkan.';
+    showGlobalLoading(title, sub);
+    
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+    }
+}
+</script>
+@endpush

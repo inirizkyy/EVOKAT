@@ -63,7 +63,10 @@
             </div>
             @endif
 
-            <form action="{{ url('/tracking') }}" method="POST" class="relative z-10">
+            <form action="{{ url('/tracking') }}" method="POST"
+                  data-loading-title="Mencari Data Registrasi..."
+                  data-loading-sub="Harap tunggu, sistem sedang mencari data permohonan Anda."
+                  class="relative z-10">
                 @csrf
                 <div class="mb-8">
                     <label class="block text-[18px] font-['Playfair_Display'] font-bold text-heading mb-4 text-center">Masukkan Nomor Registrasi</label>
@@ -218,7 +221,7 @@
             </div>
             @endif
 
-            @if($permohonan->tanggal_verifikasi_fisik && in_array($permohonan->status, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik']))
+            @if($permohonan->tanggal_verifikasi_fisik && !in_array($permohonan->status, ['Proses Pembuatan Surat', 'Surat Selesai', 'Selesai', 'Ditolak']))
             <div class="mb-8 p-6 rounded-2xl bg-warning-soft border border-border-warning-subtle text-heading relative overflow-hidden">
                 <i class="fa-regular fa-folder-open absolute -right-4 -bottom-4 text-8xl text-fg-warning opacity-10 pointer-events-none"></i>
                 <h5 class="font-bold text-lg mb-4 flex items-center gap-2 text-heading">
@@ -228,7 +231,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
                     <div>
                         <span class="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Hari</span>
-                        <span class="block text-xl font-bold text-heading">{{ $permohonan->hari_verifikasi_fisik ?? '-' }}</span>
+                        <span class="block text-xl font-bold text-heading">{{ $permohonan->hari_verifikasi_fisik ?? \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->locale('id')->isoFormat('dddd') }}</span>
                     </div>
                     <div>
                         <span class="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Tanggal</span>
@@ -257,7 +260,7 @@
                     </div>
                     <div>
                         <span class="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Lokasi</span>
-                        <span class="block text-[15px] font-bold text-fg-success-strong">{{ $permohonan->jadwalSumpah->lokasi }}</span>
+                        <span class="block text-lg font-bold text-fg-success-strong">{{ $permohonan->jadwalSumpah->lokasi }}</span>
                     </div>
                 </div>
                 
@@ -346,7 +349,13 @@
                             <div class="text-xs text-body-subtle mb-2">
                                 Dari status: <span class="px-1.5 py-0.5 bg-neutral-secondary-medium rounded text-heading">{{ $riwayat->status_lama }}</span>
                             </div>
-                            @if($riwayat->keterangan && !in_array($riwayat->status_baru, ['Proses Pembuatan Surat', 'Surat Selesai', 'Selesai']))
+                            @php
+                                $isPhysicalNote = $riwayat->keterangan && (
+                                    str_contains(strtolower($riwayat->keterangan), 'mohon bawa') || 
+                                    str_contains(strtolower($riwayat->keterangan), 'berkas fisik')
+                                );
+                            @endphp
+                            @if($riwayat->keterangan && !in_array($riwayat->status_baru, ['Proses Pembuatan Surat', 'Surat Selesai', 'Selesai']) && !str_starts_with($riwayat->status_baru, 'Menunggu Verifikasi Verifikator') && !($isPhysicalNote && !in_array($riwayat->status_baru, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik'])))
                             <p class="text-[13px] text-body bg-neutral-primary-soft p-2.5 rounded-lg border border-border-default shadow-inset mt-3 whitespace-normal break-words">
                                 {{ $riwayat->keterangan }}
                             </p>

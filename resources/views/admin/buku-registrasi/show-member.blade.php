@@ -82,10 +82,14 @@
                     <span class="text-xs font-bold text-gray-400 cursor-not-allowed">
                         <i class="fa-solid fa-lock"></i> Terkunci
                     </span>
-                @else
+                @elseif($reg->permohonan && $reg->permohonan->status === 'Selesai')
                     <a href="{{ route('admin.buku-registrasi.edit', $reg->id) }}" class="text-xs font-bold text-brand hover:underline">
                         <i class="fa-solid fa-pencil"></i> Lengkapi Data
                     </a>
+                @else
+                    <span title="Permohonan belum berstatus Selesai (Tidak dapat diisi)" class="text-xs font-bold text-gray-400 cursor-not-allowed flex items-center gap-1">
+                        <i class="fa-solid fa-lock"></i> Menunggu Status Selesai
+                    </span>
                 @endif
             </div>
 
@@ -105,16 +109,32 @@
                 </div>
                 <div class="sm:col-span-2">
                     <span class="block text-body-subtle font-medium">Saksi-saksi</span>
-                    <span class="text-heading font-semibold whitespace-pre-line">{{ $reg->saksi }}</span>
+                    @php
+                        $saksiArray = explode(';', $reg->saksi ?? '');
+                    @endphp
+                    <div class="text-heading font-semibold mt-0.5">
+                        1. {{ trim($saksiArray[0] ?? '-') }}<br>
+                        2. {{ trim($saksiArray[1] ?? '-') }}
+                    </div>
                 </div>
             </div>
             @else
             <div class="text-center py-6 text-body-subtle">
                 <i class="fa-solid fa-circle-info text-2xl text-warning mb-2"></i>
                 <p class="text-sm">Data Berita Acara Sumpah (BAS) belum lengkap.</p>
-                <a href="{{ route('admin.buku-registrasi.edit', $reg->id) }}" class="inline-flex items-center px-4 py-2 mt-4 rounded-base text-xs font-bold bg-brand text-white hover:bg-brand-strong transition-all">
-                    Lengkapi Sekarang <i class="fa-solid fa-chevron-right ml-1"></i>
-                </a>
+                @if($reg->permohonan && $reg->permohonan->status === 'Selesai')
+                    @if($reg->status_pemeriksa !== 'Disetujui')
+                        <a href="{{ route('admin.buku-registrasi.edit', $reg->id) }}" class="inline-flex items-center px-4 py-2 mt-4 rounded-base text-xs font-bold bg-brand text-white hover:bg-brand-strong transition-all">
+                            Lengkapi Sekarang <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </a>
+                    @endif
+                @else
+                    <div class="mt-4">
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-base text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                            <i class="fa-solid fa-lock mr-1.5"></i> Menunggu Status Selesai
+                        </span>
+                    </div>
+                @endif
             </div>
             @endif
         </div>

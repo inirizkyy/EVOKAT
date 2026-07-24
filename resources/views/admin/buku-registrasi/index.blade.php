@@ -188,15 +188,33 @@
                                 <span title="Data Terkunci (Sudah Disetujui Pemeriksa)" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60">
                                     <i class="fa-solid fa-lock text-xs"></i>
                                 </span>
-                            @else
-                                <a href="{{ route('admin.buku-registrasi.edit', $item->id) }}" title="Lengkapi Data Sumpah" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-warning shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
-                                    <i class="fa-solid fa-pencil text-xs"></i>
+                            @elseif($item->permohonan && $item->permohonan->status === 'Selesai')
+                                <a href="{{ route('admin.buku-registrasi.edit', $item->id) }}" title="Lengkapi Data Sumpah &amp; BAS" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-warning shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
                                 </a>
+                            @else
+                                <button type="button" disabled title="Permohonan belum berstatus Selesai (Tidak dapat diisi)" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60">
+                                    <i class="fa-solid fa-lock text-xs"></i>
+                                </button>
                             @endif
                             <!-- Print Card -->
                             <a href="{{ route('admin.buku-registrasi.print', $item->id) }}" target="_blank" title="Cetak Data" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-success shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
                                 <i class="fa-solid fa-print text-xs"></i>
                             </a>
+                            <!-- Hapus Data -->
+                            @if($item->status_pemeriksa === 'Disetujui')
+                                <span title="Data Terkunci (Sudah Disetujui Pemeriksa)" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed opacity-60">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </span>
+                            @else
+                                <form action="{{ route('admin.buku-registrasi.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data buku registrasi {{ addslashes($pemohon->nama_lengkap ?? '') }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" title="Hapus Data" class="inline-flex items-center justify-center w-8 h-8 rounded-base bg-neutral-primary-soft text-danger hover:bg-danger hover:text-white shadow-sm hover:shadow-md active:shadow-inset transition-all border border-border-default">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

@@ -302,6 +302,24 @@ class PermohonanVerifikasiTest extends TestCase
         $response->assertDownload('Draft_Surat_' . str_replace('/', '_', $this->permohonan->nomor_permohonan) . '.pdf');
     }
 
+    public function test_custom_signatory_is_saved_to_signatories_table()
+    {
+        $this->permohonan->update(['status' => 'Proses Pembuatan Surat']);
+        $filePath = 'permohonan/surat/surat_pengantar_' . $this->permohonan->nomor_permohonan . '.pdf';
+        $this->permohonan->update(['file_surat' => $filePath]);
+        Storage::disk('public')->put($filePath, 'dummy draft pdf');
+
+        $customName = 'Dr. Penandatangan Baru, S.H., M.H.';
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.permohonan.download-surat', $this->permohonan->id) . '?jabatan=PANITERA&nama_penandatangan=' . urlencode($customName));
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('signatories', [
+            'name' => $customName,
+        ]);
+    }
+
     public function test_tracking_page_shows_sedang_diproses_when_no_schedule()
     {
         $this->permohonan->update([

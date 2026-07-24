@@ -329,7 +329,8 @@
                         <label class="block text-[14px] font-bold text-heading mb-2">Catatan Keterangan</label>
                         <textarea name="catatan" id="catatan_download_form" rows="3" 
                                   oninput="document.getElementById('catatan_transition_form').value = this.value"
-                                  class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-body-subtle">{{ $permohonan->catatan }}</textarea>
+                                  placeholder="Catatan keterangan draf surat (opsional)..."
+                                  class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-body-subtle"></textarea>
                     </div>
                     <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2.5 rounded-base text-sm font-bold bg-brand text-white border border-brand shadow-sm hover:shadow-md active:shadow-inset transition-all">
                         <i class="fa-solid fa-file-word mr-2"></i> Download Draf Word
@@ -351,13 +352,13 @@
             </div>
         @endif
 
-        @if($permohonan->tanggal_verifikasi_fisik && in_array($permohonan->status, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik']))
+        @if($permohonan->tanggal_verifikasi_fisik && !in_array($permohonan->status, ['Proses Pembuatan Surat', 'Surat Selesai', 'Selesai', 'Ditolak']))
             <div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col p-6 space-y-3">
                 <h6 class="m-0 font-bold text-heading text-base border-b border-border-default pb-3">Jadwal Pengecekan Berkas Fisik</h6>
                 <div class="text-xs space-y-2 text-body">
                     <div class="flex justify-between">
                         <span class="font-medium text-body-subtle">Hari:</span>
-                        <span class="font-bold text-heading">{{ $permohonan->hari_verifikasi_fisik }}</span>
+                        <span class="font-bold text-heading">{{ $permohonan->hari_verifikasi_fisik ?? \Carbon\Carbon::parse($permohonan->tanggal_verifikasi_fisik)->locale('id')->isoFormat('dddd') }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium text-body-subtle">Tanggal:</span>
@@ -384,7 +385,10 @@
                         <span>Harap verifikasi dan setujui seluruh dokumen anggota terlebih dahulu sebelum melanjutkan ke langkah berikutnya.</span>
                     </div>
                 @endif
-                <form action="{{ route('admin.permohonan.verifikasi', $permohonan->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form action="{{ route('admin.permohonan.verifikasi', $permohonan->id) }}" method="POST" enctype="multipart/form-data"
+                      data-loading-title="Memperbarui Status Permohonan..."
+                      data-loading-sub="Sistem sedang memperbarui status dan mengirimkan notifikasi."
+                      class="space-y-4">
                     @csrf
                     <fieldset @disabled(($isCompletedWithBas && auth()->user()->role === 'admin') || ($nextStatus === 'Menunggu Verifikasi Verifikator 1' && !$allApproved)) class="space-y-4 w-full {{ ($nextStatus === 'Menunggu Verifikasi Verifikator 1' && !$allApproved) ? 'opacity-65' : '' }}">
                     
@@ -474,14 +478,12 @@
                         </div>
                     @endif
 
-                    @if($currentStatus === 'Proses Pembuatan Surat')
-                        <input type="hidden" name="catatan" id="catatan_transition_form" value="{{ $permohonan->catatan }}">
-                    @else
-                        <div class="mb-4">
-                            <label class="block text-[14px] font-medium text-heading mb-2">Catatan Keterangan</label>
-                            <textarea name="catatan" id="catatan_transition_form" rows="3" class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-body-subtle">{{ $permohonan->catatan }}</textarea>
-                        </div>
-                    @endif
+                    <div class="mb-4">
+                        <label class="block text-[14px] font-medium text-heading mb-2">Catatan Keterangan</label>
+                        <textarea name="catatan" id="catatan_transition_form" rows="3"
+                                  placeholder="Catatan keterangan (opsional)..."
+                                  class="block w-full rounded-base border border-border-default-medium bg-transparent shadow-inset text-[14px] text-heading py-2 px-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all placeholder:text-body-subtle"></textarea>
+                    </div>
 
                     <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2.5 rounded-base text-[15px] font-bold bg-brand text-white shadow-sm hover:shadow-md hover:opacity-95 active:shadow-inset transition-all border border-brand-softer">
                         <i class="fas fa-save mr-2"></i> Simpan
@@ -525,14 +527,20 @@
         <!-- Riwayat Status Timeline -->
         <div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col p-6">
             <h6 class="font-bold text-heading mb-4">Riwayat Status Permohonan</h6>
-            <div class="max-h-[400px] overflow-y-auto pr-3 pl-1 py-1 custom-scrollbar">
+            <div class="max-h-[300px] overflow-y-auto pr-3 pl-1 py-1 custom-scrollbar" style="max-height: 300px; overflow-y: auto;">
                 <div class="relative border-l border-brand ml-2 space-y-6 pb-2" style="border-left: 2px solid var(--color-brand, #8b1e1e); margin-left: 8px; position: relative;">
                     @forelse($permohonan->riwayatStatus()->orderBy('changed_at', 'desc')->get() as $riwayat)
                     <div class="relative pl-6" style="position: relative; padding-left: 24px;">
                         <div class="absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full bg-brand -translate-x-1/2" style="background-color: var(--color-brand, #8b1e1e);"></div>
                         <div class="text-[13px] text-heading font-bold">{{ $riwayat->status_baru }}</div>
                         <div class="text-[11px] text-body-subtle">{{ \Carbon\Carbon::parse($riwayat->changed_at)->translatedFormat('d M Y - H:i') }}</div>
-                        @if($riwayat->keterangan)
+                        @php
+                            $isPhysicalNote = $riwayat->keterangan && (
+                                str_contains(strtolower($riwayat->keterangan), 'mohon bawa') || 
+                                str_contains(strtolower($riwayat->keterangan), 'berkas fisik')
+                            );
+                        @endphp
+                        @if($riwayat->keterangan && !str_starts_with($riwayat->status_baru, 'Menunggu Verifikasi Verifikator') && !($isPhysicalNote && !in_array($riwayat->status_baru, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik'])))
                             <div class="text-[12px] text-body mt-1.5 bg-white p-2 rounded border border-border-default shadow-sm">{{ $riwayat->keterangan }}</div>
                         @endif
                     </div>

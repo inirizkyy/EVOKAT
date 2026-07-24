@@ -99,7 +99,13 @@
                 </div>
                 <div class="sm:col-span-2">
                     <span class="block text-body-subtle font-medium">Saksi-saksi</span>
-                    <span class="text-heading font-semibold whitespace-pre-line">{{ $reg->saksi }}</span>
+                    @php
+                        $saksiArray = explode(';', $reg->saksi ?? '');
+                    @endphp
+                    <div class="text-heading font-semibold mt-0.5">
+                        1. {{ trim($saksiArray[0] ?? '-') }}<br>
+                        2. {{ trim($saksiArray[1] ?? '-') }}
+                    </div>
                 </div>
             </div>
             @else

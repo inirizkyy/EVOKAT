@@ -226,6 +226,111 @@
         });
     </script>
 
+    <!-- Komponen Reusable Loading Overlay -->
+    <div id="global-loading-overlay" style="display: none; z-index: 999999;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex flex-col items-center justify-center transition-all duration-300">
+        <div class="relative flex flex-col items-center gap-4 p-8 text-center max-w-md mx-4 bg-white rounded-2xl shadow-2xl border border-gray-100">
+            <!-- Spinner Icon -->
+            <div class="relative flex items-center justify-center">
+                <div class="w-16 h-16 rounded-full border-4 border-red-200 border-t-red-700 animate-spin"></div>
+                <i class="fa-solid fa-scale-balanced absolute text-red-700 text-lg"></i>
+            </div>
+            
+            <div>
+                <h5 id="global-loading-title" class="text-lg font-bold text-gray-900">Memproses Data...</h5>
+                <p id="global-loading-sub" class="text-sm text-gray-600 mt-1.5 leading-relaxed">Harap tunggu, sistem sedang memproses permintaan Anda.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Notification Error Ukuran File (>2MB) -->
+    <div id="file-size-error-modal" style="display: none; z-index: 999999;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-red-100 flex flex-col items-center text-center space-y-4 transition-all">
+            <div class="w-16 h-16 rounded-full bg-red-100 border border-red-200 flex items-center justify-center text-red-600 shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
+            </div>
+            <div class="space-y-2">
+                <h4 class="text-lg font-bold text-gray-900">Ukuran File Melebihi Batas (2MB)!</h4>
+                <p id="file-size-error-text" class="text-sm text-gray-600 leading-relaxed"></p>
+            </div>
+            <button type="button" onclick="closeFileSizeErrorModal()" class="w-full py-3 px-6 rounded-xl font-bold text-sm bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-md transition-all cursor-pointer">
+                <i class="fa-solid fa-check mr-2"></i>Pilih Ulang File
+            </button>
+        </div>
+    </div>
+
+    <script>
+    function showFileSizeErrorModal(fileName, fileSizeMb, maxMb) {
+        const modal = document.getElementById('file-size-error-modal');
+        const textEl = document.getElementById('file-size-error-text');
+        if (textEl) {
+            textEl.innerHTML = `File <strong class="text-red-700 font-mono">${fileName}</strong> berukuran <strong class="text-red-700">${fileSizeMb} MB</strong>.<br><br>File hanya dengan ukuran maksimal <strong class="text-red-700">${maxMb} MB</strong>. Silakan kecilkan ukuran file Anda.`;
+        }
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function closeFileSizeErrorModal() {
+        const modal = document.getElementById('file-size-error-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function showGlobalLoading(title = 'Memproses Data...', sub = 'Harap tunggu, sistem sedang memproses permintaan Anda.') {
+        const overlay = document.getElementById('global-loading-overlay');
+        const titleEl = document.getElementById('global-loading-title');
+        const subEl   = document.getElementById('global-loading-sub');
+        
+        if (titleEl) titleEl.textContent = title;
+        if (subEl) subEl.textContent = sub;
+        if (overlay) {
+            overlay.classList.remove('hidden');
+            overlay.style.display = 'flex';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Instant client-side file size validation (>2MB blocker)
+        document.addEventListener('change', function(e) {
+            const input = e.target;
+            if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const maxMb = parseFloat(input.getAttribute('data-max-size')) || 2;
+                const maxBytes = maxMb * 1024 * 1024;
+                
+                if (file.size > maxBytes) {
+                    const sizeInMb = (file.size / (1024 * 1024)).toFixed(2);
+                    input.value = ''; // Reset file input immediately
+                    showFileSizeErrorModal(file.name, sizeInMb, maxMb);
+                }
+            }
+        }, true);
+
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (!form || form.tagName !== 'FORM') return;
+
+            if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+                return;
+            }
+
+            const title = form.getAttribute('data-loading-title') || 'Memproses Data...';
+            const sub   = form.getAttribute('data-loading-sub')   || 'Harap tunggu, sistem sedang memproses permintaan Anda.';
+            showGlobalLoading(title, sub);
+            
+            const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitBtn) {
+                setTimeout(() => {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                }, 50);
+            }
+        }, true);
+    });
+    </script>
 
     @stack('scripts')
 </body>

@@ -39,7 +39,10 @@
                 <h6 class="m-0 font-bold text-heading">Penjadwalan Berkas Fisik</h6>
             </div>
             <div class="p-6">
-                <form action="{{ route('admin.permohonan.verifikasi', $permohonan->id) }}" method="POST" class="space-y-6">
+                <form action="{{ route('admin.permohonan.verifikasi', $permohonan->id) }}" method="POST"
+                      data-loading-title="Menyimpan Jadwal Pengecekan Berkas Fisik..."
+                      data-loading-sub="Harap tunggu, sistem sedang menyimpan jadwal dan mengirim notifikasi."
+                      class="space-y-6">
                     @csrf
                     
                     <div>
@@ -94,7 +97,13 @@
                         <div class="absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full bg-brand -translate-x-1/2"></div>
                         <div class="text-[13px] text-heading font-bold leading-snug">{{ $riwayat->status_baru }}</div>
                         <div class="text-[11px] text-body-subtle mt-0.5">{{ \Carbon\Carbon::parse($riwayat->changed_at)->translatedFormat('d M Y - H:i') }}</div>
-                        @if($riwayat->keterangan)
+                        @php
+                            $isPhysicalNote = $riwayat->keterangan && (
+                                str_contains(strtolower($riwayat->keterangan), 'mohon bawa') || 
+                                str_contains(strtolower($riwayat->keterangan), 'berkas fisik')
+                            );
+                        @endphp
+                        @if($riwayat->keterangan && !str_starts_with($riwayat->status_baru, 'Menunggu Verifikasi Verifikator') && !($isPhysicalNote && !in_array($riwayat->status_baru, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik'])))
                             <div class="text-[12px] text-body mt-2 bg-white p-3 rounded-base border border-border-default shadow-sm font-medium whitespace-normal break-words">
                                 {{ $riwayat->keterangan }}
                             </div>

@@ -133,7 +133,7 @@ Route::middleware(['auth', 'verified', 'role:admin', \App\Http\Middleware\TrackA
     Route::get('buku-registrasi/export-excel', [BukuRegistrasiController::class, 'exportExcel'])->name('buku-registrasi.export-excel');
     Route::get('buku-registrasi/{id}/print', [BukuRegistrasiController::class, 'print'])->name('buku-registrasi.print');
     Route::get('buku-registrasi/member/{id}', [BukuRegistrasiController::class, 'showMember'])->name('buku-registrasi.show-member');
-    Route::resource('buku-registrasi', BukuRegistrasiController::class)->except(['create', 'store', 'destroy']);
+    Route::resource('buku-registrasi', BukuRegistrasiController::class)->except(['create', 'store']);
     Route::resource('berita', BeritaController::class)->parameters(['berita' => 'berita']);
     Route::resource('faq', FaqController::class);
     Route::resource('persyaratan', PersyaratanController::class);

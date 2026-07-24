@@ -37,8 +37,35 @@
                 <span class="text-heading font-semibold">{{ $pemohon->email }}</span>
             </div>
             <div class="flex flex-col pb-3">
-                <span class="text-xs text-body-subtle font-semibold uppercase tracking-wider mb-1">Organisasi Pengusung</span>
+                <span class="text-xs text-body-subtle font-semibold uppercase tracking-wider mb-1">Organisasi</span>
                 <span class="text-heading font-bold">{{ $permohonan->organisasi->nama_organisasi ?? '-' }}</span>
+            </div>
+        </div>
+
+        <!-- Riwayat Status Timeline (Scrollable) -->
+        <div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col p-6 mt-6">
+            <h6 class="font-bold text-heading mb-4">Riwayat Status Permohonan</h6>
+            <div class="max-h-[280px] overflow-y-auto pr-2 pl-1 py-1 custom-scrollbar" style="max-height: 280px; overflow-y: auto;">
+                <div class="relative border-l border-brand ml-2 space-y-6 pb-2" style="border-left: 2px solid var(--color-brand, #8b1e1e); margin-left: 8px; position: relative;">
+                    @forelse($permohonan->riwayatStatus()->orderBy('changed_at', 'desc')->get() as $riwayat)
+                    <div class="relative pl-6" style="position: relative; padding-left: 24px;">
+                        <div class="absolute left-0 top-1.5 w-2.5 h-2.5 rounded-full bg-brand -translate-x-1/2" style="background-color: var(--color-brand, #8b1e1e);"></div>
+                        <div class="text-[13px] text-heading font-bold">{{ $riwayat->status_baru }}</div>
+                        <div class="text-[11px] text-body-subtle">{{ \Carbon\Carbon::parse($riwayat->changed_at)->translatedFormat('d M Y - H:i') }}</div>
+                        @php
+                            $isPhysicalNote = $riwayat->keterangan && (
+                                str_contains(strtolower($riwayat->keterangan), 'mohon bawa') || 
+                                str_contains(strtolower($riwayat->keterangan), 'berkas fisik')
+                            );
+                        @endphp
+                        @if($riwayat->keterangan && !str_starts_with($riwayat->status_baru, 'Menunggu Verifikasi Verifikator') && !($isPhysicalNote && !in_array($riwayat->status_baru, ['Menentukan Jadwal Berkas Fisik', 'Verifikasi Berkas Fisik'])))
+                            <div class="text-[12px] text-body mt-1.5 bg-white p-2 rounded border border-border-default shadow-sm font-medium whitespace-normal break-words">{{ $riwayat->keterangan }}</div>
+                        @endif
+                    </div>
+                    @empty
+                    <div class="pl-4 text-body-subtle text-xs italic">Belum ada riwayat.</div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>
@@ -46,7 +73,9 @@
     <!-- Kolom Kanan: Validasi Ulang Dokumen Persyaratan -->
     <div class="lg:col-span-2 space-y-8 min-w-0">
         
-        <form action="{{ route($role . '.permohonan.member-verifikasi', [$permohonan->id, $pemohon->id]) }}" method="POST">
+        <form action="{{ route($role . '.permohonan.member-verifikasi', [$permohonan->id, $pemohon->id]) }}" method="POST"
+              data-loading-title="Menyimpan Hasil Pemeriksaan Dokumen..."
+              data-loading-sub="Harap tunggu, hasil verifikasi dokumen sedang disimpan.">
             @csrf
             <div class="bg-neutral-primary-soft rounded-base shadow-md border border-border-default flex flex-col mb-8">
                 <div class="py-4 px-6 border-b border-border-default bg-neutral-primary-soft rounded-t-base flex justify-between items-center">

@@ -16,23 +16,30 @@ class BukuRegistrasiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan']);
+        $query = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan'])
+            ->select('buku_registrasi_advokats.*')
+            ->join('permohonans', 'buku_registrasi_advokats.permohonan_id', '=', 'permohonans.id');
+
         $query = $this->applySearchFilters($request, $query);
 
         // Belum Lengkap: BukuRegistrasiAdvokat where nomor_bas is null
-        $countBelumLengkap = (clone $query)->whereNull('nomor_bas')->count();
+        $countBelumLengkap = (clone $query)->whereNull('buku_registrasi_advokats.nomor_bas')->count();
 
         // Sudah Lengkap: BukuRegistrasiAdvokat where nomor_bas is not null
-        $countSudahLengkap = (clone $query)->whereNotNull('nomor_bas')->count();
+        $countSudahLengkap = (clone $query)->whereNotNull('buku_registrasi_advokats.nomor_bas')->count();
 
         $status = $request->query('status', 'belum_lengkap');
         if ($status === 'lengkap') {
-            $query->whereNotNull('nomor_bas');
+            $query->whereNotNull('buku_registrasi_advokats.nomor_bas');
         } else {
-            $query->whereNull('nomor_bas');
+            $query->whereNull('buku_registrasi_advokats.nomor_bas');
         }
 
-        $registrasi = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $registrasi = $query->orderByRaw("CASE WHEN permohonans.status = 'Selesai' THEN 0 ELSE 1 END ASC")
+                            ->orderBy('buku_registrasi_advokats.updated_at', 'desc')
+                            ->orderBy('buku_registrasi_advokats.created_at', 'desc')
+                            ->paginate(10)
+                            ->withQueryString();
 
         return view('admin.buku-registrasi.index', compact('registrasi', 'countBelumLengkap', 'countSudahLengkap', 'status'));
     }
@@ -106,6 +113,16 @@ class BukuRegistrasiController extends Controller
     {
         $reg = BukuRegistrasiAdvokat::with(['pemohon.organisasi', 'permohonan'])->findOrFail($id);
         
+        if (!$reg->permohonan || $reg->permohonan->status !== 'Selesai') {
+            return redirect()->route('admin.buku-registrasi.index')
+                ->with('error', 'Lengkapi Data BAS hanya dapat diisi apabila status permohonan telah diset Selesai oleh Admin.');
+        }
+
+        if ($reg->status_pemeriksa === 'Disetujui') {
+            return redirect()->route('admin.buku-registrasi.show', $reg->permohonan_id)
+                ->with('error', 'Data ini sudah disetujui oleh Pemeriksa dan dikunci.');
+        }
+        
         $saksiArray = explode(';', $reg->saksi);
         $saksi_1 = trim($saksiArray[0] ?? '');
         $saksi_2 = trim($saksiArray[1] ?? '');
@@ -117,8 +134,13 @@ class BukuRegistrasiController extends Controller
 
     public function update(Request $request, $id)
     {
-        $reg = BukuRegistrasiAdvokat::findOrFail($id);
+        $reg = BukuRegistrasiAdvokat::with('permohonan')->findOrFail($id);
         
+        if (!$reg->permohonan || $reg->permohonan->status !== 'Selesai') {
+            return redirect()->route('admin.buku-registrasi.index')
+                ->with('error', 'Lengkapi Data BAS hanya dapat diisi apabila status permohonan telah diset Selesai oleh Admin.');
+        }
+
         if ($reg->status_pemeriksa === 'Disetujui') {
             return redirect()->route('admin.buku-registrasi.show', $reg->permohonan_id)
                 ->with('error', 'Data ini sudah disetujui oleh Pemeriksa dan dikunci.');
@@ -131,6 +153,10 @@ class BukuRegistrasiController extends Controller
             'saksi_1' => 'required|string|max:255',
             'saksi_2' => 'required|string|max:255',
         ]);
+
+        if ($request->filled('ketua_pengadilan_tinggi') && trim($request->ketua_pengadilan_tinggi) !== '') {
+            Leader::firstOrCreate(['name' => trim($request->ketua_pengadilan_tinggi)]);
+        }
         
         $data = $request->except(['saksi_1', 'saksi_2']);
         $data['saksi'] = trim($request->saksi_1) . ';' . trim($request->saksi_2);
@@ -139,6 +165,19 @@ class BukuRegistrasiController extends Controller
 
         return redirect()->route('admin.buku-registrasi.show', $reg->permohonan_id)
             ->with('success', 'Data Buku Registrasi berhasil diperbarui.');
+    }
+
+    public function destroy($id)
+    {
+        $reg = BukuRegistrasiAdvokat::findOrFail($id);
+
+        if ($reg->status_pemeriksa === 'Disetujui') {
+            return redirect()->back()->with('error', 'Data ini tidak dapat dihapus karena sudah disetujui oleh Pemeriksa.');
+        }
+
+        $reg->delete();
+
+        return redirect()->back()->with('success', 'Data Buku Registrasi berhasil dihapus.');
     }
 
 

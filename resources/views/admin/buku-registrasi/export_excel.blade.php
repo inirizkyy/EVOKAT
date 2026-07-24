@@ -37,7 +37,14 @@
             <td style="border: 1px solid #000;">{{ $item->nomor_bas ?? '-' }}</td>
             <td style="border: 1px solid #000;">{{ $item->tanggal_disumpah ? \Carbon\Carbon::parse($item->tanggal_disumpah)->format('Y-m-d') : '-' }}</td>
             <td style="border: 1px solid #000;">{{ $item->ketua_pengadilan_tinggi ?? '-' }}</td>
-            <td style="border: 1px solid #000;">{{ $item->saksi ?? '-' }}</td>
+            <td style="border: 1px solid #000;">
+                @if($item->saksi)
+                    @php $saksiArray = explode(';', $item->saksi); @endphp
+                    1. {{ trim($saksiArray[0] ?? '-') }}, 2. {{ trim($saksiArray[1] ?? '-') }}
+                @else
+                    -
+                @endif
+            </td>
         </tr>
         @endforeach
     </tbody>

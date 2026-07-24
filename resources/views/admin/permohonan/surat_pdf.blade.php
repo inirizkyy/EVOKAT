@@ -16,26 +16,72 @@
             padding: 20px 40px;
             box-sizing: border-box;
         }
-        .header {
+        .kop-surat {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+        .kop-surat td {
+            vertical-align: middle;
+        }
+        .kop-logo {
+            width: 15%;
             text-align: center;
-            border-bottom: 3px double #000;
-            padding-bottom: 8px;
-            margin-bottom: 25px;
         }
-        .header h2 {
+        .kop-logo img {
+            height: 105px;
+            width: auto;
+        }
+        .kop-text {
+            width: 70%;
+            text-align: center;
+        }
+        .kop-space {
+            width: 15%;
+        }
+        .kop-text .h1-title {
             margin: 0;
-            font-size: 16pt;
-            text-transform: uppercase;
-        }
-        .header h3 {
-            margin: 5px 0 0 0;
             font-size: 14pt;
-            font-weight: normal;
+            font-weight: bold;
+            font-family: "Times New Roman", Times, serif;
+            letter-spacing: 0.5px;
+            color: #000;
         }
-        .header p {
-            margin: 5px 0 0 0;
+        .kop-text .h2-title {
+            margin: 2px 0 0 0;
+            font-size: 14pt;
+            font-weight: bold;
+            font-family: "Times New Roman", Times, serif;
+            letter-spacing: 0.5px;
+            color: #000;
+        }
+        .kop-text .h3-title {
+            margin: 2px 0 3px 0;
+            font-size: 16pt;
+            font-weight: bold;
+            font-family: "Times New Roman", Times, serif;
+            letter-spacing: 0.5px;
+            color: #000;
+        }
+        .kop-text p {
+            margin: 1px 0;
             font-size: 10pt;
-            font-style: italic;
+            font-weight: bold;
+            font-family: "Times New Roman", Times, serif;
+            color: #000;
+        }
+        .kop-text a {
+            color: #0000ff;
+            text-decoration: underline;
+        }
+        
+        .line-thick {
+            border-bottom: 3px solid #000;
+            margin-bottom: 2px;
+        }
+        .line-thin {
+            border-bottom: 1px solid #000;
+            margin-bottom: 20px;
         }
         .title {
             text-align: center;
@@ -89,11 +135,26 @@
 <body>
     <div class="container">
         <!-- Kop Surat -->
-        <div class="header">
-            <h2>PENGADILAN TINGGI TANJUNGKARANG</h2>
-            <h3>PANITIA PENDAFTARAN SUMPAH ADVOKAT</h3>
-            <p>Jl. Cut Mutia No.42, Gulak Galik, Kec. Telukbetung Utara, Kota Bandar Lampung | Telp: (0721) 482431</p>
-        </div>
+        <table class="kop-surat">
+            <tr>
+                <td class="kop-logo">
+                    @if(file_exists(public_path('img/logo-pt.png')))
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('img/logo-pt.png'))) }}" alt="Logo PT Tanjungkarang">
+                    @endif
+                </td>
+                <td class="kop-text">
+                    <div class="h1-title">MAHKAMAH AGUNG REPUBLIK INDONESIA</div>
+                    <div class="h2-title">DIREKTORAT JENDERAL BADAN PERADILAN UMUM</div>
+                    <div class="h3-title">PENGADILAN TINGGI TANJUNGKARANG</div>
+                    <p>Jalan Cut Mutia No. 42, Teluk Betung Utara Kota Bandar Lampung, (0721) 481286</p>
+                    <p>Provinsi Lampung Kode Pos – 35214</p>
+                    <p>www.pt-tanjungkarang.go.id, <a href="mailto:admin@pt-tanjungkarang.go.id">admin@pt-tanjungkarang.go.id</a></p>
+                </td>
+                <td class="kop-space"></td>
+            </tr>
+        </table>
+        <div class="line-thick"></div>
+        <div class="line-thin"></div>
 
         <!-- Judul Surat -->
         <div class="title">

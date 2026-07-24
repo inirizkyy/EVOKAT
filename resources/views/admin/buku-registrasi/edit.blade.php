@@ -55,38 +55,99 @@
         </div>
 
         <!-- Pejabat yang Memimpin Sumpah Advokat -->
-        <div x-data="{ 
-            selectedLeader: '{{ old('ketua_pengadilan_tinggi', $reg->ketua_pengadilan_tinggi) }}',
-            customLeader: '',
-            init() {
-                const knownLeaders = @json($leaders->pluck('name'));
-                if (this.selectedLeader !== '' && !knownLeaders.includes(this.selectedLeader)) {
-                    this.customLeader = this.selectedLeader;
-                    this.selectedLeader = 'custom_leader';
-                }
-                this.updateHidden();
-            },
-            updateHidden() {
-                document.getElementById('ketua_pengadilan_tinggi').value = this.selectedLeader === 'custom_leader' ? this.customLeader : this.selectedLeader;
-            }
-        }">
+        <div class="space-y-2">
             <label class="block text-[14px] font-semibold text-heading mb-2">Nama yang Memimpin Sumpah Advokat <span class="text-fg-danger">*</span></label>
-            <select @change="selectedLeader = $event.target.value; updateHidden();" 
+            <select id="select_ketua_pengadilan" 
+                    onchange="handleLeaderSelectChange(this)"
                     @disabled($reg->status_pemeriksa === 'Disetujui')
-                    class="block w-full rounded-base border border-border-default-medium bg-white text-[14px] py-3 px-4 focus:outline-none focus:border-brand transition-all disabled:bg-neutral-primary-soft disabled:text-body-subtle disabled:cursor-not-allowed" required>
+                    class="block w-full rounded-base border border-border-default-medium bg-white text-[14px] py-3 px-4 focus:outline-none focus:border-brand transition-all disabled:bg-neutral-primary-soft disabled:text-body-subtle disabled:cursor-not-allowed" 
+                    required>
                 <option value="">Pilih Pejabat</option>
                 @foreach($leaders as $leader)
-                    <option value="{{ $leader->name }}" :selected="selectedLeader === '{{ $leader->name }}'">{{ $leader->name }}</option>
+                    <option value="{{ $leader->name }}">{{ $leader->name }}</option>
                 @endforeach
-                <option value="custom_leader" :selected="selectedLeader === 'custom_leader'">+ Ajukan Nama Baru</option>
+                <option value="custom_leader">+ Ajukan Nama Baru</option>
             </select>
-            <div x-show="selectedLeader === 'custom_leader'" class="mt-3">
-                <input type="text" x-model="customLeader" @input="updateHidden()" placeholder="Masukkan nama pejabat..."
+
+            <!-- Container Inputan Nama Pejabat Baru -->
+            <div id="wrapper_custom_leader" class="mt-3 hidden" style="display: none;">
+                <label class="block text-[12px] font-semibold text-heading mb-1.5">Nama Pejabat Baru yang Diajukan <span class="text-fg-danger">*</span></label>
+                <input type="text" 
+                       id="input_custom_leader" 
+                       oninput="syncKetuaPengadilanValue()"
+                       placeholder="Masukkan nama pejabat yang memimpin sumpah..."
                        @disabled($reg->status_pemeriksa === 'Disetujui')
                        class="block w-full rounded-base border border-border-default-medium bg-white text-[14px] py-3 px-4 focus:outline-none focus:border-brand transition-all disabled:bg-neutral-primary-soft disabled:text-body-subtle disabled:cursor-not-allowed">
             </div>
-            <input type="hidden" name="ketua_pengadilan_tinggi" id="ketua_pengadilan_tinggi" value="">
+
+            <!-- Hidden input untuk backend -->
+            <input type="hidden" name="ketua_pengadilan_tinggi" id="ketua_pengadilan_tinggi" value="{{ old('ketua_pengadilan_tinggi', $reg->ketua_pengadilan_tinggi) }}">
         </div>
+
+        <script>
+            function handleLeaderSelectChange(selectEl) {
+                const wrapper = document.getElementById('wrapper_custom_leader');
+                const customInput = document.getElementById('input_custom_leader');
+                if (selectEl.value === 'custom_leader') {
+                    if (wrapper) {
+                        wrapper.classList.remove('hidden');
+                        wrapper.style.display = 'block';
+                    }
+                    if (customInput) {
+                        customInput.required = true;
+                        customInput.focus();
+                    }
+                } else {
+                    if (wrapper) {
+                        wrapper.classList.add('hidden');
+                        wrapper.style.display = 'none';
+                    }
+                    if (customInput) {
+                        customInput.required = false;
+                    }
+                }
+                syncKetuaPengadilanValue();
+            }
+
+            function syncKetuaPengadilanValue() {
+                const selectEl = document.getElementById('select_ketua_pengadilan');
+                const customInput = document.getElementById('input_custom_leader');
+                const hiddenInput = document.getElementById('ketua_pengadilan_tinggi');
+
+                if (selectEl && hiddenInput) {
+                    if (selectEl.value === 'custom_leader') {
+                        hiddenInput.value = customInput ? customInput.value.trim() : '';
+                    } else {
+                        hiddenInput.value = selectEl.value;
+                    }
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const hiddenInput = document.getElementById('ketua_pengadilan_tinggi');
+                const selectEl = document.getElementById('select_ketua_pengadilan');
+                const customInput = document.getElementById('input_custom_leader');
+                
+                if (hiddenInput && selectEl) {
+                    const val = hiddenInput.value;
+                    if (val) {
+                        let found = false;
+                        for (let i = 0; i < selectEl.options.length; i++) {
+                            if (selectEl.options[i].value === val) {
+                                selectEl.selectedIndex = i;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found && val !== '') {
+                            selectEl.value = 'custom_leader';
+                            if (customInput) customInput.value = val;
+                        }
+                    }
+                    handleLeaderSelectChange(selectEl);
+                }
+            });
+        </script>
 
         <!-- Nama Saksi 1 & 2 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

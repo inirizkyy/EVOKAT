@@ -43,7 +43,7 @@
                 <span class="text-heading font-semibold">{{ $pemohon->email }}</span>
             </div>
             <div class="flex flex-col pb-3">
-                <span class="text-xs text-body-subtle font-semibold uppercase tracking-wider mb-1">Organisasi Pengusung</span>
+                <span class="text-xs text-body-subtle font-semibold uppercase tracking-wider mb-1">Organisasi</span>
                 <span class="text-heading font-bold">{{ $pemohon->permohonan->organisasi->nama_organisasi ?? '-' }}</span>
             </div>
         </div>
@@ -53,7 +53,9 @@
     <div class="lg:col-span-2 space-y-8 min-w-0">
         
         <!-- Form Verifikasi Dokumen dan Keputusan -->
-        <form action="{{ route('admin.permohonan.verifikasi-member', $pemohon->id) }}" method="POST">
+        <form action="{{ route('admin.permohonan.verifikasi-member', $pemohon->id) }}" method="POST"
+              data-loading-title="Menyimpan Hasil Verifikasi Dokumen..."
+              data-loading-sub="Harap tunggu, sistem sedang menyimpan status verifikasi dokumen anggota.">
             @csrf
             <fieldset @disabled(($isCompletedWithBas || $pemohon->status_verifikasi === 'Disetujui') && auth()->user()->role === 'admin') class="space-y-8 w-full {{ $pemohon->status_verifikasi === 'Disetujui' ? 'bg-gray-100/50 p-4 rounded-xl opacity-80' : '' }}">
             

@@ -41,7 +41,7 @@ class PermohonanController extends Controller
         return view('verifikator.dashboard', compact('countQueue', 'countAll', 'countSelesai', 'countBukuReg'));
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $role = Auth::user()->role;
         $targetStatus = $this->getTargetStatusForRole($role);
@@ -64,40 +64,48 @@ class PermohonanController extends Controller
             'verifikator3' => 'status_verifikator3',
             'verifikator4' => 'status_verifikator4',
         ];
-
         $statusField = $statusFieldMap[$role] ?? null;
 
-        $permohonans = Permohonan::with(['organisasi', 'pemohons'])
-            ->where(function($query) use ($targetStatus, $statusPerbaikan, $statusField) {
-                $query->where('status', $targetStatus);
-                if ($statusPerbaikan) {
-                    $query->orWhere('status', $statusPerbaikan);
-                }
-                if ($statusField) {
-                    $query->orWhereNotNull($statusField);
-                }
-            })
-            ->orderByRaw("CASE WHEN status = ? THEN 0 WHEN status = ? THEN 1 ELSE 2 END ASC", [$targetStatus, $statusPerbaikan])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Filter berdasarkan Tab
+        $tab = $request->query('tab', 'antrean');
 
-        return view('verifikator.permohonan.index', compact('permohonans'));
+        $query = Permohonan::with(['organisasi', 'pemohons']);
+
+        $activeStatuses = array_filter([$targetStatus, $statusPerbaikan]);
+
+        if ($tab === 'antrean') {
+            // HANYA MUNCULKAN PERMOHONAN YANG SEKARANG ADA DI ANTREAN ROLE INI
+            $query->whereIn('status', $activeStatuses);
+        } else {
+            // TAB RIWAYAT: Permohonan yang sudah pernah diverifikasi/disetujui oleh role ini
+            if ($statusField) {
+                $query->whereNotNull($statusField)
+                      ->whereNotIn('status', $activeStatuses);
+            }
+        }
+
+        $permohonans = $query->orderBy('updated_at', 'desc')
+                            ->orderBy('created_at', 'desc')
+                            ->paginate(10)
+                            ->withQueryString();
+
+        // Hitung badge count untuk antrean & riwayat
+        $countAntrean = Permohonan::whereIn('status', $activeStatuses)->count();
+        $countRiwayat = $statusField 
+            ? Permohonan::whereNotNull($statusField)->whereNotIn('status', $activeStatuses)->count()
+            : 0;
+
+        return view('verifikator.permohonan.index', compact('permohonans', 'role', 'targetStatus', 'tab', 'countAntrean', 'countRiwayat'));
     }
 
     public function show($id)
     {
-        $permohonan = Permohonan::with([
-            'pemohon.organisasi',
-            'pemohons.organisasi',
-            'pemohons.dokumenPersyaratan.masterPersyaratan',
-            'riwayatStatus',
-            'verifikasi',
-            'jadwalSumpah',
-            'organisasi'
-        ])->findOrFail($id);
-
         $role = Auth::user()->role;
         $targetStatus = $this->getTargetStatusForRole($role);
+
+        if (!$targetStatus) {
+            abort(403, 'Akses ditolak.');
+        }
 
         $statusPerbaikanMap = [
             'verifikator1' => 'Menunggu Perbaikan Dokumen Verifikator 1',
@@ -106,6 +114,31 @@ class PermohonanController extends Controller
             'verifikator4' => 'Menunggu Perbaikan Dokumen Verifikator 4',
         ];
         $statusPerbaikan = $statusPerbaikanMap[$role] ?? null;
+
+        $statusFieldMap = [
+            'verifikator1' => 'status_verifikator1',
+            'verifikator2' => 'status_verifikator2',
+            'verifikator3' => 'status_verifikator3',
+            'verifikator4' => 'status_verifikator4',
+        ];
+        $statusField = $statusFieldMap[$role] ?? null;
+
+        $activeStatuses = array_filter([$targetStatus, $statusPerbaikan]);
+
+        $permohonan = Permohonan::with([
+            'pemohon.organisasi',
+            'pemohons.organisasi',
+            'pemohons.dokumenPersyaratan.masterPersyaratan',
+            'riwayatStatus',
+            'verifikasi',
+            'jadwalSumpah',
+            'organisasi'
+        ])->where(function($query) use ($activeStatuses, $statusField) {
+            $query->whereIn('status', $activeStatuses);
+            if ($statusField) {
+                $query->orWhereNotNull($statusField);
+            }
+        })->findOrFail($id);
 
         return view('verifikator.permohonan.show', compact('permohonan', 'role', 'targetStatus', 'statusPerbaikan'));
     }

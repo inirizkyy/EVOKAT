@@ -139,7 +139,7 @@
                                 </span>
                             @endif
 
-                            <a href="{{ route('permohonan.dokumen-upload', [$permohonan->nomor_permohonan, $pemohon->id]) }}" class="inline-flex justify-center items-center px-4 py-2 rounded-full text-[13px] font-bold bg-neutral-primary-soft text-brand hover:bg-neutral-secondary-soft transition-all border border-brand shadow-sm">
+                            <a href="{{ route('permohonan.dokumen-upload', [$permohonan->nomor_permohonan, $pemohon->id]) }}" onclick="showGlobalLoading('Membuka Halaman Upload Dokumen...', 'Harap tunggu sebentar.')" class="inline-flex justify-center items-center px-4 py-2 rounded-full text-[13px] font-bold bg-neutral-primary-soft text-brand hover:bg-neutral-secondary-soft transition-all border border-brand shadow-sm">
                                 <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload Dokumen
                             </a>
                         </div>
@@ -148,7 +148,10 @@
             </div>
 
             <!-- SUBMIT FORM -->
-            <form id="submitForm" action="{{ route('permohonan.submit', $permohonan->nomor_permohonan) }}" method="POST" class="pt-6 border-t border-border-default flex flex-col sm:flex-row justify-between items-center gap-4">
+            <form id="submitForm" action="{{ route('permohonan.submit', $permohonan->nomor_permohonan) }}" method="POST"
+                  data-loading-title="Mengirimkan Permohonan ke Pengadilan..."
+                  data-loading-sub="Nomor registrasi dan notifikasi email sedang diproses."
+                  class="pt-6 border-t border-border-default flex flex-col sm:flex-row justify-between items-center gap-4">
                 @csrf
                 <div class="text-center sm:text-left">
                     <p class="text-[14px] text-body font-medium">Nomor Registrasi Sementara: <strong class="font-mono text-brand">{{ $permohonan->nomor_permohonan }}</strong></p>

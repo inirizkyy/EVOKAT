@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Permohonan;
+use App\Models\Signatory;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -298,6 +299,10 @@ class PermohonanController extends Controller
             'tanggal_sumpah'           => 'required_if:status,Proses Pembuatan Surat|nullable|date',
             'jam_sumpah'               => 'required_if:status,Proses Pembuatan Surat|nullable',
             'lokasi_sumpah'            => 'required_if:status,Proses Pembuatan Surat|nullable|string',
+        ], [
+            'surat_bertanda_tangan.max' => 'Ukuran file surat pengantar final bertanda tangan melebihi batas maksimal 2MB.',
+            'surat_bertanda_tangan.mimes' => 'File surat pengantar final bertanda tangan harus berformat PDF.',
+            'surat_bertanda_tangan.required_if' => 'File surat pengantar final bertanda tangan wajib diunggah.',
         ]);
 
         \Illuminate\Support\Facades\DB::beginTransaction();
@@ -371,7 +376,7 @@ class PermohonanController extends Controller
                 'permohonan_id' => $permohonan->id,
                 'status_lama' => $statusLama,
                 'status_baru' => $request->status,
-                'keterangan' => $request->catatan,
+                'keterangan' => str_starts_with($request->status, 'Menunggu Verifikasi Verifikator') ? null : $request->catatan,
                 'changed_by' => auth()->id() ?? 1,
             ]);
 
@@ -445,6 +450,9 @@ class PermohonanController extends Controller
             $activeTemplate = \App\Models\SuratTemplate::where('is_active', true)->first();
             $jabatan = $request->jabatan;
             $nama_penandatangan = $request->nama_penandatangan;
+            if ($nama_penandatangan && $nama_penandatangan !== '[KOSONG]' && trim($nama_penandatangan) !== '') {
+                Signatory::firstOrCreate(['name' => trim($nama_penandatangan)]);
+            }
             if ($nama_penandatangan === '[KOSONG]') {
                 $nama_penandatangan = '..................................................';
             } else {
